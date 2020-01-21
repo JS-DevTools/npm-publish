@@ -29,10 +29,10 @@
     "lib"
   ],
   "scripts": {
-    "clean": "shx rm -rf bin lib",
+    "clean": "shx rm -rf dist",
     "test": "tslint -p tsconfig.json",
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "ncc build src/index.ts --source-map",
+    "watch": "npm run build -- --watch",
     "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump --tag --push --all",
     "release": "npm run upgrade && npm run clean && npm run build && npm test && npm run bump"
@@ -41,22 +41,21 @@
     "node": ">=12"
   },
   "devDependencies": {
+    "@actions/core": "^1.2.1",
     "@types/node": "^12.0.7",
     "@types/semver": "^6.2.0",
     "@types/source-map-support": "^0.5.0",
+    "@zeit/ncc": "^0.21.0",
+    "ez-spawn": "^2.1.6",
     "npm-check": "^5.9.0",
+    "ono": "^6.0.1",
+    "semver": "^7.1.1",
     "shx": "^0.3.2",
+    "source-map-support": "^0.5.16",
     "tslint": "^5.17.0",
     "tslint-modular": "^1.4.1",
     "typescript": "^3.5.1",
     "typescript-tslint-plugin": "^0.5.0",
     "version-bump-prompt": "^5.0.3"
-  },
-  "dependencies": {
-    "@actions/core": "^1.2.1",
-    "ez-spawn": "^2.1.6",
-    "ono": "^6.0.1",
-    "semver": "^7.1.1",
-    "source-map-support": "^0.5.12"
   }
 }

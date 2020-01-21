@@ -1,7 +1,7 @@
 import { getInput, setFailed, setOutput } from "@actions/core";
 import * as sourceMapSupport from "source-map-support";
-import { Options } from "../lib/options";
-import { publishToNPM } from "../lib/publish-to-npm";
+import { Options } from "./options";
+import { publishToNPM } from "./publish-to-npm";
 
 /**
  * The main entry point of the GitHub Action
