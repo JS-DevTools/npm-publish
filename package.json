@@ -33,8 +33,8 @@
     "test": "tslint -p tsconfig.json",
     "build": "npm run build:ncc && npm run build:node_modules",
     "build:ncc": "ncc build src/index.ts --source-map --external semver",
-    "build:node_modules": "shx mkdir -p dist/node_modules && shx cp -r node_modules/semver dist/node_modules/semver",
-    "watch": "npm run build -- --watch",
+    "build:node_modules": "shx mkdir -p dist/node_modules && shx cp -r node_modules/semver dist/node_modules",
+    "watch": "npm run build:ncc -- --watch",
     "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump --tag --push --all",
     "release": "npm run upgrade && npm run clean && npm run build && npm test && npm run bump"

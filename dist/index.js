@@ -2452,7 +2452,8 @@ async function getNpmConfigPath() {
  */
 async function readNpmConfig(configPath) {
     try {
-        return fs_1.promises.readFile(configPath, "utf-8");
+        let config = await fs_1.promises.readFile(configPath, "utf-8");
+        return config;
     }
     catch (error) {
         if (error.code === "ENOENT") {
