@@ -1,5 +1,4 @@
 import { getInput, setFailed, setOutput } from "@actions/core";
-import * as sourceMapSupport from "source-map-support";
 import { Options } from "./options";
 import { publishToNPM } from "./publish-to-npm";
 
@@ -11,9 +10,6 @@ async function main(): Promise<void> {
     // Setup global error handlers
     process.on("uncaughtException", errorHandler);
     process.on("unhandledRejection", errorHandler);
-
-    // Map any errors back to the original TypeScript source code
-    sourceMapSupport.install();
 
     // Get the GitHub Actions input options
     const options: Options = {
