@@ -97,6 +97,9 @@ To build the project locally on your computer:
 3. __Build the code__<br>
 `npm run build`
 
+4. __Run the tests__<br>
+`npm test`
+
 
 
 License
