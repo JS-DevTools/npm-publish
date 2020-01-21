@@ -1,7 +1,7 @@
 {
   "name": "npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "keywords": [
     "github-action",
@@ -50,7 +50,7 @@
     "@actions/core": "^1.2.1",
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.7",
+    "@types/node": "^13.1.8",
     "@types/semver": "^6.2.0",
     "@types/source-map-support": "^0.5.0",
     "@zeit/ncc": "^0.21.0",
