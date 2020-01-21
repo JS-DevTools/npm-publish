@@ -6,7 +6,7 @@
 
     "outDir": ".",
     "sourceMap": true,
-    "declaration": true,
+    "declaration": false,
 
     "newLine": "LF",
     "forceConsistentCasingInFileNames": true,
