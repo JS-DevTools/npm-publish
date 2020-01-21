@@ -2,43 +2,82 @@ NPM Publish GitHub Action
 ==============================================
 ### Fast, easy publishing to NPM
 
-[![Dependencies](https://david-dm.org/JS-DevTools/npm-publish.svg)](https://david-dm.org/JS-DevTools/npm-publish)
-[![License](https://img.shields.io/npm/l/npm-publish.svg)](LICENSE)
-
 
 
 Features
 --------------------------
-- Feature 1
-- Feature 2
-- Feature 3
+- 🧠 **Smart**<br>
+Only publishes if the version number in `package.json` differs from the latest on NPM
 
+- 🛠 **Configurable**<br>
+Customize the version-checking behavior, the registry URL, and path of your package
 
+- 🔐 **Secure**<br>
+Keeps your NPM access token secret. Doesn't write it to `~/.npmrc`
 
-Example
---------------------------
+- ⚡ **Fast**<br>
+100% JavaScript (which is faster than Docker) and bundled to optimize loading time
 
-```javascript
-import publishToNPM from "npm-publish";
-
-// TODO: Add a usage example here
-```
-
-
-
-Installation
---------------------------
-You can install `npm-publish` via [npm](https://docs.npmjs.com/about-npm/).
-
-```bash
-npm install npm-publish
-```
+- 📤 **Outputs**<br>
+Exposes the old and new version numbers, and the type of change (major, minor, patch, etc.) as variables that you can use in your workflow.
 
 
 
 Usage
 --------------------------
-TODO: Document the library's API and CLI usage
+By default, the only thing you need to do is set the `token` parameter to your [NPM auth token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens).
+
+```yaml
+steps:
+  - uses: actions/checkout@v1
+  - uses: actions/setup-node@v1
+    with:
+      node-version: 10
+  - run: npm install
+  - run: npm test
+  - uses: JS-DevTools/npm-publish@v1
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+```
+
+
+
+Input Parameters
+--------------------------
+You can set any or all of the following input parameters:
+
+|Name            |Type    |Required? |Default               |Description
+|----------------|--------|----------|----------------------|------------------------------------
+|`token`         |string  |yes       |                      |The NPM auth token to use for publishing
+|`registry`      |string  |no        |//registry.npmjs.org/ |The NPM registry URL to use
+|`package`       |string  |no        |./package.json        |The path of your package.json file
+|`check-version` |boolean |no        |true                  |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+
+
+
+Output Variables
+--------------------------
+npm-publish exposes some output variables, which you can use in later steps of your workflow. To access the output variables, you'll need to set an `id` for the npm-publish step.
+
+```yaml
+steps:
+  - id: publish
+    uses: JS-DevTools/npm-publish@v1
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+
+  - if: steps.publish.type != 'none'
+    run: |
+      echo "Version changed: ${{ steps.publish.old-version }} => ${{ steps.publish.version }}"
+```
+
+
+|Variable      |Type    |Description
+|--------------|--------|------------------------------------
+|`type`        |string  |The type of version change that occurred ("major", "minor", "patch", etc.). If there was no version change, then type will be "none".
+|`version`     |string  |The version that was published
+|`old-version` |string  |The version number that was previously published to NPM
+
 
 
 
