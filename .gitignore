@@ -39,6 +39,7 @@ pids
 node_modules
 
 # Build output
+/bin
 /lib
 
 # Test output

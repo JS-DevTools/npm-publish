@@ -1,58 +1,51 @@
 {
-  "name": "project-package-name",
+  "name": "npm-publish",
+  "description": "Fast, easy publishing to NPM",
   "version": "0.0.1",
-  "description": "This is the project description",
-  "keywords": [],
+  "private": true,
+  "keywords": [
+    "github-action",
+    "npm",
+    "publish",
+    "version",
+    "bump"
+  ],
   "author": {
     "name": "James Messinger",
     "url": "https://jamesmessinger.com"
   },
   "license": "MIT",
-  "homepage": "https://jstools.dev/project-package-name",
+  "homepage": "https://jstools.dev/npm-publish",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JS-DevTools/project-package-name.git"
+    "url": "https://github.com/JS-DevTools/npm-publish.git"
   },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "bin/npm-publish.js",
   "bin": {
-    "project-cli-name": "bin/project-cli-name.js"
+    "npm-publish": "bin/npm-publish.js"
   },
   "files": [
     "bin",
     "lib"
   ],
   "scripts": {
-    "clean": "shx rm -rf .nyc_output coverage lib",
-    "lint": "npm run lint:typescript && npm run lint:javascript",
-    "lint:typescript": "tslint -p tsconfig.json",
-    "lint:javascript": "eslint test",
+    "clean": "shx rm -rf bin lib",
+    "test": "tslint -p tsconfig.json",
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "mocha && npm run lint",
-    "coverage": "nyc node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump --tag --push --all",
     "release": "npm run upgrade && npm run clean && npm run build && npm test && npm run bump"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=12"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/command-line-args": "^5.0.0",
-    "@types/mocha": "^5.2.7",
     "@types/node": "^12.0.7",
-    "chai": "^4.2.0",
-    "chai-exec": "^1.1.1",
-    "coveralls": "^3.0.4",
-    "eslint": "^5.16.0",
-    "eslint-config-modular": "^7.0.0",
-    "mocha": "^6.1.4",
+    "@types/semver": "^6.2.0",
+    "@types/source-map-support": "^0.5.0",
     "npm-check": "^5.9.0",
-    "nyc": "^14.1.1",
     "shx": "^0.3.2",
-    "source-map-support": "^0.5.12",
     "tslint": "^5.17.0",
     "tslint-modular": "^1.4.1",
     "typescript": "^3.5.1",
@@ -60,6 +53,10 @@
     "version-bump-prompt": "^5.0.3"
   },
   "dependencies": {
-    "command-line-args": "^5.1.1"
+    "@actions/core": "^1.2.1",
+    "ez-spawn": "^2.1.6",
+    "ono": "^6.0.1",
+    "semver": "^7.1.1",
+    "source-map-support": "^0.5.12"
   }
 }

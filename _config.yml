@@ -1,6 +1,6 @@
 remote_theme: JS-DevTools/gh-pages-theme
 
-title: Friendly Project Name
+title: NPM Publish GitHub Action
 logo: https://jstools.dev/img/logos/logo.png
 
 author:
@@ -17,10 +17,6 @@ defaults:
       path: ""
     values:
       image: https://jstools.dev/img/logos/card.png
-  - scope:
-      path: "test/**/*"
-    values:
-      sitemap: false
 
 plugins:
   - jekyll-sitemap

@@ -4,7 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
 
-    "outDir": "lib",
+    "outDir": ".",
     "sourceMap": true,
     "declaration": true,
 
@@ -19,8 +19,7 @@
     "stripInternal": true,
 
     "typeRoots": [
-      "node_modules/@types",
-      "src/typings"
+      "node_modules/@types"
     ],
 
     "plugins": [

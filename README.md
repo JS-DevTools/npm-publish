@@ -1,53 +1,75 @@
-Node.js TypeScript Template
-===========================
-This is a **template repo** for Node.js projects written in TypeScript. This template works for libraries and/or CLIs.
+NPM Publish GitHub Action
+==============================================
+### Fast, easy publishing to NPM
+
+[![Dependencies](https://david-dm.org/JS-DevTools/npm-publish.svg)](https://david-dm.org/JS-DevTools/npm-publish)
+[![License](https://img.shields.io/npm/l/npm-publish.svg)](LICENSE)
 
 
 
-Step 1: Copy this repo
----------------------------------------------
-Create a new git repo and copy the contents of this repo into it.
+Features
+--------------------------
+- Feature 1
+- Feature 2
+- Feature 3
 
 
 
-Step 2: Delete unneeded files
----------------------------------------------
-If you **don't** need a CLI, then:
-  - Delete the following files and directories:
-    - `bin`
-    - `src/cli`
-    - `test/specs/cli.spec.js`
-    - `test/utils/project-cli-name.js`
-  - Delete the following fields in `package.json`:
-    - `bin`
-    - `files.bin`
-    - `devDependencies.chai-exec`
-    - `devDependencies.@types/command-line-args`
-    - `dependencies.command-line-args`
-  - Delete the `Run CLI` config from `.vscode/launch.json`
+Example
+--------------------------
+
+```javascript
+import publishToNPM from "npm-publish";
+
+// TODO: Add a usage example here
+```
 
 
 
-Step 3: Replace placeholders
----------------------------------------------
-Replace all occurrences of the following placeholders in all files:
+Installation
+--------------------------
+You can install `npm-publish` via [npm](https://docs.npmjs.com/about-npm/).
 
-|Placeholder                        |Description
-|:----------------------------------|:------------------------------------------------------------
-|`project-package-name`             |This is the name of the NPM package. It should also match the GitHub repo name. It should be kebab-cased.
-|`project-cli-name`                 |The name of the CLI program for this project, if any.
-|`projectExportName`                |The name of the library's default export, if any.  This should be a valid JavaScript identifier name.
-|`Friendly Project Name`            |This is the human friendly name of the project that is used in the ReadMe, descriptions, and docs pages
-|`This is the project description`  |A short, human friendly description of the project that is used in the ReadMe and package.json
+```bash
+npm install npm-publish
+```
 
 
 
-Step 4: TODOs
----------------------------------------------
-Find all "TODO" notes in the code and follow their instructions.
+Usage
+--------------------------
+TODO: Document the library's API and CLI usage
 
 
 
-Step 5: ReadMe
----------------------------------------------
-Delete this file and replace it with `README_md`.
+Contributing
+--------------------------
+Contributions, enhancements, and bug-fixes are welcome!  [File an issue](https://github.com/JS-DevTools/npm-publish/issues) on GitHub and [submit a pull request](https://github.com/JS-DevTools/npm-publish/pulls).
+
+#### Building
+To build the project locally on your computer:
+
+1. __Clone this repo__<br>
+`git clone https://github.com/JS-DevTools/npm-publish.git`
+
+2. __Install dependencies__<br>
+`npm install`
+
+3. __Build the code__<br>
+`npm run build`
+
+
+
+License
+--------------------------
+npm-publish is 100% free and open-source, under the [MIT license](LICENSE). Use it however you want.
+
+
+
+Big Thanks To
+--------------------------
+Thanks to these awesome companies for their support of Open Source developers ❤
+
+[![Travis CI](https://jstools.dev/img/badges/travis-ci.svg)](https://travis-ci.com)
+[![SauceLabs](https://jstools.dev/img/badges/sauce-labs.svg)](https://saucelabs.com)
+[![Coveralls](https://jstools.dev/img/badges/coveralls.svg)](https://coveralls.io)
