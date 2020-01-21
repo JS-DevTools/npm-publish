@@ -31,7 +31,9 @@
   "scripts": {
     "clean": "shx rm -rf dist",
     "test": "tslint -p tsconfig.json",
-    "build": "ncc build src/index.ts --source-map",
+    "build": "npm run build:ncc && npm run build:node_modules",
+    "build:ncc": "ncc build src/index.ts --source-map --external semver",
+    "build:node_modules": "shx mkdir -p dist/node_modules && shx cp -r node_modules/semver dist/node_modules/semver",
     "watch": "npm run build -- --watch",
     "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump --tag --push --all",
