@@ -33,12 +33,10 @@ function updateConfig(config: string, { registry, token }: Options): string {
   );
 
   // Append the new registry and token to the end of the file
-  config =
-    lines.join(EOL) + "\n" +
-    `registry=${registry}\n` +
-    `${registry}:_authToken=${token}\n`;
+  lines.push(`registry=${registry}`);
+  lines.push(`${registry}:_authToken=${token}`);
 
-  return config;
+  return lines.join(EOL).trim() + EOL;
 }
 
 
