@@ -1,0 +1,14 @@
+# Mocha options
+# https://mochajs.org/#configuring-mocha-nodejs
+# https://github.com/mochajs/mocha/blob/master/example/config/.mocharc.yml
+
+spec:
+  # Test fixtures
+  - test/fixtures/**/*.js
+
+  # Test specs
+  - test/specs/**/*.spec.js
+
+bail: true
+recursive: true
+timeout: 30000 # Allow time for multiple process spawning
