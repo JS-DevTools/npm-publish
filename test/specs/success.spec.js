@@ -26,6 +26,7 @@ describe("Success tests", () => {
 
     npm.mock({
       args: ["publish"],
+      env: { NPM_TOKEN: "my-secret-token" },
       stdout: `my-lib 2.0.0${EOL}`,
     });
 
@@ -49,7 +50,7 @@ describe("Success tests", () => {
 
     files.assert.contents("home/.npmrc",
       `registry=//registry.npmjs.org/${EOL}` +
-      `//registry.npmjs.org/:_authToken=my-secret-token${EOL}`
+      `//registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
     );
 
     npm.assert.ranSuccessfully();
