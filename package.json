@@ -40,7 +40,7 @@
     "test": "mocha && npm run lint",
     "coverage": "nyc -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
-    "bump": "bump --tag --push --all",
+    "bump": "bump --tag --push --all && git tag -afm v1 v1 && git push --tags --force",
     "release": "npm run upgrade && npm run clean && npm run build && npm test && npm run bump"
   },
   "engines": {
