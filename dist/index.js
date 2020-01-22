@@ -267,6 +267,7 @@ exports.npm = {
                 stdio: "inherit",
                 cwd: path_1.resolve(path_1.dirname(options.package)),
                 env: {
+                    ...process.env,
                     NPM_TOKEN: options.token,
                 }
             });
