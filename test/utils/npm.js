@@ -37,6 +37,14 @@ module.exports = {
 
   assert: {
     /**
+     * Asserts that NPM did not run
+     */
+    didNotRun () {
+      let mocks = readMocks();
+      expect(mocks).to.have.lengthOf(0, "NPM ran when it shouldn't have");
+    },
+
+    /**
      * Asserts that all mocks ran successfully.
      */
     ranSuccessfully (times) {
@@ -53,7 +61,7 @@ module.exports = {
       }
 
       expect(mocks).to.have.lengthOf(times, `Expected NPM to be run ${times} times`);
-    }
+    },
   },
 };
 
