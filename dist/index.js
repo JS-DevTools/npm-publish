@@ -262,10 +262,14 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
-            // We need to run NPM in the same directory as the package
-            let cwd = path_1.resolve(path_1.dirname(options.package));
             // Run NPM to publish the package
-            await ezSpawn.async("npm", ["publish"], { cwd, stdio: "inherit" });
+            await ezSpawn.async("npm", ["publish"], {
+                stdio: "inherit",
+                cwd: path_1.resolve(path_1.dirname(options.package)),
+                env: {
+                    NPM_TOKEN: options.token,
+                }
+            });
             core_1.debug(`Successfully published ${name} v${version} to NPM`);
         }
         catch (error) {
@@ -1582,7 +1586,7 @@ function updateConfig(config, { registry, token }) {
     lines = lines.filter((line) => !(line.startsWith("registry=") || line.includes("_authToken=")));
     // Append the new registry and token to the end of the file
     lines.push(`registry=${registry}`);
-    lines.push(`${registry}:_authToken=${token}`);
+    lines.push(`${registry}:_authToken=\${NPM_TOKEN}`);
     return lines.join(os_1.EOL).trim() + os_1.EOL;
 }
 /**

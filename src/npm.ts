@@ -40,11 +40,14 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
-      // We need to run NPM in the same directory as the package
-      let cwd = resolve(dirname(options.package));
-
       // Run NPM to publish the package
-      await ezSpawn.async("npm", ["publish"], { cwd, stdio: "inherit" });
+      await ezSpawn.async("npm", ["publish"], {
+        stdio: "inherit",
+        cwd: resolve(dirname(options.package)),
+        env: {
+          NPM_TOKEN: options.token,
+        }
+      });
 
       debug(`Successfully published ${name} v${version} to NPM`);
     }
