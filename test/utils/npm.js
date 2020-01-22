@@ -45,9 +45,9 @@ module.exports = {
     },
 
     /**
-     * Asserts that all mocks ran successfully.
+     * Asserts that all mocks ran the specified number of times
      */
-    ranSuccessfully (times) {
+    ran (times) {
       let mocks = readMocks();
 
       for (let [index, stub] of mocks.entries()) {
