@@ -16,7 +16,7 @@ chaiExec.defaults = {
   options: {
     cwd: paths.workspace,
     env: {
-      INPUT_REGISTRY: "//registry.npmjs.org/",
+      INPUT_REGISTRY: "https://registry.npmjs.org/",
       INPUT_PACKAGE: "package.json",
       "INPUT_CHECK-VERSION": "true",
     },

@@ -46,12 +46,12 @@ Input Parameters
 --------------------------
 You can set any or all of the following input parameters:
 
-|Name            |Type    |Required? |Default               |Description
-|----------------|--------|----------|----------------------|------------------------------------
-|`token`         |string  |yes       |                      |The NPM auth token to use for publishing
-|`registry`      |string  |no        |//registry.npmjs.org/ |The NPM registry URL to use
-|`package`       |string  |no        |./package.json        |The path of your package.json file
-|`check-version` |boolean |no        |true                  |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|Name            |Type    |Required? |Default                     |Description
+|----------------|--------|----------|----------------------------|------------------------------------
+|`token`         |string  |yes       |                            |The NPM auth token to use for publishing
+|`registry`      |string  |no        |https://registry.npmjs.org/ |The NPM registry URL to use
+|`package`       |string  |no        |./package.json              |The path of your package.json file
+|`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
 
 
 

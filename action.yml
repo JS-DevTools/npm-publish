@@ -17,7 +17,7 @@ inputs:
   registry:
     description: The NPM registry URL to use
     required: false
-    default: //registry.npmjs.org/
+    default: https://registry.npmjs.org/
 
   package:
     description: The path of your package.json file

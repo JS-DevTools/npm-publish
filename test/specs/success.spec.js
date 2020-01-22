@@ -49,8 +49,8 @@ describe("Success tests", () => {
     );
 
     files.assert.contents("home/.npmrc",
-      `registry=//registry.npmjs.org/${EOL}` +
-      `//registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
+      `registry=https://registry.npmjs.org/${EOL}` +
+      `https://registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
     );
 
     npm.assert.ranSuccessfully();
