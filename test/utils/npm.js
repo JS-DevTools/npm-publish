@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const paths = require("./paths");
+const { expect } = require("chai");
 
 module.exports = {
   /**
@@ -38,8 +39,9 @@ module.exports = {
     /**
      * Asserts that all mocks ran successfully.
      */
-    ranSuccessfully () {
+    ranSuccessfully (times) {
       let mocks = readMocks();
+
       for (let [index, stub] of mocks.entries()) {
         if (!stub.ran) {
           throw new Error(
@@ -49,6 +51,8 @@ module.exports = {
           );
         }
       }
+
+      expect(mocks).to.have.lengthOf(times, `Expected NPM to be run ${times} times`);
     }
   },
 };
