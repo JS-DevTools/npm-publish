@@ -1583,7 +1583,7 @@ function updateConfig(config, { registry, token }) {
     lines = lines.filter((line) => !(line.startsWith("registry=") || line.includes("_authToken=")));
     // Append the new registry and token to the end of the file
     lines.push(`registry=${registry}`);
-    lines.push(`${registry}:_authToken=${token}`);
+    lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
     return lines.join(os_1.EOL).trim() + os_1.EOL;
 }
 /**
