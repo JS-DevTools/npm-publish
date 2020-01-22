@@ -63,6 +63,6 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Publish to NPM
-        uses: .
+        uses: ./
         with:
           token: ${{ secrets.NPM_TOKEN }}
