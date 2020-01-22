@@ -16,6 +16,8 @@ export async function setNpmConfig(options: Options): Promise<void> {
   // Update the config
   config = updateConfig(config, options);
 
+  console.log("NPM CONFIG:\n", config);
+
   // Save the new config
   await writeNpmConfig(configPath, config);
 }

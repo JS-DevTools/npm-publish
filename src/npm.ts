@@ -40,6 +40,13 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
+      if (process.env.INPUT_TOKEN === options.token) {
+        console.log("INPUT_TOKEN is set");
+      }
+      else {
+        console.log("MISSING INPUT_TOKEN");
+      }
+
       // Run NPM to publish the package
       await ezSpawn.async("npm", ["publish"], {
         stdio: "inherit",

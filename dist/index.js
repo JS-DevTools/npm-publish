@@ -262,6 +262,12 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
+            if (process.env.INPUT_TOKEN === options.token) {
+                console.log("INPUT_TOKEN is set");
+            }
+            else {
+                console.log("MISSING INPUT_TOKEN");
+            }
             // Run NPM to publish the package
             await ezSpawn.async("npm", ["publish"], {
                 stdio: "inherit",
@@ -1570,6 +1576,7 @@ async function setNpmConfig(options) {
     let config = await readNpmConfig(configPath);
     // Update the config
     config = updateConfig(config, options);
+    console.log("NPM CONFIG:\n", config);
     // Save the new config
     await writeNpmConfig(configPath, config);
 }
