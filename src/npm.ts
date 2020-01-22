@@ -44,10 +44,6 @@ export const npm = {
       await ezSpawn.async("npm", ["publish"], {
         stdio: "inherit",
         cwd: resolve(dirname(options.package)),
-        env: {
-          ...process.env,
-          NPM_TOKEN: options.token,
-        }
       });
 
       debug(`Successfully published ${name} v${version} to NPM`);

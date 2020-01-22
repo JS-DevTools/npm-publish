@@ -27,7 +27,7 @@ describe("Success tests", () => {
 
     npm.mock({
       args: ["publish"],
-      env: { NPM_TOKEN: "my-secret-token" },
+      env: { INPUT_TOKEN: "my-secret-token" },
       stdout: `my-lib 2.0.0${EOL}`,
     });
 
@@ -50,7 +50,7 @@ describe("Success tests", () => {
 
     files.assert.contents("home/.npmrc",
       `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
+      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
     );
 
     npm.assert.ran(3);
@@ -104,7 +104,7 @@ describe("Success tests", () => {
 
     npm.mock({
       args: ["publish"],
-      env: { NPM_TOKEN: "my-secret-token" },
+      env: { INPUT_TOKEN: "my-secret-token" },
       stdout: `my-lib 1.1.0${EOL}`,
     });
 
@@ -130,7 +130,7 @@ describe("Success tests", () => {
       `There are many like it,${EOL}` +
       `but this one is mine.${EOL}` +
       `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
+      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
     );
 
     npm.assert.ran(3);
@@ -166,7 +166,7 @@ describe("Success tests", () => {
 
     npm.mock({
       args: ["publish"],
-      env: { NPM_TOKEN: "my-secret-token" },
+      env: { INPUT_TOKEN: "my-secret-token" },
       stdout: `my-lib 1.0.1${EOL}`,
     });
 
@@ -195,7 +195,7 @@ describe("Success tests", () => {
       `# Use some other package registry${EOL}` +
       `${EOL}` +
       `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
+      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
     );
 
     npm.assert.ran(3);
@@ -219,7 +219,7 @@ describe("Success tests", () => {
     npm.mock({
       args: ["publish"],
       cwd: join(paths.workspace, "subdir/my-lib"),
-      env: { NPM_TOKEN: "my-secret-token" },
+      env: { INPUT_TOKEN: "my-secret-token" },
       stdout: `my-lib 1.0.0-beta${EOL}`,
     });
 
@@ -243,7 +243,7 @@ describe("Success tests", () => {
 
     files.assert.contents("home/.npmrc",
       `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${NPM_TOKEN}${EOL}`
+      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
     );
 
     npm.assert.ran(3);

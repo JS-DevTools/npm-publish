@@ -34,7 +34,7 @@ function updateConfig(config: string, { registry, token }: Options): string {
 
   // Append the new registry and token to the end of the file
   lines.push(`registry=${registry}`);
-  lines.push(`${registry}:_authToken=\${NPM_TOKEN}`);
+  lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
 
   return lines.join(EOL).trim() + EOL;
 }
