@@ -35,6 +35,14 @@ module.exports = {
     contents (p, expected) {
       let actual = fs.readFileSync(path.join(paths.tmp, p), "utf8");
       expect(actual).to.equal(expected, `Incorrect file contents in ${p}`);
-    }
+    },
+
+    /**
+     * Asserts the the specified file does not exist
+     */
+    doesNotExist (p) {
+      let exists = fs.existsSync(path.join(paths.tmp, p));
+      expect(exists).to.equal(false, `File should not exist: ${p}`);
+    },
   },
 };
