@@ -7,9 +7,16 @@ module.exports = {
   /**
    * Adds a stub behavior for our mock NPM binary
    */
-  mock ({ args, env, stdout, stderr, exitCode }) {
+  mock ({ args, cwd, env, stdout, stderr, exitCode }) {
+    args = args || [];
+    cwd = cwd || paths.workspace;
+    env = env || {};
+    stdout = stdout || "";
+    stderr = stderr || "";
+    exitCode = exitCode || 0;
+
     let mocks = readMocks();
-    let stub = { args, env, stdout, stderr, exitCode };
+    let stub = { args, cwd, env, stdout, stderr, exitCode };
     mocks.push(stub);
     fs.writeFileSync(paths.mocks, JSON.stringify(mocks));
   },
@@ -17,7 +24,7 @@ module.exports = {
   /**
    * Returns the next stub behavior for the mock NPM binary
    *
-   * @returns {{ args: string[], env: object, stdout: string, stderr: string, exitCode: number }}
+   * @returns {{ args: string[], cwd: string, env: object, stdout: string, stderr: string, exitCode: number }}
    */
   stub () {
     let mocks = readMocks();
