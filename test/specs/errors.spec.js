@@ -13,7 +13,7 @@ describe("Failure tests", () => {
     let cli = npmPublish({});
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.matches(/^::error::Error: Input required and not supplied: token/);
+    expect(cli).stdout.to.include("::error::Error: Input required and not supplied: token");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -29,7 +29,7 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.matches(/^::error::Error: Unable to read package.json %0AENOENT: no such file or directory/);
+    expect(cli).stdout.to.include("::error::Error: Unable to read package.json %0AENOENT: no such file or directory");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -49,8 +49,8 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.matches(/^::error::SyntaxError: Unable to parse package.json/);
-    expect(cli).to.have.stdout.that.includes("Unexpected token h in JSON at position 0");
+    expect(cli).stdout.to.include("::error::SyntaxError: Unable to parse package.json");
+    expect(cli).stdout.to.include("Unexpected token h in JSON at position 0");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -69,8 +69,8 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.matches(/^::error::TypeError: Unable to parse package.json/);
-    expect(cli).to.have.stdout.that.includes("Invalid package name");
+    expect(cli).stdout.to.include("::error::TypeError: Unable to parse package.json");
+    expect(cli).stdout.to.include("Invalid package name");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -89,8 +89,8 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.matches(/^::error::TypeError: Unable to parse package.json/);
-    expect(cli).to.have.stdout.that.includes("Invalid Version: hello, world");
+    expect(cli).stdout.to.include("::error::TypeError: Unable to parse package.json");
+    expect(cli).stdout.to.include("Invalid Version: hello, world");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -115,9 +115,9 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.includes("::error::Error: Unable to determine the current version of my-lib on NPM.");
-    expect(cli).to.have.stdout.that.includes("npm view my-lib version exited with a status of 1");
-    expect(cli).to.have.stdout.that.includes("BOOM!");
+    expect(cli).stdout.to.include("::error::Error: Unable to determine the current version of my-lib on NPM.");
+    expect(cli).stdout.to.include("npm view my-lib version exited with a status of 1");
+    expect(cli).stdout.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(1);
@@ -146,8 +146,8 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.includes("::error::Error: Unable to read the NPM config file: ");
-    expect(cli).to.have.stdout.that.includes("Error: EISDIR: illegal operation on a directory, read");
+    expect(cli).stdout.to.include("::error::Error: Unable to read the NPM config file: ");
+    expect(cli).stdout.to.include("Error: EISDIR: illegal operation on a directory, read");
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(2);
@@ -176,9 +176,9 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout.that.includes("::error::Error: Unable to determine the NPM config file path.");
-    expect(cli).to.have.stdout.that.includes("npm config get userconfig exited with a status of 1");
-    expect(cli).to.have.stdout.that.includes("BOOM!");
+    expect(cli).stdout.to.include("::error::Error: Unable to determine the NPM config file path.");
+    expect(cli).stdout.to.include("npm config get userconfig exited with a status of 1");
+    expect(cli).stdout.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(2);
@@ -212,9 +212,9 @@ describe("Failure tests", () => {
     });
 
     expect(cli).to.have.stderr("BOOM!");
-    expect(cli).to.have.stdout.that.includes("::error::Error: Unable to publish my-lib v2.0.0 to NPM.");
-    expect(cli).to.have.stdout.that.includes("npm publish exited with a status of 1");
-    expect(cli).to.have.stdout.that.does.not.include("BOOM!");
+    expect(cli).stdout.to.include("::error::Error: Unable to publish my-lib v2.0.0 to NPM.");
+    expect(cli).stdout.to.include("npm publish exited with a status of 1");
+    expect(cli).stdout.not.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(3);

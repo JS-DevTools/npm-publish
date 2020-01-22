@@ -38,14 +38,11 @@ describe("Success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout(
-      `::debug::The local version of my-lib is at v1.0.0${EOL}` +
-      `my-lib 2.0.0${EOL}` +
-      `::debug::Successfully published my-lib v2.0.0 to NPM${EOL}` +
-      `::set-output name=type::major${EOL}` +
-      `::set-output name=version::2.0.0${EOL}` +
-      `::set-output name=old-version::1.0.0${EOL}`
-    );
+    expect(cli).stdout.to.include("my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::2.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -73,13 +70,10 @@ describe("Success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout(
-      `::debug::The local version of my-lib is at v1.0.0${EOL}` +
-      `::debug::my-lib v1.0.0 is already published to NPM${EOL}` +
-      `::set-output name=type::none${EOL}` +
-      `::set-output name=version::1.0.0${EOL}` +
-      `::set-output name=old-version::1.0.0${EOL}`
-    );
+    expect(cli).stdout.to.include("📦 my-lib v1.0.0 is already published to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::none");
+    expect(cli).stdout.to.include("::set-output name=version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).to.have.exitCode(0);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -115,14 +109,11 @@ describe("Success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout(
-      `::debug::The local version of my-lib is at v1.0.0${EOL}` +
-      `my-lib 1.1.0${EOL}` +
-      `::debug::Successfully published my-lib v1.1.0 to NPM${EOL}` +
-      `::set-output name=type::minor${EOL}` +
-      `::set-output name=version::1.1.0${EOL}` +
-      `::set-output name=old-version::1.0.0${EOL}`
-    );
+    expect(cli).stdout.to.include("my-lib 1.1.0");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.1.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::minor");
+    expect(cli).stdout.to.include("::set-output name=version::1.1.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -177,14 +168,11 @@ describe("Success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout(
-      `::debug::The local version of my-lib is at v1.0.0${EOL}` +
-      `my-lib 1.0.1${EOL}` +
-      `::debug::Successfully published my-lib v1.0.1 to NPM${EOL}` +
-      `::set-output name=type::patch${EOL}` +
-      `::set-output name=version::1.0.1${EOL}` +
-      `::set-output name=old-version::1.0.0${EOL}`
-    );
+    expect(cli).stdout.to.include("my-lib 1.0.1");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.1 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::patch");
+    expect(cli).stdout.to.include("::set-output name=version::1.0.1");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -231,14 +219,11 @@ describe("Success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).to.have.stdout(
-      `::debug::The local version of my-lib is at v1.0.0${EOL}` +
-      `my-lib 1.0.0-beta${EOL}` +
-      `::debug::Successfully published my-lib v1.0.0-beta to NPM${EOL}` +
-      `::set-output name=type::prerelease${EOL}` +
-      `::set-output name=version::1.0.0-beta${EOL}` +
-      `::set-output name=old-version::1.0.0${EOL}`
-    );
+    expect(cli).stdout.to.include("my-lib 1.0.0-beta");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.0-beta to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::prerelease");
+    expect(cli).stdout.to.include("::set-output name=version::1.0.0-beta");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
