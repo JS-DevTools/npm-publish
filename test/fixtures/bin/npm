@@ -35,6 +35,17 @@ for (let i = 0; i < Math.max(argv.length, stub.args.length); i++) {
   }
 }
 
+// Ensure that the environment variables match
+for (let key of Object.keys(stub.env || {})) {
+  if (process.env[key] !== stub.env[key]) {
+    throw new Error(
+      "NPM was called with incorrect environment variables:\n" +
+      `EXPECTED: ${key} = ${stub.env[key]}\n` +
+      `ACTUAL:   ${key} = ${process.env[key]}\n`
+    );
+  }
+}
+
 // Print the stub output
 if (stub.stdout) {
   process.stdout.write(stub.stdout);
