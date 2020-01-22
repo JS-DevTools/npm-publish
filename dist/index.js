@@ -1572,6 +1572,7 @@ const fs_1 = __webpack_require__(747);
 const ono_1 = __webpack_require__(114);
 const os_1 = __webpack_require__(87);
 const path_1 = __webpack_require__(622);
+const url_1 = __webpack_require__(835);
 /**
  * Sets/updates the NPM config based on the options.
  */
@@ -1588,13 +1589,15 @@ exports.setNpmConfig = setNpmConfig;
 /**
  * Updates the given NPM config with the specified options.
  */
-function updateConfig(config, { registry, token }) {
+function updateConfig(config, options) {
+    let registry = new url_1.URL(options.registry);
+    let authDomain = registry.origin.slice(registry.protocol.length);
     let lines = config.split(/\r?\n/);
     // Remove any existing lines that set the registry or token
     lines = lines.filter((line) => !(line.startsWith("registry=") || line.includes("_authToken=")));
     // Append the new registry and token to the end of the file
-    lines.push(`registry=${registry}`);
-    lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
+    lines.push(`${authDomain}/:_authToken=\${INPUT_TOKEN}`);
+    lines.push(`registry=${registry.href}`);
     config = lines.join(os_1.EOL).trim() + os_1.EOL;
     core_1.debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
     return config;
@@ -2658,6 +2661,13 @@ function normalizeResult ({ command, args, pid, stdout, stderr, output, status, 
   }
 }
 
+
+/***/ }),
+
+/***/ 835:
+/***/ (function(module) {
+
+module.exports = require("url");
 
 /***/ }),
 

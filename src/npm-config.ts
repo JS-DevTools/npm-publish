@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import { ono } from "ono";
 import { EOL } from "os";
 import { dirname } from "path";
+import { URL } from "url";
 import { Options } from "./options";
 
 /**
@@ -25,7 +26,10 @@ export async function setNpmConfig(options: Options): Promise<void> {
 /**
  * Updates the given NPM config with the specified options.
  */
-function updateConfig(config: string, { registry, token }: Options): string {
+function updateConfig(config: string, options: Options): string {
+  let registry = new URL(options.registry);
+  let authDomain = registry.origin.slice(registry.protocol.length);
+
   let lines = config.split(/\r?\n/);
 
   // Remove any existing lines that set the registry or token
@@ -34,8 +38,8 @@ function updateConfig(config: string, { registry, token }: Options): string {
   );
 
   // Append the new registry and token to the end of the file
-  lines.push(`registry=${registry}`);
-  lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
+  lines.push(`${authDomain}/:_authToken=\${INPUT_TOKEN}`);
+  lines.push(`registry=${registry.href}`);
 
   config = lines.join(EOL).trim() + EOL;
 

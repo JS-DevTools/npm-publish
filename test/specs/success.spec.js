@@ -46,8 +46,8 @@ describe("Success tests", () => {
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
-      `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(3);
@@ -120,8 +120,8 @@ describe("Success tests", () => {
       `This is my NPM config.${EOL}` +
       `There are many like it,${EOL}` +
       `but this one is mine.${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(3);
@@ -182,8 +182,8 @@ describe("Success tests", () => {
       `${EOL}` +
       `# Use some other package registry${EOL}` +
       `${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(3);
@@ -227,8 +227,8 @@ describe("Success tests", () => {
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
-      `registry=https://registry.npmjs.org/${EOL}` +
-      `https://registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}`
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(3);
