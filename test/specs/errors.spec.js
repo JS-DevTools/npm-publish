@@ -10,7 +10,11 @@ const { EOL } = require("os");
 describe("Failure tests", () => {
 
   it("should fail if the NPM token isn't set", () => {
-    let cli = npmPublish({});
+    let cli = npmPublish({
+      env: {
+        INPUT_TOKEN: "",
+      }
+    });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("::error::Error: Input required and not supplied: token");
