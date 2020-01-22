@@ -21,7 +21,7 @@ export async function publishToNPM(options: Options): Promise<Results> {
     await npm.publish(manifest, options);
   }
   else {
-    debug(`${name} v${publishedVersion} is already published to NPM`);
+    debug(`${manifest.name} v${publishedVersion} is already published to NPM`);
   }
 
   return {

@@ -1112,7 +1112,7 @@ async function publishToNPM(options) {
         await npm_1.npm.publish(manifest, options);
     }
     else {
-        core_1.debug(`${name} v${publishedVersion} is already published to NPM`);
+        core_1.debug(`${manifest.name} v${publishedVersion} is already published to NPM`);
     }
     return {
         type: diff || "none",
