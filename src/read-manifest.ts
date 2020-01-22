@@ -1,5 +1,7 @@
+import { debug } from "@actions/core";
 import { promises as fs } from "fs";
 import { ono } from "ono";
+import { resolve } from "path";
 import { SemVer } from "semver";
 
 /**
@@ -14,6 +16,7 @@ export interface Manifest {
  * Reads the package manifest (package.json) and returns its parsed contents
  */
 export async function readManifest(path: string): Promise<Manifest> {
+  debug(`Reading package manifest from ${resolve(path)}`);
   let json: string;
 
   try {
@@ -30,10 +33,13 @@ export async function readManifest(path: string): Promise<Manifest> {
       throw new TypeError(`Invalid package name`);
     }
 
-    return {
+    let manifest: Manifest = {
       name,
       version: new SemVer(version as string),
     };
+
+    debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+    return manifest;
   }
   catch (error) {
     throw ono(error, `Unable to parse ${path}`);

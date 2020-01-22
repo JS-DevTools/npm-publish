@@ -243,6 +243,7 @@ exports.npm = {
      */
     async getLatestVersion(name) {
         try {
+            core_1.debug(`Running command: npm view ${name} version`);
             // Run NPM to get the latest published versiono of the package
             let process = await ezSpawn.async("npm", "view", name, "version");
             let version = process.stdout.trim();
@@ -262,18 +263,12 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
-            if (process.env.INPUT_TOKEN === options.token) {
-                console.log("INPUT_TOKEN is set");
-            }
-            else {
-                console.log("MISSING INPUT_TOKEN");
-            }
+            core_1.debug(`Running command: npm publish`);
             // Run NPM to publish the package
             await ezSpawn.async("npm", ["publish"], {
                 stdio: "inherit",
                 cwd: path_1.resolve(path_1.dirname(options.package)),
             });
-            core_1.debug(`Successfully published ${name} v${version} to NPM`);
         }
         catch (error) {
             throw ono_1.ono(error, `Unable to publish ${name} v${version} to NPM.`);
@@ -755,13 +750,16 @@ module.exports.async = __webpack_require__(231);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const core_1 = __webpack_require__(470);
 const fs_1 = __webpack_require__(747);
 const ono_1 = __webpack_require__(114);
+const path_1 = __webpack_require__(622);
 const semver_1 = __webpack_require__(513);
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
  */
 async function readManifest(path) {
+    core_1.debug(`Reading package manifest from ${path_1.resolve(path)}`);
     let json;
     try {
         json = await fs_1.promises.readFile(path, "utf-8");
@@ -774,10 +772,12 @@ async function readManifest(path) {
         if (typeof name !== "string" || name.trim().length === 0) {
             throw new TypeError(`Invalid package name`);
         }
-        return {
+        let manifest = {
             name,
             version: new semver_1.SemVer(version),
         };
+        core_1.debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+        return manifest;
     }
     catch (error) {
         throw ono_1.ono(error, `Unable to parse ${path}`);
@@ -1097,6 +1097,7 @@ module.exports = readShebang;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable: no-console
 const core_1 = __webpack_require__(470);
 const semver = __webpack_require__(513);
 const npm_1 = __webpack_require__(62);
@@ -1113,15 +1114,18 @@ async function publishToNPM(options) {
     if (diff || !options.checkVersion) {
         // Publish the new version to NPM
         await npm_1.npm.publish(manifest, options);
+        console.log(`\n📦 Successfully published ${manifest.name} v${manifest.version} to NPM`);
     }
     else {
-        core_1.debug(`${manifest.name} v${publishedVersion} is already published to NPM`);
+        console.log(`\n📦 ${manifest.name} v${publishedVersion} is already published to NPM`);
     }
-    return {
+    let results = {
         type: diff || "none",
         version: manifest.version.raw,
         oldVersion: publishedVersion.raw,
     };
+    core_1.debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
+    return results;
 }
 exports.publishToNPM = publishToNPM;
 
@@ -1562,6 +1566,7 @@ module.exports = require("semver");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const core_1 = __webpack_require__(470);
 const ezSpawn = __webpack_require__(260);
 const fs_1 = __webpack_require__(747);
 const ono_1 = __webpack_require__(114);
@@ -1576,7 +1581,6 @@ async function setNpmConfig(options) {
     let config = await readNpmConfig(configPath);
     // Update the config
     config = updateConfig(config, options);
-    console.log("NPM CONFIG:\n", config);
     // Save the new config
     await writeNpmConfig(configPath, config);
 }
@@ -1591,13 +1595,16 @@ function updateConfig(config, { registry, token }) {
     // Append the new registry and token to the end of the file
     lines.push(`registry=${registry}`);
     lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
-    return lines.join(os_1.EOL).trim() + os_1.EOL;
+    config = lines.join(os_1.EOL).trim() + os_1.EOL;
+    core_1.debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
+    return config;
 }
 /**
  * Gets the path of the NPM config file.
  */
 async function getNpmConfigPath() {
     try {
+        core_1.debug(`Running command: npm config get userconfig`);
         let process = await ezSpawn.async("npm", "config", "get", "userconfig");
         return process.stdout.trim();
     }
@@ -1610,11 +1617,14 @@ async function getNpmConfigPath() {
  */
 async function readNpmConfig(configPath) {
     try {
+        core_1.debug(`Reading NPM config from ${configPath}`);
         let config = await fs_1.promises.readFile(configPath, "utf-8");
+        core_1.debug(`OLD NPM CONFIG: \n${config}`);
         return config;
     }
     catch (error) {
         if (error.code === "ENOENT") {
+            core_1.debug(`OLD NPM CONFIG: <none>`);
             return "";
         }
         throw ono_1.ono(error, `Unable to read the NPM config file: ${configPath}`);
@@ -1625,6 +1635,7 @@ async function readNpmConfig(configPath) {
  */
 async function writeNpmConfig(configPath, config) {
     try {
+        core_1.debug(`Writing new NPM config to ${configPath}`);
         await fs_1.promises.mkdir(path_1.dirname(configPath), { recursive: true });
         await fs_1.promises.writeFile(configPath, config);
     }

@@ -1,3 +1,4 @@
+import { debug } from "@actions/core";
 import * as ezSpawn from "ez-spawn";
 import { promises as fs } from "fs";
 import { ono } from "ono";
@@ -15,8 +16,6 @@ export async function setNpmConfig(options: Options): Promise<void> {
 
   // Update the config
   config = updateConfig(config, options);
-
-  console.log("NPM CONFIG:\n", config);
 
   // Save the new config
   await writeNpmConfig(configPath, config);
@@ -38,7 +37,10 @@ function updateConfig(config: string, { registry, token }: Options): string {
   lines.push(`registry=${registry}`);
   lines.push(`${registry}:_authToken=\${INPUT_TOKEN}`);
 
-  return lines.join(EOL).trim() + EOL;
+  config = lines.join(EOL).trim() + EOL;
+
+  debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
+  return config;
 }
 
 
@@ -47,6 +49,8 @@ function updateConfig(config: string, { registry, token }: Options): string {
  */
 async function getNpmConfigPath(): Promise<string> {
   try {
+    debug(`Running command: npm config get userconfig`);
+
     let process = await ezSpawn.async("npm", "config", "get", "userconfig");
     return process.stdout.trim();
   }
@@ -61,11 +65,16 @@ async function getNpmConfigPath(): Promise<string> {
  */
 async function readNpmConfig(configPath: string): Promise<string> {
   try {
+    debug(`Reading NPM config from ${configPath}`);
+
     let config = await fs.readFile(configPath, "utf-8");
+
+    debug(`OLD NPM CONFIG: \n${config}`);
     return config;
   }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      debug(`OLD NPM CONFIG: <none>`);
       return "";
     }
 
@@ -79,6 +88,8 @@ async function readNpmConfig(configPath: string): Promise<string> {
  */
 async function writeNpmConfig(configPath: string, config: string): Promise<void> {
   try {
+    debug(`Writing new NPM config to ${configPath}`);
+
     await fs.mkdir(dirname(configPath), { recursive: true });
     await fs.writeFile(configPath, config);
   }

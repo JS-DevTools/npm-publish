@@ -1,3 +1,4 @@
+// tslint:disable: no-console
 import { debug } from "@actions/core";
 import * as semver from "semver";
 import { npm } from "./npm";
@@ -19,14 +20,19 @@ export async function publishToNPM(options: Options): Promise<Results> {
   if (diff || !options.checkVersion) {
     // Publish the new version to NPM
     await npm.publish(manifest, options);
+
+    console.log(`\n📦 Successfully published ${manifest.name} v${manifest.version} to NPM`);
   }
   else {
-    debug(`${manifest.name} v${publishedVersion} is already published to NPM`);
+    console.log(`\n📦 ${manifest.name} v${publishedVersion} is already published to NPM`);
   }
 
-  return {
+  let results: Results = {
     type: diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
   };
+
+  debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
+  return results;
 }

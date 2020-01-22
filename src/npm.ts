@@ -16,6 +16,8 @@ export const npm = {
    */
   async getLatestVersion(name: string): Promise<SemVer> {
     try {
+      debug(`Running command: npm view ${name} version`);
+
       // Run NPM to get the latest published versiono of the package
       let process = await ezSpawn.async("npm", "view", name, "version");
       let version = process.stdout.trim();
@@ -40,20 +42,13 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
-      if (process.env.INPUT_TOKEN === options.token) {
-        console.log("INPUT_TOKEN is set");
-      }
-      else {
-        console.log("MISSING INPUT_TOKEN");
-      }
+      debug(`Running command: npm publish`);
 
       // Run NPM to publish the package
       await ezSpawn.async("npm", ["publish"], {
         stdio: "inherit",
         cwd: resolve(dirname(options.package)),
       });
-
-      debug(`Successfully published ${name} v${version} to NPM`);
     }
     catch (error) {
       throw ono(error, `Unable to publish ${name} v${version} to NPM.`);
