@@ -1,7 +1,7 @@
 {
   "name": "npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "keywords": [
     "github-action",
