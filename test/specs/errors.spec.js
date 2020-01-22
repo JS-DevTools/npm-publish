@@ -21,6 +21,36 @@ describe("Failure tests", () => {
     npm.assert.didNotRun();
   });
 
+  it("should fail if the NPM registry URL is invalid", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.2.3" }},
+    ]);
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    let cli = npmPublish({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        INPUT_REGISTRY: "example.com",
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("::error::TypeError [ERR_INVALID_URL] [ERR_INVALID_URL]: Invalid URL: example.com");
+    expect(cli).to.have.exitCode(1);
+
+    files.assert.doesNotExist("home/.npmrc");
+    npm.assert.ran(2);
+  });
+
   it("should fail if the package.json file does not exist", () => {
     let cli = npmPublish({
       env: {
