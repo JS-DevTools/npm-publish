@@ -3,7 +3,7 @@
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions
 
-name: CI-CD
+name: CI/CD
 
 on:
   push:
@@ -43,8 +43,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run linter
+        run: npm run lint
+
       - name: Run tests
-        run: npm test
+        run: npm run coverage
+
+      - name: Send code coverage results to Coveralls
+        run: cat ./coverage/lcov.info | coveralls
 
   deploy:
     name: Publish to NPM
