@@ -3,7 +3,7 @@
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions
 
-name: CI/CD
+name: CI-CD
 
 on:
   push:
@@ -50,7 +50,22 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        run: cat ./coverage/lcov.info | node_modules/.bin/coveralls
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel: true
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: test
+    steps:
+      - name: Let Coveralls know that all tests have finished
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
 
   deploy:
     name: Publish to NPM

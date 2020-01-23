@@ -3,7 +3,7 @@ NPM Publish GitHub Action
 ### Fast, easy publishing to NPM
 
 ![Cross-Platform Compatibility](https://jstools.dev/img/badges/os-badges.svg)
-![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI/CD/badge.svg)
+![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI-CD/badge.svg)
 
 [![Coverage Status](https://coveralls.io/repos/github/JS-DevTools/npm-publish/badge.svg?branch=master)](https://coveralls.io/github/JS-DevTools/npm-publish)
 [![Dependencies](https://david-dm.org/JS-DevTools/npm-publish/status.svg)](https://david-dm.org/JS-DevTools/npm-publish)
