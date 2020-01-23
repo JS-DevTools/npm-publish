@@ -50,7 +50,7 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        run: cat ./coverage/lcov.info | coveralls
+        run: cat ./coverage/lcov.info | node_modules/.bin/coveralls
 
   deploy:
     name: Publish to NPM
