@@ -1,5 +1,5 @@
 {
-  "name": "npm-publish",
+  "name": "@jsdevtools/npm-publish",
   "description": "Fast, easy publishing to NPM",
   "version": "1.0.9",
   "private": true,
