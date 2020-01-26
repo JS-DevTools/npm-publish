@@ -1,6 +1,5 @@
-NPM Publish GitHub Action
+Fast, easy publishing to NPM
 ==============================================
-### Fast, easy publishing to NPM
 
 [![Cross-Platform Compatibility](https://jstools.dev/img/badges/os-badges.svg)](https://github.com/JS-DevTools/npm-publish/blob/master/.github/workflows/CI-CD.yaml)
 [![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI-CD/badge.svg)](https://github.com/JS-DevTools/npm-publish/blob/master/.github/workflows/CI-CD.yaml)
@@ -10,6 +9,8 @@ NPM Publish GitHub Action
 
 [![npm](https://img.shields.io/npm/v/@jsdevtools/npm-publish.svg)](https://www.npmjs.com/package/@jsdevtools/npm-publish)
 [![License](https://img.shields.io/npm/l/@jsdevtools/npm-publish.svg)](LICENSE)
+
+
 
 Features
 --------------------------
@@ -32,19 +33,36 @@ Exposes the old and new version numbers, and the type of change (major, minor, p
 
 Usage
 --------------------------
-By default, the only thing you need to do is set the `token` parameter to your [NPM auth token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens).
+This package can be used three different ways:
+
+- 🤖 A [**GitHub Action**](#github-action) as part of your CI/CD process
+
+- 🧩 A [**function**](#javascript-function) that you call in your JavaScript code
+
+- 🖥 A [**CLI**](#command-line-interface) that you run in your terminal
+
+
+
+GitHub Action
+-----------------------------
+To use the GitHub Action, you'll need to add it as a step in your [Workflow file](https://help.github.com/en/actions/automating-your-workflow-with-github-actions). By default, the only thing you need to do is set the `token` parameter to your [NPM auth token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens).
 
 ```yaml
-steps:
-  - uses: actions/checkout@v1
-  - uses: actions/setup-node@v1
-    with:
-      node-version: 10
-  - run: npm install
-  - run: npm test
-  - uses: JS-DevTools/npm-publish@v1
-    with:
-      token: ${{ secrets.NPM_TOKEN }}
+on: push
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - run: npm install
+      - run: npm test
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
 ```
 
 
@@ -85,6 +103,100 @@ steps:
 |`version`     |string  |The version that was published
 |`old-version` |string  |The version number that was previously published to NPM
 
+
+
+JavaScript Function
+------------------------------
+To use npm-package in your JavaScript code, you'll need to install it using [NPM](https://docs.npmjs.com/about-npm/):
+
+```bash
+npm install @jsdevtools/npm-publish
+```
+
+You can then import it and use it in your code like this:
+
+```javascript
+const npmPublish = require("@jsdevtools/npm-publish");
+
+// Run npm-publish with all defaults
+await npmPublish();
+
+// Run npm-publish with options
+await npmPublish({
+  package: "./path/to/package.json",
+  token: "YOUR_NPM_AUTH_TOKEN_HERE"
+});
+```
+
+### Options
+As shown in the example above, you can pass options to the `npmPublish()` function. Here are the available options:
+
+|Name            |Type     |Default                     |Description
+|----------------|---------|----------------------------|------------------------------------
+|`token`         |string   |NPM's default credentials   |The NPM auth token to use for publishing. If not set, then NPM will
+|`registry`      |string   |https://registry.npmjs.org/ |The NPM registry URL to use
+|`package`       |string   |./package.json              |The path of your package.json file
+|`checkVersion`  |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|`quiet`         |boolean  |false                       |Suppress console output from NPM and npm-publish
+|`debug`         |function |no-op                       |A function to log debug messages. You can set this to a custom function to receive debug messages, or just set it to `console.debug` to print debug messages to the console.
+
+### Return Value
+The `npmPublish()` function asynchronously returns an object with the following properties:
+
+|Name            |Type     |Description
+|----------------|---------|------------------------------------
+|`type`          |string   |The type of version change that occurred ("major", "minor", "patch", etc.)  If there was no version change, then the the type is "none".
+|`package`       |string   |The name of the NPM package that was published
+|`version`       |string   |The version number that was published
+|`oldVersion`    |string   |The version number that was previously published to NPM
+
+
+
+Command Line Interface
+------------------------------
+To use npm-package from as a command-line tool in your terminal, you'll need to install it globally using [NPM](https://docs.npmjs.com/about-npm/):
+
+```bash
+npm install -g @jsdevtools/npm-publish
+```
+
+You can then use it in your terminal or in Bash scripts. You can call it without any arguments, and it will publish the current directory using NPM's default credentials.
+
+```bash
+npm-publish
+```
+
+Or you can call it with arguments to explicitly set the NPM auth token, registry, package path, etc.
+
+```bash
+npm-publish --token=YOUR_NPM_AUTH_TOKEN_HERE ./path/to/package.json
+```
+
+### Options
+Run `npm-publish --help` to see the full list of options available.
+
+```
+> npm-publish --help
+
+Usage: npm-publish [options] [package_path]
+
+options:
+  --token <token>     The NPM access token to use when publishing
+
+  --registry <url>    The NPM registry URL to use
+
+  --debug, -d         Enable debug mode, with increased logging
+
+  --quiet, -q         Suppress unnecessary output
+
+  --version, -v       Print the version number
+
+  --help, -h          Show help
+
+package_path          The absolute or relative path of the NPM package to publish.
+                      Can be a directory path, or the path of a package.json file.
+                      Defaults to the current directory.
+```
 
 
 
