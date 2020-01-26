@@ -1,11 +1,12 @@
-import { debug } from "@actions/core";
 import { promises as fs } from "fs";
 import { ono } from "ono";
 import { resolve } from "path";
 import { SemVer } from "semver";
+import { Debug } from "./options";
 
 /**
  * A package manifest (package.json)
+ * @internal
  */
 export interface Manifest {
   name: string;
@@ -14,9 +15,10 @@ export interface Manifest {
 
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
+ * @internal
  */
-export async function readManifest(path: string): Promise<Manifest> {
-  debug(`Reading package manifest from ${resolve(path)}`);
+export async function readManifest(path: string, debug?: Debug): Promise<Manifest> {
+  debug && debug(`Reading package manifest from ${resolve(path)}`);
   let json: string;
 
   try {
@@ -38,7 +40,7 @@ export async function readManifest(path: string): Promise<Manifest> {
       version: new SemVer(version as string),
     };
 
-    debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+    debug && debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
     return manifest;
   }
   catch (error) {

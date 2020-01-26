@@ -34,7 +34,7 @@ require('./sourcemap-register.js');module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(325);
+/******/ 		return __webpack_require__(48);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -222,13 +222,69 @@ module.exports.default = pathKey;
 
 /***/ }),
 
-/***/ 62:
+/***/ 48:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = __webpack_require__(470);
+const npm_publish_1 = __webpack_require__(775);
+/**
+ * The main entry point of the GitHub Action
+ * @internal
+ */
+async function main() {
+    try {
+        // Setup global error handlers
+        process.on("uncaughtException", errorHandler);
+        process.on("unhandledRejection", errorHandler);
+        // Get the GitHub Actions input options
+        const options = {
+            token: core_1.getInput("token", { required: true }),
+            registry: core_1.getInput("registry", { required: true }),
+            package: core_1.getInput("package", { required: true }),
+            checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
+            debug: core_1.debug,
+        };
+        // Puglish to NPM
+        let results = await npm_publish_1.npmPublish(options);
+        // tslint:disable: no-console
+        if (results.type === "none") {
+            console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
+        }
+        else {
+            console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
+        }
+        // Set the GitHub Actions output variables
+        core_1.setOutput("type", results.type);
+        core_1.setOutput("version", results.version);
+        core_1.setOutput("old-version", results.oldVersion);
+    }
+    catch (error) {
+        errorHandler(error);
+    }
+}
+/**
+ * Prints errors to the GitHub Actions console
+ */
+function errorHandler(error) {
+    let message = error.stack || error.message || String(error);
+    core_1.setFailed(message);
+    process.exit();
+}
+// tslint:disable-next-line: no-floating-promises
+main();
+
+
+/***/ }),
+
+/***/ 62:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const ezSpawn = __webpack_require__(260);
 const ono_1 = __webpack_require__(114);
 const path_1 = __webpack_require__(622);
@@ -236,20 +292,21 @@ const semver_1 = __webpack_require__(513);
 const npm_config_1 = __webpack_require__(566);
 /**
  * Runs NPM commands.
+ * @internal
  */
 exports.npm = {
     /**
      * Gets the latest published version of the specified package.
      */
-    async getLatestVersion(name) {
+    async getLatestVersion(name, { debug }) {
         try {
-            core_1.debug(`Running command: npm view ${name} version`);
+            debug(`Running command: npm view ${name} version`);
             // Run NPM to get the latest published versiono of the package
             let process = await ezSpawn.async("npm", "view", name, "version");
             let version = process.stdout.trim();
             // Parse/validate the version number
             let semver = new semver_1.SemVer(version);
-            core_1.debug(`The local version of ${name} is at v${semver}`);
+            debug(`The local version of ${name} is at v${semver}`);
             return semver;
         }
         catch (error) {
@@ -263,7 +320,7 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
-            core_1.debug(`Running command: npm publish`);
+            options.debug(`Running command: npm publish`);
             // Run NPM to publish the package
             await ezSpawn.async("npm", ["publish"], {
                 stdio: "inherit",
@@ -750,16 +807,16 @@ module.exports.async = __webpack_require__(231);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(470);
 const fs_1 = __webpack_require__(747);
 const ono_1 = __webpack_require__(114);
 const path_1 = __webpack_require__(622);
 const semver_1 = __webpack_require__(513);
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
+ * @internal
  */
-async function readManifest(path) {
-    core_1.debug(`Reading package manifest from ${path_1.resolve(path)}`);
+async function readManifest(path, debug) {
+    debug && debug(`Reading package manifest from ${path_1.resolve(path)}`);
     let json;
     try {
         json = await fs_1.promises.readFile(path, "utf-8");
@@ -776,7 +833,7 @@ async function readManifest(path) {
             name,
             version: new semver_1.SemVer(version),
         };
-        core_1.debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+        debug && debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
         return manifest;
     }
     catch (error) {
@@ -784,54 +841,6 @@ async function readManifest(path) {
     }
 }
 exports.readManifest = readManifest;
-
-
-/***/ }),
-
-/***/ 325:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(470);
-const publish_to_npm_1 = __webpack_require__(400);
-/**
- * The main entry point of the GitHub Action
- */
-async function main() {
-    try {
-        // Setup global error handlers
-        process.on("uncaughtException", errorHandler);
-        process.on("unhandledRejection", errorHandler);
-        // Get the GitHub Actions input options
-        const options = {
-            token: core_1.getInput("token", { required: true }),
-            registry: core_1.getInput("registry", { required: true }),
-            package: core_1.getInput("package", { required: true }),
-            checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
-        };
-        // Puglish to NPM
-        let results = await publish_to_npm_1.publishToNPM(options);
-        // Set the GitHub Actions output variables
-        core_1.setOutput("type", results.type);
-        core_1.setOutput("version", results.version);
-        core_1.setOutput("old-version", results.oldVersion);
-    }
-    catch (error) {
-        errorHandler(error);
-    }
-}
-/**
- * Prints errors to the console
- */
-function errorHandler(error) {
-    let message = error.stack || error.message || String(error);
-    core_1.setFailed(message);
-    process.exit();
-}
-// tslint:disable-next-line: no-floating-promises
-main();
 
 
 /***/ }),
@@ -1087,47 +1096,6 @@ function readShebang(command) {
 }
 
 module.exports = readShebang;
-
-
-/***/ }),
-
-/***/ 400:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-// tslint:disable: no-console
-const core_1 = __webpack_require__(470);
-const semver = __webpack_require__(513);
-const npm_1 = __webpack_require__(62);
-const read_manifest_1 = __webpack_require__(292);
-/**
- * Publishes an package to NPM, if its version has changed
- */
-async function publishToNPM(options) {
-    // Get the old and new version numbers
-    let manifest = await read_manifest_1.readManifest(options.package);
-    let publishedVersion = await npm_1.npm.getLatestVersion(manifest.name);
-    // Determine if/how the version has changed
-    let diff = semver.diff(manifest.version, publishedVersion);
-    if (diff || !options.checkVersion) {
-        // Publish the new version to NPM
-        await npm_1.npm.publish(manifest, options);
-        console.log(`\n📦 Successfully published ${manifest.name} v${manifest.version} to NPM`);
-    }
-    else {
-        console.log(`\n📦 ${manifest.name} v${publishedVersion} is already published to NPM`);
-    }
-    let results = {
-        type: diff || "none",
-        version: manifest.version.raw,
-        oldVersion: publishedVersion.raw,
-    };
-    core_1.debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
-    return results;
-}
-exports.publishToNPM = publishToNPM;
 
 
 /***/ }),
@@ -1566,31 +1534,29 @@ module.exports = require("semver");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(470);
 const ezSpawn = __webpack_require__(260);
 const fs_1 = __webpack_require__(747);
 const ono_1 = __webpack_require__(114);
 const os_1 = __webpack_require__(87);
 const path_1 = __webpack_require__(622);
-const url_1 = __webpack_require__(835);
 /**
  * Sets/updates the NPM config based on the options.
+ * @internal
  */
 async function setNpmConfig(options) {
     // Read the current NPM config
-    let configPath = await getNpmConfigPath();
-    let config = await readNpmConfig(configPath);
+    let configPath = await getNpmConfigPath(options);
+    let config = await readNpmConfig(configPath, options);
     // Update the config
     config = updateConfig(config, options);
     // Save the new config
-    await writeNpmConfig(configPath, config);
+    await writeNpmConfig(configPath, config, options);
 }
 exports.setNpmConfig = setNpmConfig;
 /**
  * Updates the given NPM config with the specified options.
  */
-function updateConfig(config, options) {
-    let registry = new url_1.URL(options.registry);
+function updateConfig(config, { registry, debug }) {
     let authDomain = registry.origin.slice(registry.protocol.length);
     let lines = config.split(/\r?\n/);
     // Remove any existing lines that set the registry or token
@@ -1599,15 +1565,15 @@ function updateConfig(config, options) {
     lines.push(`${authDomain}/:_authToken=\${INPUT_TOKEN}`);
     lines.push(`registry=${registry.href}`);
     config = lines.join(os_1.EOL).trim() + os_1.EOL;
-    core_1.debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
+    debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
     return config;
 }
 /**
  * Gets the path of the NPM config file.
  */
-async function getNpmConfigPath() {
+async function getNpmConfigPath({ debug }) {
     try {
-        core_1.debug(`Running command: npm config get userconfig`);
+        debug(`Running command: npm config get userconfig`);
         let process = await ezSpawn.async("npm", "config", "get", "userconfig");
         return process.stdout.trim();
     }
@@ -1618,16 +1584,16 @@ async function getNpmConfigPath() {
 /**
  * Reads the NPM config file.
  */
-async function readNpmConfig(configPath) {
+async function readNpmConfig(configPath, { debug }) {
     try {
-        core_1.debug(`Reading NPM config from ${configPath}`);
+        debug(`Reading NPM config from ${configPath}`);
         let config = await fs_1.promises.readFile(configPath, "utf-8");
-        core_1.debug(`OLD NPM CONFIG: \n${config}`);
+        debug(`OLD NPM CONFIG: \n${config}`);
         return config;
     }
     catch (error) {
         if (error.code === "ENOENT") {
-            core_1.debug(`OLD NPM CONFIG: <none>`);
+            debug(`OLD NPM CONFIG: <none>`);
             return "";
         }
         throw ono_1.ono(error, `Unable to read the NPM config file: ${configPath}`);
@@ -1636,9 +1602,9 @@ async function readNpmConfig(configPath) {
 /**
  * Writes the NPM config file.
  */
-async function writeNpmConfig(configPath, config) {
+async function writeNpmConfig(configPath, config, { debug }) {
     try {
-        core_1.debug(`Writing new NPM config to ${configPath}`);
+        debug(`Writing new NPM config to ${configPath}`);
         await fs_1.promises.mkdir(path_1.dirname(configPath), { recursive: true });
         await fs_1.promises.writeFile(configPath, config);
     }
@@ -2398,6 +2364,71 @@ function sync (path, options) {
 /***/ (function(module) {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 751:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const url_1 = __webpack_require__(835);
+/**
+ * Normalizes and sanitizes options, and fills-in any default values.
+ * @internal
+ */
+function normalizeOptions(options) {
+    let registryURL = typeof options.registry === "string" ? new url_1.URL(options.registry) : options.registry;
+    return {
+        token: options.token || "",
+        registry: registryURL || new url_1.URL("https://registry.npmjs.org/"),
+        package: options.package || "./package.json",
+        checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
+        quiet: options.quiet || false,
+        debug: options.debug || (() => undefined),
+    };
+}
+exports.normalizeOptions = normalizeOptions;
+
+
+/***/ }),
+
+/***/ 775:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const semver = __webpack_require__(513);
+const normalize_options_1 = __webpack_require__(751);
+const npm_1 = __webpack_require__(62);
+const read_manifest_1 = __webpack_require__(292);
+/**
+ * Publishes a package to NPM, if its version has changed
+ */
+async function npmPublish(opts = {}) {
+    let options = normalize_options_1.normalizeOptions(opts);
+    // Get the old and new version numbers
+    let manifest = await read_manifest_1.readManifest(options.package, options.debug);
+    let publishedVersion = await npm_1.npm.getLatestVersion(manifest.name, options);
+    // Determine if/how the version has changed
+    let diff = semver.diff(manifest.version, publishedVersion);
+    if (diff || !options.checkVersion) {
+        // Publish the new version to NPM
+        await npm_1.npm.publish(manifest, options);
+    }
+    let results = {
+        package: manifest.name,
+        type: diff || "none",
+        version: manifest.version.raw,
+        oldVersion: publishedVersion.raw,
+    };
+    options.debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
+    return results;
+}
+exports.npmPublish = npmPublish;
+
 
 /***/ }),
 

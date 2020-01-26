@@ -1,20 +1,20 @@
-import { debug } from "@actions/core";
 import * as ezSpawn from "ez-spawn";
 import { ono } from "ono";
 import { dirname, resolve } from "path";
 import { SemVer } from "semver";
+import { NormalizedOptions } from "./normalize-options";
 import { setNpmConfig } from "./npm-config";
-import { Options } from "./options";
 import { Manifest } from "./read-manifest";
 
 /**
  * Runs NPM commands.
+ * @internal
  */
 export const npm = {
   /**
    * Gets the latest published version of the specified package.
    */
-  async getLatestVersion(name: string): Promise<SemVer> {
+  async getLatestVersion(name: string, { debug }: NormalizedOptions): Promise<SemVer> {
     try {
       debug(`Running command: npm view ${name} version`);
 
@@ -37,12 +37,12 @@ export const npm = {
   /**
    * Publishes the specified package to NPM
    */
-  async publish({ name, version }: Manifest, options: Options): Promise<void> {
+  async publish({ name, version }: Manifest, options: NormalizedOptions): Promise<void> {
     // Update the NPM config with the specified registry and token
     await setNpmConfig(options);
 
     try {
-      debug(`Running command: npm publish`);
+      options.debug(`Running command: npm publish`);
 
       // Run NPM to publish the package
       await ezSpawn.async("npm", ["publish"], {

@@ -1,33 +1,31 @@
-import { debug } from "@actions/core";
 import * as ezSpawn from "ez-spawn";
 import { promises as fs } from "fs";
 import { ono } from "ono";
 import { EOL } from "os";
 import { dirname } from "path";
-import { URL } from "url";
-import { Options } from "./options";
+import { NormalizedOptions } from "./normalize-options";
 
 /**
  * Sets/updates the NPM config based on the options.
+ * @internal
  */
-export async function setNpmConfig(options: Options): Promise<void> {
+export async function setNpmConfig(options: NormalizedOptions): Promise<void> {
   // Read the current NPM config
-  let configPath = await getNpmConfigPath();
-  let config = await readNpmConfig(configPath);
+  let configPath = await getNpmConfigPath(options);
+  let config = await readNpmConfig(configPath, options);
 
   // Update the config
   config = updateConfig(config, options);
 
   // Save the new config
-  await writeNpmConfig(configPath, config);
+  await writeNpmConfig(configPath, config, options);
 }
 
 
 /**
  * Updates the given NPM config with the specified options.
  */
-function updateConfig(config: string, options: Options): string {
-  let registry = new URL(options.registry);
+function updateConfig(config: string, { registry, debug }: NormalizedOptions): string {
   let authDomain = registry.origin.slice(registry.protocol.length);
 
   let lines = config.split(/\r?\n/);
@@ -51,7 +49,7 @@ function updateConfig(config: string, options: Options): string {
 /**
  * Gets the path of the NPM config file.
  */
-async function getNpmConfigPath(): Promise<string> {
+async function getNpmConfigPath({ debug }: NormalizedOptions): Promise<string> {
   try {
     debug(`Running command: npm config get userconfig`);
 
@@ -67,7 +65,7 @@ async function getNpmConfigPath(): Promise<string> {
 /**
  * Reads the NPM config file.
  */
-async function readNpmConfig(configPath: string): Promise<string> {
+async function readNpmConfig(configPath: string, { debug }: NormalizedOptions): Promise<string> {
   try {
     debug(`Reading NPM config from ${configPath}`);
 
@@ -90,7 +88,7 @@ async function readNpmConfig(configPath: string): Promise<string> {
 /**
  * Writes the NPM config file.
  */
-async function writeNpmConfig(configPath: string, config: string): Promise<void> {
+async function writeNpmConfig(configPath: string, config: string, { debug }: NormalizedOptions): Promise<void> {
   try {
     debug(`Writing new NPM config to ${configPath}`);
 
