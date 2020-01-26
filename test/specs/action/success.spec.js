@@ -1,9 +1,9 @@
 "use strict";
 
-const npm = require("../utils/npm");
-const files = require("../utils/files");
-const paths = require("../utils/paths");
-const npmPublish = require("../utils/npm-publish");
+const npm = require("../../utils/npm");
+const files = require("../../utils/files");
+const paths = require("../../utils/paths");
+const exec = require("../../utils/exec");
 const { expect } = require("chai");
 const { EOL } = require("os");
 const { join } = require("path");
@@ -31,7 +31,7 @@ describe("Success tests", () => {
       stdout: `my-lib 2.0.0${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -63,7 +63,7 @@ describe("Success tests", () => {
       stdout: `1.0.0${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -102,7 +102,7 @@ describe("Success tests", () => {
       stdout: `my-lib 1.1.0${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -161,7 +161,7 @@ describe("Success tests", () => {
       stdout: `my-lib 1.0.1${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -211,7 +211,7 @@ describe("Success tests", () => {
       stdout: `my-lib 1.0.0-beta${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
         INPUT_PACKAGE: "subdir/my-lib/package.json",

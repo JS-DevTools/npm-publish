@@ -1,16 +1,16 @@
 "use strict";
 
-const npm = require("../utils/npm");
-const files = require("../utils/files");
-const paths = require("../utils/paths");
-const npmPublish = require("../utils/npm-publish");
+const npm = require("../../utils/npm");
+const files = require("../../utils/files");
+const paths = require("../../utils/paths");
+const exec = require("../../utils/exec");
 const { expect } = require("chai");
 const { EOL } = require("os");
 
 describe("Failure tests", () => {
 
   it("should fail if the NPM token isn't set", () => {
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "",
       }
@@ -30,17 +30,7 @@ describe("Failure tests", () => {
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.2.3" }},
     ]);
 
-    npm.mock({
-      args: ["view", "my-lib", "version"],
-      stdout: `1.0.0${EOL}`,
-    });
-
-    npm.mock({
-      args: ["config", "get", "userconfig"],
-      stdout: `${paths.npmrc}${EOL}`,
-    });
-
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
         INPUT_REGISTRY: "example.com",
@@ -52,11 +42,11 @@ describe("Failure tests", () => {
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
-    npm.assert.ran(2);
+    npm.assert.ran(0);
   });
 
   it("should fail if the package.json file does not exist", () => {
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -76,7 +66,7 @@ describe("Failure tests", () => {
       { path: "workspace/package.json", contents: "hello, world" },
     ]);
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -96,7 +86,7 @@ describe("Failure tests", () => {
       { path: "workspace/package.json", contents: { name: "\n  \t" }},
     ]);
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -116,7 +106,7 @@ describe("Failure tests", () => {
       { path: "workspace/package.json", contents: { name: "my-lib", version: "hello, world" }},
     ]);
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -142,7 +132,7 @@ describe("Failure tests", () => {
       exitCode: 1,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -173,7 +163,7 @@ describe("Failure tests", () => {
       stdout: `${paths.npmrc}${EOL}`,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -203,7 +193,7 @@ describe("Failure tests", () => {
       exitCode: 1,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
@@ -239,7 +229,7 @@ describe("Failure tests", () => {
       exitCode: 1,
     });
 
-    let cli = npmPublish({
+    let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
       }
