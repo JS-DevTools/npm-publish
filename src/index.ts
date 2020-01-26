@@ -1,45 +1,15 @@
-import { getInput, setFailed, setOutput } from "@actions/core";
-import { Options } from "./options";
-import { publishToNPM } from "./publish-to-npm";
+// tslint:disable: no-default-export
+import { npmPublish } from "./npm-publish";
 
-/**
- * The main entry point of the GitHub Action
- */
-async function main(): Promise<void> {
-  try {
-    // Setup global error handlers
-    process.on("uncaughtException", errorHandler);
-    process.on("unhandledRejection", errorHandler);
+// Exprot the external type definitions as named exports
+export * from "./options";
+export * from "./results";
 
-    // Get the GitHub Actions input options
-    const options: Options = {
-      token: getInput("token", { required: true }),
-      registry: getInput("registry", { required: true }),
-      package: getInput("package", { required: true }),
-      checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
-    };
+// Export `npmPublish` as a named export and the default export
+export { npmPublish };
+export default npmPublish;
 
-    // Puglish to NPM
-    let results = await publishToNPM(options);
-
-    // Set the GitHub Actions output variables
-    setOutput("type", results.type);
-    setOutput("version", results.version);
-    setOutput("old-version", results.oldVersion);
-  }
-  catch (error) {
-    errorHandler(error as Error);
-  }
+// CommonJS default export hack
+if (typeof module === "object" && typeof module.exports === "object") {
+  module.exports = Object.assign(module.exports.default, module.exports);  // tslint:disable-line: no-unsafe-any
 }
-
-/**
- * Prints errors to the console
- */
-function errorHandler(error: Error): void {
-  let message = error.stack || error.message || String(error);
-  setFailed(message);
-  process.exit();
-}
-
-// tslint:disable-next-line: no-floating-promises
-main();

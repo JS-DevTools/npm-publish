@@ -19,23 +19,25 @@
     "type": "git",
     "url": "https://github.com/JS-DevTools/npm-publish.git"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "bin": {
-    "npm-publish": "dist/index.js"
+    "npm-publish": "bin/npm-publish.js"
   },
   "files": [
-    "dist"
+    "bin",
+    "lib"
   ],
   "scripts": {
-    "clean": "shx rm -rf .nyc_output coverage dist",
+    "clean": "shx rm -rf .nyc_output coverage lib dist",
     "lint": "npm run lint:typescript && npm run lint:javascript",
     "lint:typescript": "tslint -p tsconfig.json",
     "lint:javascript": "eslint test",
-    "build": "npm run build:ncc && npm run build:node_modules",
-    "build:ncc": "ncc build src/index.ts --source-map --external semver",
+    "build": "npm run build:typescript && npm run build:ncc && npm run build:node_modules",
+    "build:typescript": "tsc --declaration",
+    "build:ncc": "ncc build src/action/index.ts --source-map --external semver",
     "build:node_modules": "shx mkdir -p dist/node_modules && shx cp -r node_modules/semver dist/node_modules",
-    "watch": "npm run build:ncc -- --watch",
+    "watch": "tsc --watch",
     "test": "mocha && npm run lint",
     "coverage": "nyc -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
@@ -48,6 +50,7 @@
   "devDependencies": {
     "@actions/core": "^1.2.1",
     "@types/chai": "^4.2.7",
+    "@types/command-line-args": "^5.0.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.8",
     "@types/semver": "^6.2.0",
@@ -69,5 +72,8 @@
     "typescript": "^3.5.1",
     "typescript-tslint-plugin": "^0.5.0",
     "version-bump-prompt": "^5.0.3"
+  },
+  "dependencies": {
+    "command-line-args": "^5.1.1"
   }
 }
