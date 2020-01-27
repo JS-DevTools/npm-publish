@@ -8,7 +8,7 @@ const { expect } = require("chai");
 const { EOL } = require("os");
 const { join } = require("path");
 
-describe("NPM package - success tests", async () => {
+describe("NPM package - success tests", () => {
   let previousCWD;
 
   beforeEach(() => {
