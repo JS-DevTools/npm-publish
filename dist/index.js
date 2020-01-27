@@ -2399,7 +2399,7 @@ function normalizeOptions(options) {
     return {
         token: options.token || "",
         registry: registryURL || new url_1.URL("https://registry.npmjs.org/"),
-        package: options.package || "./package.json",
+        package: options.package || "package.json",
         checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
         quiet: options.quiet || false,
         debug: options.debug || (() => undefined),
