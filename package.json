@@ -48,11 +48,11 @@
     "node": ">=12"
   },
   "devDependencies": {
-    "@actions/core": "^1.2.1",
+    "@actions/core": "^1.2.2",
     "@types/chai": "^4.2.7",
     "@types/command-line-args": "^5.0.0",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^13.1.8",
+    "@types/node": "^13.5.0",
     "@types/semver": "^6.2.0",
     "@types/source-map-support": "^0.5.0",
     "@zeit/ncc": "^0.21.0",
@@ -60,12 +60,9 @@
     "chai-exec": "^1.1.2",
     "eslint": "^6.8.0",
     "eslint-config-modular": "^7.0.1",
-    "ez-spawn": "^2.1.6",
-    "mocha": "^7.0.0",
+    "mocha": "^7.0.1",
     "npm-check": "^5.9.0",
     "nyc": "^15.0.0",
-    "ono": "^6.0.1",
-    "semver": "^7.1.1",
     "shx": "^0.3.2",
     "tslint": "^6.0.0",
     "tslint-modular": "^1.4.1",
@@ -74,6 +71,9 @@
     "version-bump-prompt": "^5.0.3"
   },
   "dependencies": {
-    "command-line-args": "^5.1.1"
+    "command-line-args": "^5.1.1",
+    "ez-spawn": "^2.1.6",
+    "ono": "^6.0.1",
+    "semver": "^7.1.1"
   }
 }
