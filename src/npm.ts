@@ -1,3 +1,4 @@
+import { StdioOptions } from "child_process";
 import * as ezSpawn from "ez-spawn";
 import { ono } from "ono";
 import { dirname, resolve } from "path";
@@ -42,12 +43,22 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
-      options.debug(`Running command: npm publish`);
+      // Run "npm publish" in the package.json directory
+      let cwd = resolve(dirname(options.package));
+
+      // Determine whether to suppress NPM's output
+      let stdio: StdioOptions = options.quiet ? "pipe" : "inherit";
+
+      // Only pass environment variables if we need to set the NPM token
+      let env = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+
+      options.debug("Running command: npm publish", { stdio, cwd, env });
 
       // Run NPM to publish the package
       await ezSpawn.async("npm", ["publish"], {
-        stdio: "inherit",
-        cwd: resolve(dirname(options.package)),
+        cwd,
+        stdio,
+        env: env ? { ...process.env, INPUT_TOKEN: options.token } : undefined
       });
     }
     catch (error) {

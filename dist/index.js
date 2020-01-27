@@ -245,7 +245,7 @@ async function main() {
             registry: core_1.getInput("registry", { required: true }),
             package: core_1.getInput("package", { required: true }),
             checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
-            debug: core_1.debug,
+            debug: debugHandler,
         };
         // Puglish to NPM
         let results = await npm_publish_1.npmPublish(options);
@@ -272,6 +272,15 @@ function errorHandler(error) {
     let message = error.stack || error.message || String(error);
     core_1.setFailed(message);
     process.exit();
+}
+/**
+ * Prints debug logs to the GitHub Actions console
+ */
+function debugHandler(message, data) {
+    if (data) {
+        message += "\n" + JSON.stringify(data, undefined, 2);
+    }
+    core_1.debug(message);
 }
 // tslint:disable-next-line: no-floating-promises
 main();
@@ -320,11 +329,18 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
-            options.debug(`Running command: npm publish`);
+            // Run "npm publish" in the package.json directory
+            let cwd = path_1.resolve(path_1.dirname(options.package));
+            // Determine whether to suppress NPM's output
+            let stdio = options.quiet ? "pipe" : "inherit";
+            // Only pass environment variables if we need to set the NPM token
+            let env = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+            options.debug("Running command: npm publish", { stdio, cwd, env });
             // Run NPM to publish the package
             await ezSpawn.async("npm", ["publish"], {
-                stdio: "inherit",
-                cwd: path_1.resolve(path_1.dirname(options.package)),
+                cwd,
+                stdio,
+                env: env ? { ...process.env, INPUT_TOKEN: options.token } : undefined
             });
         }
         catch (error) {
@@ -833,7 +849,7 @@ async function readManifest(path, debug) {
             name,
             version: new semver_1.SemVer(version),
         };
-        debug && debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+        debug && debug("MANIFEST:", manifest);
         return manifest;
     }
     catch (error) {
@@ -1565,7 +1581,7 @@ function updateConfig(config, { registry, debug }) {
     lines.push(`${authDomain}/:_authToken=\${INPUT_TOKEN}`);
     lines.push(`registry=${registry.href}`);
     config = lines.join(os_1.EOL).trim() + os_1.EOL;
-    debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
+    debug(`NEW NPM CONFIG: \n${config}`);
     return config;
 }
 /**
@@ -2424,7 +2440,7 @@ async function npmPublish(opts = {}) {
         version: manifest.version.raw,
         oldVersion: publishedVersion.raw,
     };
-    options.debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
+    options.debug("OUTPUT:", results);
     return results;
 }
 exports.npmPublish = npmPublish;
