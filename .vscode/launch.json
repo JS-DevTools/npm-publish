@@ -22,12 +22,13 @@
         "--retries=0",
       ],
       "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
+        "${workspaceFolder}/lib/**/*.js"
       ],
       "smartStep": true,
       "skipFiles": [
         "<node_internals>/**/*.js"
       ],
+      "outputCapture": "std"
     },
   ]
 }
