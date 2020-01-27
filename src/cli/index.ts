@@ -28,11 +28,21 @@ export async function main(args: string[]): Promise<void> {
     else if (version) {
       // Show the version number and exit
       let manifest = await readManifest(join(__dirname, "../../package.json"));
-      console.log(manifest.version);
+      console.log(manifest.version.toString());
       process.exit(ExitCode.Success);
     }
     else {
-      await npmPublish(options);
+      let results = await npmPublish(options);
+
+      if (!options.quiet) {
+        // tslint:disable: no-console
+        if (results.type === "none") {
+          console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
+        }
+        else {
+          console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
+        }
+      }
     }
   }
   catch (error) {
