@@ -33,6 +33,14 @@ export function parseArgs(argv: string[]): ParsedArgs {
       { argv }
     );
 
+    if (args.token === null) {
+      throw new SyntaxError("The --token argument requires a value");
+    }
+
+    if (args.registry === null) {
+      throw new SyntaxError("The --registry argument requires a value");
+    }
+
     let parsedArgs: ParsedArgs = {
       help: args.help as boolean,
       version: args.version as boolean,
