@@ -30,6 +30,6 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
     oldVersion: publishedVersion.raw,
   };
 
-  options.debug(`OUTPUT: \n${JSON.stringify(results, undefined, 2)}`);
+  options.debug("OUTPUT:", results);
   return results;
 }

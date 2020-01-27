@@ -40,7 +40,7 @@ export async function readManifest(path: string, debug?: Debug): Promise<Manifes
       version: new SemVer(version as string),
     };
 
-    debug && debug(`MANIFEST: \n${JSON.stringify(manifest, undefined, 2)}`);
+    debug && debug("MANIFEST:", manifest);
     return manifest;
   }
   catch (error) {

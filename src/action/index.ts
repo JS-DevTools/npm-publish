@@ -18,7 +18,7 @@ async function main(): Promise<void> {
       registry: getInput("registry", { required: true }),
       package: getInput("package", { required: true }),
       checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
-      debug,
+      debug: debugHandler,
     };
 
     // Puglish to NPM
@@ -49,6 +49,17 @@ function errorHandler(error: Error): void {
   let message = error.stack || error.message || String(error);
   setFailed(message);
   process.exit();
+}
+
+/**
+ * Prints debug logs to the GitHub Actions console
+ */
+function debugHandler(message: string, data?: object) {
+  if (data) {
+    message += "\n" + JSON.stringify(data, undefined, 2);
+  }
+
+  debug(message);
 }
 
 // tslint:disable-next-line: no-floating-promises

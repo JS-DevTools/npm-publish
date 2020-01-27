@@ -24,15 +24,15 @@ export interface Options {
   package?: string;
 
   /**
-   * If set to `true`, then the package will only be published if the version number
-   * in package.json differs from the latest on NPM.
+   * Only publish the package if the version number in package.json
+   * differs from the latest on NPM.
    *
    * Defaults to `true`
    */
   checkVersion?: boolean;
 
   /**
-   * Suppress console output from NPM and npm-publish
+   * Suppress console output from NPM.
    *
    * Defaults to `false`
    */
@@ -49,4 +49,4 @@ export interface Options {
 /**
  * A function that receives debug messages
  */
-export type Debug = (message: string) => void;
+export type Debug = (message: string, data?: object) => void;

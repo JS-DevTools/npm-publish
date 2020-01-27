@@ -41,7 +41,7 @@ function updateConfig(config: string, { registry, debug }: NormalizedOptions): s
 
   config = lines.join(EOL).trim() + EOL;
 
-  debug(`NEW NPM CONFIG: \n${JSON.stringify(config, undefined, 2)}`);
+  debug(`NEW NPM CONFIG: \n${config}`);
   return config;
 }
 
