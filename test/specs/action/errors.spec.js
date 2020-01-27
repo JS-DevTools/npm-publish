@@ -7,7 +7,7 @@ const exec = require("../../utils/exec");
 const { expect } = require("chai");
 const { EOL } = require("os");
 
-describe("Failure tests", () => {
+describe("GitHub Action - failure tests", () => {
 
   it("should fail if the NPM token isn't set", () => {
     let cli = exec.action({

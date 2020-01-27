@@ -11,6 +11,11 @@ module.exports = {
   action: path.join(ROOT_DIR, "dist/index.js"),
 
   /**
+   * The path of the CLI JavaScript file
+   */
+  cli: path.join(ROOT_DIR, "bin/npm-publish.js"),
+
+  /**
    * The path of our mock bin directory
    */
   bin: path.join(ROOT_DIR, "test/fixtures/bin"),

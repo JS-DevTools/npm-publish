@@ -26,4 +26,21 @@ module.exports = {
 
     return chaiExec("node", [paths.action], options);
   },
+
+  /**
+   * Executes the CLI with the specified options
+   */
+  cli (options) {
+    // Deep merge the options object, since Chai Exec only does a shallow merge
+    options = {
+      cwd: paths.workspace,
+      ...options,
+      env: {
+        ...process.env,
+        ...options.env,
+      }
+    };
+
+    return chaiExec("node", [paths.cli], options);
+  },
 };
