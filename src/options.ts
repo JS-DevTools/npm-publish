@@ -32,7 +32,7 @@ export interface Options {
   checkVersion?: boolean;
 
   /**
-   * Suppress console output from NPM.
+   * Suppress console output from NPM and npm-publish.
    *
    * Defaults to `false`
    */
