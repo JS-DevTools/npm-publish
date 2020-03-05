@@ -1,7 +1,7 @@
 "use strict";
 
 const chai = require("chai");
-const chaiExec = require("chai-exec");
+const chaiExec = require("@jsdevtools/chai-exec");
 const paths = require("./paths");
 
 chai.use(chaiExec);

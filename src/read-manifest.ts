@@ -1,5 +1,5 @@
 import { promises as fs } from "fs";
-import { ono } from "ono";
+import { ono } from "@jsdevtools/ono";
 import { resolve } from "path";
 import { SemVer } from "semver";
 import { Debug } from "./options";

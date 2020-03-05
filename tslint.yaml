@@ -3,5 +3,5 @@
 # https://jstools.dev/tslint-modular/
 
 extends:
-  - tslint-modular/best-practices
-  - tslint-modular/style
+  - "@jsdevtools/tslint-modular/best-practices"
+  - "@jsdevtools/tslint-modular/style"
