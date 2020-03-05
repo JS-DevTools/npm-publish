@@ -7,15 +7,8 @@ const paths = require("../utils/paths");
  * Re-create the .tmp directories before each test
  */
 beforeEach("clean the .tmp directory", async () => {
-  try {
-    // Delete the .tmp directory, if it exists
-    await fs.rmdir(paths.tmp, { recursive: true });
-  }
-  catch (error) {
-    if (error.code !== "ENOENT") {
-      throw error;
-    }
-  }
+  // Delete the .tmp directory, if it exists
+  await fs.rmdir(paths.tmp, { recursive: true });
 
   // Create the home and workspace directories
   await fs.mkdir(paths.home, { recursive: true });
