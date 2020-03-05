@@ -1,6 +1,6 @@
 import * as ezSpawn from "@jsdevtools/ez-spawn";
-import { promises as fs } from "fs";
 import { ono } from "@jsdevtools/ono";
+import { promises as fs } from "fs";
 import { EOL } from "os";
 import { dirname } from "path";
 import { NormalizedOptions } from "./normalize-options";

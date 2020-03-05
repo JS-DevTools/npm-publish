@@ -1,6 +1,6 @@
-import { StdioOptions } from "child_process";
 import * as ezSpawn from "@jsdevtools/ez-spawn";
 import { ono } from "@jsdevtools/ono";
+import { StdioOptions } from "child_process";
 import { dirname, resolve } from "path";
 import { SemVer } from "semver";
 import { NormalizedOptions } from "./normalize-options";
