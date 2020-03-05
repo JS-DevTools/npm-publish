@@ -90,7 +90,168 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
-/***/ 21:
+/***/ 39:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
+
+/***/ 48:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const core_1 = __webpack_require__(470);
+const npm_publish_1 = __webpack_require__(775);
+/**
+ * The main entry point of the GitHub Action
+ * @internal
+ */
+async function main() {
+    try {
+        // Setup global error handlers
+        process.on("uncaughtException", errorHandler);
+        process.on("unhandledRejection", errorHandler);
+        // Get the GitHub Actions input options
+        const options = {
+            token: core_1.getInput("token", { required: true }),
+            registry: core_1.getInput("registry", { required: true }),
+            package: core_1.getInput("package", { required: true }),
+            checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
+            debug: debugHandler,
+        };
+        // Puglish to NPM
+        let results = await npm_publish_1.npmPublish(options);
+        // tslint:disable: no-console
+        if (results.type === "none") {
+            console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
+        }
+        else {
+            console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
+        }
+        // Set the GitHub Actions output variables
+        core_1.setOutput("type", results.type);
+        core_1.setOutput("version", results.version);
+        core_1.setOutput("old-version", results.oldVersion);
+    }
+    catch (error) {
+        errorHandler(error);
+    }
+}
+/**
+ * Prints errors to the GitHub Actions console
+ */
+function errorHandler(error) {
+    let message = error.stack || error.message || String(error);
+    core_1.setFailed(message);
+    process.exit();
+}
+/**
+ * Prints debug logs to the GitHub Actions console
+ */
+function debugHandler(message, data) {
+    if (data) {
+        message += "\n" + JSON.stringify(data, undefined, 2);
+    }
+    core_1.debug(message);
+}
+// tslint:disable-next-line: no-floating-promises
+main();
+
+
+/***/ }),
+
+/***/ 62:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const ezSpawn = __webpack_require__(733);
+const ono_1 = __webpack_require__(271);
+const path_1 = __webpack_require__(622);
+const semver_1 = __webpack_require__(513);
+const npm_config_1 = __webpack_require__(566);
+/**
+ * Runs NPM commands.
+ * @internal
+ */
+exports.npm = {
+    /**
+     * Gets the latest published version of the specified package.
+     */
+    async getLatestVersion(name, { debug }) {
+        try {
+            debug(`Running command: npm view ${name} version`);
+            // Run NPM to get the latest published versiono of the package
+            let process = await ezSpawn.async("npm", "view", name, "version");
+            let version = process.stdout.trim();
+            // Parse/validate the version number
+            let semver = new semver_1.SemVer(version);
+            debug(`The local version of ${name} is at v${semver}`);
+            return semver;
+        }
+        catch (error) {
+            throw ono_1.ono(error, `Unable to determine the current version of ${name} on NPM.`);
+        }
+    },
+    /**
+     * Publishes the specified package to NPM
+     */
+    async publish({ name, version }, options) {
+        // Update the NPM config with the specified registry and token
+        await npm_config_1.setNpmConfig(options);
+        try {
+            // Run "npm publish" in the package.json directory
+            let cwd = path_1.resolve(path_1.dirname(options.package));
+            // Determine whether to suppress NPM's output
+            let stdio = options.quiet ? "pipe" : "inherit";
+            // Only pass environment variables if we need to set the NPM token
+            let env = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+            options.debug("Running command: npm publish", { stdio, cwd, env });
+            // Run NPM to publish the package
+            await ezSpawn.async("npm", ["publish"], {
+                cwd,
+                stdio,
+                env: env ? { ...process.env, INPUT_TOKEN: options.token } : undefined
+            });
+        }
+        catch (error) {
+            throw ono_1.ono(error, `Unable to publish ${name} v${version} to NPM.`);
+        }
+    },
+};
+
+
+/***/ }),
+
+/***/ 87:
+/***/ (function(module) {
+
+module.exports = require("os");
+
+/***/ }),
+
+/***/ 116:
 /***/ (function(__unusedmodule, exports) {
 
 "use strict";
@@ -198,187 +359,6 @@ function lazyPopStack(error, lazyStack) {
 
 /***/ }),
 
-/***/ 39:
-/***/ (function(module) {
-
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
-
-
-/***/ }),
-
-/***/ 48:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(470);
-const npm_publish_1 = __webpack_require__(775);
-/**
- * The main entry point of the GitHub Action
- * @internal
- */
-async function main() {
-    try {
-        // Setup global error handlers
-        process.on("uncaughtException", errorHandler);
-        process.on("unhandledRejection", errorHandler);
-        // Get the GitHub Actions input options
-        const options = {
-            token: core_1.getInput("token", { required: true }),
-            registry: core_1.getInput("registry", { required: true }),
-            package: core_1.getInput("package", { required: true }),
-            checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
-            debug: debugHandler,
-        };
-        // Puglish to NPM
-        let results = await npm_publish_1.npmPublish(options);
-        // tslint:disable: no-console
-        if (results.type === "none") {
-            console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
-        }
-        else {
-            console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
-        }
-        // Set the GitHub Actions output variables
-        core_1.setOutput("type", results.type);
-        core_1.setOutput("version", results.version);
-        core_1.setOutput("old-version", results.oldVersion);
-    }
-    catch (error) {
-        errorHandler(error);
-    }
-}
-/**
- * Prints errors to the GitHub Actions console
- */
-function errorHandler(error) {
-    let message = error.stack || error.message || String(error);
-    core_1.setFailed(message);
-    process.exit();
-}
-/**
- * Prints debug logs to the GitHub Actions console
- */
-function debugHandler(message, data) {
-    if (data) {
-        message += "\n" + JSON.stringify(data, undefined, 2);
-    }
-    core_1.debug(message);
-}
-// tslint:disable-next-line: no-floating-promises
-main();
-
-
-/***/ }),
-
-/***/ 62:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const ezSpawn = __webpack_require__(260);
-const ono_1 = __webpack_require__(114);
-const path_1 = __webpack_require__(622);
-const semver_1 = __webpack_require__(513);
-const npm_config_1 = __webpack_require__(566);
-/**
- * Runs NPM commands.
- * @internal
- */
-exports.npm = {
-    /**
-     * Gets the latest published version of the specified package.
-     */
-    async getLatestVersion(name, { debug }) {
-        try {
-            debug(`Running command: npm view ${name} version`);
-            // Run NPM to get the latest published versiono of the package
-            let process = await ezSpawn.async("npm", "view", name, "version");
-            let version = process.stdout.trim();
-            // Parse/validate the version number
-            let semver = new semver_1.SemVer(version);
-            debug(`The local version of ${name} is at v${semver}`);
-            return semver;
-        }
-        catch (error) {
-            throw ono_1.ono(error, `Unable to determine the current version of ${name} on NPM.`);
-        }
-    },
-    /**
-     * Publishes the specified package to NPM
-     */
-    async publish({ name, version }, options) {
-        // Update the NPM config with the specified registry and token
-        await npm_config_1.setNpmConfig(options);
-        try {
-            // Run "npm publish" in the package.json directory
-            let cwd = path_1.resolve(path_1.dirname(options.package));
-            // Determine whether to suppress NPM's output
-            let stdio = options.quiet ? "pipe" : "inherit";
-            // Only pass environment variables if we need to set the NPM token
-            let env = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
-            options.debug("Running command: npm publish", { stdio, cwd, env });
-            // Run NPM to publish the package
-            await ezSpawn.async("npm", ["publish"], {
-                cwd,
-                stdio,
-                env: env ? { ...process.env, INPUT_TOKEN: options.token } : undefined
-            });
-        }
-        catch (error) {
-            throw ono_1.ono(error, `Unable to publish ${name} v${version} to NPM.`);
-        }
-    },
-};
-
-
-/***/ }),
-
-/***/ 87:
-/***/ (function(module) {
-
-module.exports = require("os");
-
-/***/ }),
-
-/***/ 114:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const singleton_1 = __webpack_require__(951);
-exports.ono = singleton_1.ono;
-var constructor_1 = __webpack_require__(181);
-exports.Ono = constructor_1.Ono;
-// tslint:disable-next-line: no-default-export
-exports.default = singleton_1.ono;
-// CommonJS default export hack
-if ( true && typeof module.exports === "object") {
-    module.exports = Object.assign(module.exports.default, module.exports); // tslint:disable-line: no-unsafe-any
-}
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ 129:
 /***/ (function(module) {
 
@@ -386,173 +366,30 @@ module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 181:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 152:
+/***/ (function(module) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const extend_error_1 = __webpack_require__(196);
-const normalize_1 = __webpack_require__(661);
-const to_json_1 = __webpack_require__(648);
-const constructor = Ono;
-exports.Ono = constructor;
+
 /**
- * Returns an object containing all properties of the given Error object,
- * which can be used with `JSON.stringify()`.
+ * An instance of this class is returned by {@link sync} and {@link async} when the process exits
+ * with a non-zero status code.
  */
-Ono.toJSON = function toJSON(error) {
-    return to_json_1.toJSON.call(error);
+module.exports = class ProcessError extends Error {
+  constructor (process) {
+    let message = `${process.toString()} exited with a status of ${process.status}.`;
+
+    if (process.stderr.length > 0) {
+      message += "\n\n" + process.stderr.toString().trim();
+    }
+
+    super(message);
+    Object.assign(this, process);
+    this.name = ProcessError.name;
+  }
 };
-/**
- * Creates an `Ono` instance for a specifc error type.
- */
-// tslint:disable-next-line: variable-name
-function Ono(ErrorConstructor, options) {
-    options = normalize_1.normalizeOptions(options);
-    function ono(...args) {
-        let { originalError, props, message } = normalize_1.normalizeArgs(args, options);
-        // Create a new error of the specified type
-        let newError = new ErrorConstructor(message);
-        // Extend the error with the properties of the original error and the `props` object
-        extend_error_1.extendError(newError, originalError, props);
-        return newError;
-    }
-    ono[Symbol.species] = ErrorConstructor;
-    return ono;
-}
-//# sourceMappingURL=constructor.js.map
 
-/***/ }),
-
-/***/ 190:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const normalizeArgs = __webpack_require__(386);
-const normalizeResult = __webpack_require__(827);
-const spawnSync = __webpack_require__(20).sync;
-
-module.exports = sync;
-
-/**
- * Executes the given command synchronously, and returns the buffered results.
- *
- * @param {string|string[]} command - The command to run
- * @param {string|string[]} [args] - The command arguments
- * @param {object} [options] - options
- * @returns {Process}
- *
- * @see {@link normalizeArgs} for argument details
- */
-function sync () {
-  // Normalize the function arguments
-  let { command, args, options, error } = normalizeArgs(arguments);
-
-  if (error) {
-    // Invalid arguments
-    normalizeResult({ command, args, options, error });
-  }
-  else {
-    let result;
-
-    try {
-      // Run the program
-      result = spawnSync(command, args, options);
-    }
-    catch (error) {
-      // An error occurred while spawning or killing the process
-      normalizeResult({ error, command, args, options });
-    }
-
-    // Return the results or throw an error
-    return normalizeResult(Object.assign({}, result, { command, args, options }));
-  }
-}
-
-
-/***/ }),
-
-/***/ 196:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const isomorphic_node_1 = __webpack_require__(665);
-const stack_1 = __webpack_require__(21);
-const to_json_1 = __webpack_require__(648);
-const protectedProps = ["name", "message", "stack"];
-/**
- * Extends the new error with the properties of the original error and the `props` object.
- *
- * @param newError - The error object to extend
- * @param originalError - The original error object, if any
- * @param props - Additional properties to add, if any
- */
-function extendError(newError, originalError, props) {
-    extendStack(newError, originalError);
-    // Copy properties from the original error
-    if (originalError && typeof originalError === "object") {
-        mergeErrors(newError, originalError);
-    }
-    // The default `toJSON` method doesn't output props like `name`, `message`, `stack`, etc.
-    // So replace it with one that outputs every property of the error.
-    newError.toJSON = to_json_1.toJSON;
-    // On Node.js, add support for the `util.inspect()` method
-    if (isomorphic_node_1.addInspectMethod) {
-        isomorphic_node_1.addInspectMethod(newError);
-    }
-    // Finally, copy custom properties that were specified by the user.
-    // These props OVERWRITE any previous props
-    if (props && typeof props === "object") {
-        Object.assign(newError, props);
-    }
-}
-exports.extendError = extendError;
-/**
- * Extend the error stack to include its cause
- */
-function extendStack(newError, originalError) {
-    let stackProp = Object.getOwnPropertyDescriptor(newError, "stack");
-    if (stack_1.isLazyStack(stackProp)) {
-        stack_1.lazyJoinStacks(stackProp, newError, originalError);
-    }
-    else if (stack_1.isWritableStack(stackProp)) {
-        newError.stack = stack_1.joinStacks(newError, originalError);
-    }
-}
-/**
- * Merges properties of the original error with the new error.
- *
- * @param newError - The error object to extend
- * @param originalError - The original error object, if any
- */
-function mergeErrors(newError, originalError) {
-    // Get the original error's keys
-    // NOTE: We specifically exclude properties that we have already set on the new error.
-    // This is _especially_ important for the `stack` property, because this property has
-    // a lazy getter in some environments
-    let keys = to_json_1.getDeepKeys(originalError, protectedProps);
-    // HACK: We have to cast the errors to `any` so we can use symbol indexers.
-    // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
-    let _newError = newError;
-    let _originalError = originalError;
-    for (let key of keys) {
-        if (_newError[key] === undefined) {
-            try {
-                _newError[key] = _originalError[key];
-            }
-            catch (e) {
-                // This property is read-only, so it can't be copied
-            }
-        }
-    }
-}
-//# sourceMappingURL=extend-error.js.map
 
 /***/ }),
 
@@ -604,216 +441,23 @@ function checkMode (stat, options) {
 
 /***/ }),
 
-/***/ 231:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 271:
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-const normalizeArgs = __webpack_require__(386);
-const normalizeResult = __webpack_require__(827);
-const maybe = __webpack_require__(791);
-const spawn = __webpack_require__(20);
-
-module.exports = async;
-
-/**
- * Executes the given command asynchronously, and returns the buffered
- * results via a callback or Promise.
- *
- * @param {string|string[]} command - The command to run
- * @param {string|string[]} [args] - The command arguments
- * @param {object} [options] - options
- * @param {function} [callback] - callback that will receive the results
- *
- * @returns {Promise<Process>|undefined}
- * Returns a Promise if no callback is given. The promise resolves with
- * a {@link Process} object.
- *
- * @see {@link normalizeArgs} for argument details
- */
-function async () {
-  // Normalize the function arguments
-  let { command, args, options, callback, error } = normalizeArgs(arguments);
-
-  return maybe(callback, new Promise((resolve, reject) => {
-    if (error) {
-      // Invalid arguments
-      normalizeResult({ command, args, options, error });
-    }
-    else {
-      let spawnedProcess;
-
-      try {
-        // Spawn the program
-        spawnedProcess = spawn(command, args, options);
-      }
-      catch (error) {
-        // An error occurred while spawning the process
-        normalizeResult({ error, command, args, options });
-      }
-
-      let pid = spawnedProcess.pid;
-      let stdout = options.encoding === "buffer" ? Buffer.from([]) : "";
-      let stderr = options.encoding === "buffer" ? Buffer.from([]) : "";
-
-      spawnedProcess.stdout && spawnedProcess.stdout.on("data", (data) => {
-        if (typeof stdout === "string") {
-          stdout += data.toString();
-        }
-        else {
-          stdout = Buffer.concat([stdout, data]);
-        }
-      });
-
-      spawnedProcess.stderr && spawnedProcess.stderr.on("data", (data) => {
-        if (typeof stderr === "string") {
-          stderr += data.toString();
-        }
-        else {
-          stderr = Buffer.concat([stderr, data]);
-        }
-      });
-
-      spawnedProcess.on("error", (error) => {
-        try {
-          normalizeResult({ error, command, args, options, pid, stdout, stderr });
-        }
-        catch (error) {
-          reject(error);
-        }
-      });
-
-      spawnedProcess.on("exit", (status, signal) => {
-        try {
-          resolve(normalizeResult({ command, args, options, pid, stdout, stderr, status, signal }));
-        }
-        catch (error) {
-          reject(error);
-        }
-      });
-    }
-  }));
+Object.defineProperty(exports, "__esModule", { value: true });
+const singleton_1 = __webpack_require__(755);
+exports.ono = singleton_1.ono;
+var constructor_1 = __webpack_require__(507);
+exports.Ono = constructor_1.Ono;
+// tslint:disable-next-line: no-default-export
+exports.default = singleton_1.ono;
+// CommonJS default export hack
+if ( true && typeof module.exports === "object") {
+    module.exports = Object.assign(module.exports.default, module.exports); // tslint:disable-line: no-unsafe-any
 }
-
-
-/***/ }),
-
-/***/ 252:
-/***/ (function(module) {
-
-"use strict";
-
-
-/**
- * An instance of this class is returned by {@link sync} and {@link async}.
- * It contains information about how the process was spawned, how it exited, and its output.
- */
-module.exports = class Process {
-  /**
-   * @param {object} props - Initial property values
-   */
-  constructor ({ command, args, pid, stdout, stderr, output, status, signal, options }) {
-    options = options || {};
-    stdout = stdout || (options.encoding === "buffer" ? Buffer.from([]) : "");
-    stderr = stderr || (options.encoding === "buffer" ? Buffer.from([]) : "");
-    output = output || [options.input || null, stdout, stderr];
-
-    /**
-     * The command that was used to spawn the process
-     *
-     * @type {string}
-     */
-    this.command = command || "";
-
-    /**
-     * The command-line arguments that were passed to the process.
-     *
-     * @type {string[]}
-     */
-    this.args = args || [];
-
-    /**
-     * The numeric process ID assigned by the operating system
-     *
-     * @type {number}
-     */
-    this.pid = pid || 0;
-
-    /**
-     * The process's standard output
-     *
-     * @type {Buffer|string}
-     */
-
-    this.stdout = output[1];
-
-    /**
-     * The process's error output
-     *
-     * @type {Buffer|string}
-     */
-    this.stderr = output[2];
-
-    /**
-     * The process's stdio [stdin, stdout, stderr]
-     *
-     * @type {Buffer[]|string[]}
-     */
-    this.output = output;
-
-    /**
-     * The process's status code
-     *
-     * @type {number}
-     */
-    this.status = status;
-
-    /**
-     * The signal used to kill the process, if applicable
-     *
-     * @type {string}
-     */
-    this.signal = signal || null;
-  }
-
-  /**
-   * Returns the full command and arguments used to spawn the process
-   *
-   * @type {string}
-   */
-  toString () {
-    let string = this.command;
-
-    for (let arg of this.args) {
-      // Escape quotes
-      arg = arg.replace(/"/g, '\\"');
-
-      if (arg.indexOf(" ") >= 0) {
-        // Add quotes if the arg contains whitespace
-        string += ` "${arg}"`;
-      }
-      else {
-        string += ` ${arg}`;
-      }
-    }
-
-    return string;
-  }
-};
-
-
-/***/ }),
-
-/***/ 260:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports.sync = __webpack_require__(190);
-module.exports.async = __webpack_require__(231);
-
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -823,8 +467,8 @@ module.exports.async = __webpack_require__(231);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
-const ono_1 = __webpack_require__(114);
 const path_1 = __webpack_require__(622);
 const semver_1 = __webpack_require__(513);
 /**
@@ -861,224 +505,133 @@ exports.readManifest = readManifest;
 
 /***/ }),
 
-/***/ 386:
+/***/ 326:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const isomorphic_node_1 = __webpack_require__(757);
+const stack_1 = __webpack_require__(116);
+const to_json_1 = __webpack_require__(483);
+const protectedProps = ["name", "message", "stack"];
+/**
+ * Extends the new error with the properties of the original error and the `props` object.
+ *
+ * @param newError - The error object to extend
+ * @param originalError - The original error object, if any
+ * @param props - Additional properties to add, if any
+ */
+function extendError(error, originalError, props) {
+    let onoError = error;
+    extendStack(onoError, originalError);
+    // Copy properties from the original error
+    if (originalError && typeof originalError === "object") {
+        mergeErrors(onoError, originalError);
+    }
+    // The default `toJSON` method doesn't output props like `name`, `message`, `stack`, etc.
+    // So replace it with one that outputs every property of the error.
+    onoError.toJSON = to_json_1.toJSON;
+    // On Node.js, add support for the `util.inspect()` method
+    if (isomorphic_node_1.addInspectMethod) {
+        isomorphic_node_1.addInspectMethod(onoError);
+    }
+    // Finally, copy custom properties that were specified by the user.
+    // These props OVERWRITE any previous props
+    if (props && typeof props === "object") {
+        Object.assign(onoError, props);
+    }
+    return onoError;
+}
+exports.extendError = extendError;
+/**
+ * Extend the error stack to include its cause
+ */
+function extendStack(newError, originalError) {
+    let stackProp = Object.getOwnPropertyDescriptor(newError, "stack");
+    if (stack_1.isLazyStack(stackProp)) {
+        stack_1.lazyJoinStacks(stackProp, newError, originalError);
+    }
+    else if (stack_1.isWritableStack(stackProp)) {
+        newError.stack = stack_1.joinStacks(newError, originalError);
+    }
+}
+/**
+ * Merges properties of the original error with the new error.
+ *
+ * @param newError - The error object to extend
+ * @param originalError - The original error object, if any
+ */
+function mergeErrors(newError, originalError) {
+    // Get the original error's keys
+    // NOTE: We specifically exclude properties that we have already set on the new error.
+    // This is _especially_ important for the `stack` property, because this property has
+    // a lazy getter in some environments
+    let keys = to_json_1.getDeepKeys(originalError, protectedProps);
+    // HACK: We have to cast the errors to `any` so we can use symbol indexers.
+    // see https://github.com/Microsoft/TypeScript/issues/1863
+    // tslint:disable: no-any no-unsafe-any
+    let _newError = newError;
+    let _originalError = originalError;
+    for (let key of keys) {
+        if (_newError[key] === undefined) {
+            try {
+                _newError[key] = _originalError[key];
+            }
+            catch (e) {
+                // This property is read-only, so it can't be copied
+            }
+        }
+    }
+}
+//# sourceMappingURL=extend-error.js.map
+
+/***/ }),
+
+/***/ 328:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-const { parseArgsStringToArgv } = __webpack_require__(982);  // possible alternative: parse-spawn-args
-const detectType = __webpack_require__(657);
+const normalizeArgs = __webpack_require__(874);
+const normalizeResult = __webpack_require__(700);
+const spawnSync = __webpack_require__(20).sync;
 
-module.exports = normalizeArgs;
-
-/**
- * This function normalizes the arguments of the {@link sync} and {@link async}
- * so they can be passed to Node's {@link child_process.spawn} or
- * {@link child_process.spawn} functions.
- *
- * @param {string|string[]} command
- * The command to run (e.g. "git"), or the command and its arguments as a string
- * (e.g. "git commit -a -m fixed_stuff"), or the command and its arguments as an
- * array (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
- *
- * @param {string|string[]} [args]
- * The command arguments as a string (e.g. "git commit -a -m fixed_stuff") or as an array
- * (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
- *
- * @param {object} [options]
- * The same options as {@link child_process.spawn} or {@link child_process.spawnSync}.
- *
- * @param {function} [callback]
- * The callback that will receive the results, if applicable.
- *
- * @returns {object}
- */
-function normalizeArgs (params) {
-  let command, args, options, callback, error;
-
-  try {
-    // Shift the arguments, if necessary
-    ({ command, args, options, callback } = shiftArgs(params));
-
-    let commandArgs = [];
-
-    if (typeof command === "string" && args === undefined) {
-      // The command parameter is actually the command AND arguments,
-      // so split the string into an array
-      command = splitArgString(command);
-    }
-
-    if (Array.isArray(command)) {
-      // Split the command from the arguments
-      commandArgs = command.slice(1);
-      command = command[0];
-    }
-
-    if (typeof args === "string") {
-      // Convert the `args` argument from a string an array
-      args = splitArgString(args);
-    }
-
-    if (Array.isArray(args)) {
-      // Add these arguments to any arguments from above
-      args = commandArgs.concat(args);
-    }
-
-    if (args === undefined || args === null) {
-      args = commandArgs;
-    }
-
-    if (options === undefined || options === null) {
-      options = {};
-    }
-
-    // Set default options
-    options.encoding = options.encoding || "utf8";
-
-    // Validate all arguments
-    validateArgs(command, args, options, callback);
-  }
-  catch (err) {
-    error = err;
-
-    // Sanitize args that are used as output
-    command = String(command || "");
-    args = (Array.isArray(args) ? args : []).map((arg) => String(arg || ""));
-  }
-
-  return { command, args, options, callback, error };
-}
+module.exports = sync;
 
 /**
- * Detects whether any optional arguments have been omitted,
- * and shifts the other arguments as needed.
+ * Executes the given command synchronously, and returns the buffered results.
  *
- * @param {string|string[]} command
- * @param {string|string[]} [args]
- * @param {object} [options]
- * @param {function} [callback]
- * @returns {object}
+ * @param {string|string[]} command - The command to run
+ * @param {string|string[]} [args] - The command arguments
+ * @param {object} [options] - options
+ * @returns {Process}
+ *
+ * @see {@link normalizeArgs} for argument details
  */
-function shiftArgs (params) {
-  params = Array.prototype.slice.call(params);
-  let command, args, options, callback;
+function sync () {
+  // Normalize the function arguments
+  let { command, args, options, error } = normalizeArgs(arguments);
 
-  // Check for a callback as the final parameter
-  let lastParam = params[params.length - 1];
-  if (typeof lastParam === "function") {
-    callback = lastParam;
-    params.pop();
-  }
-
-  // Check for an options object as the second-to-last parameter
-  lastParam = params[params.length - 1];
-  if (lastParam === null || lastParam === undefined ||
-  (typeof lastParam === "object" && !Array.isArray(lastParam))) {
-    options = lastParam;
-    params.pop();
-  }
-
-  // The first parameter is the command
-  command = params.shift();
-
-  // All remaining parameters are the args
-  if (params.length === 0) {
-    args = undefined;
-  }
-  else if (params.length === 1 && Array.isArray(params[0])) {
-    args = params[0];
-  }
-  else if (params.length === 1 && params[0] === "") {
-    args = [];
+  if (error) {
+    // Invalid arguments
+    normalizeResult({ command, args, options, error });
   }
   else {
-    args = params;
-  }
+    let result;
 
-  return { command, args, options, callback };
-}
-
-/**
- * Validates all arguments, and throws an error if any are invalid.
- *
- * @param {string} command
- * @param {string[]} args
- * @param {object} options
- * @param {function} [callback]
- */
-function validateArgs (command, args, options, callback) {
-  if (command === undefined || command === null) {
-    throw new Error("The command to execute is missing.");
-  }
-
-  if (typeof command !== "string") {
-    throw new Error("The command to execute should be a string, not " + friendlyType(command));
-  }
-
-  if (!Array.isArray(args)) {
-    throw new Error(
-      "The command arguments should be a string or an array, not " +
-      friendlyType(args)
-    );
-  }
-
-  for (let i = 0; i < args.length; i++) {
-    let arg = args[i];
-
-    if (typeof arg !== "string") {
-      throw new Error(
-        `The command arguments should be strings, but argument #${i + 1} is ` +
-        friendlyType(arg)
-      );
+    try {
+      // Run the program
+      result = spawnSync(command, args, options);
     }
-  }
-
-  if (typeof options !== "object") {
-    throw new Error(
-      "The options should be an object, not " +
-      friendlyType(options)
-    );
-  }
-
-  if (callback !== undefined && callback !== null) {
-    if (typeof callback !== "function") {
-      throw new Error("The callback should be a function, not " + friendlyType(callback));
+    catch (error) {
+      // An error occurred while spawning or killing the process
+      normalizeResult({ error, command, args, options });
     }
-  }
-}
 
-/**
- * Splits an argument string (e.g. git commit -a -m "fixed stuff")
- * into an array (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
- *
- * @param {string} argString
- * @returns {string[]}
- */
-function splitArgString (argString) {
-  try {
-    return parseArgsStringToArgv(argString);
-  }
-  catch (error) {
-    throw new Error(`Could not parse the string: ${argString}\n${error.message}`);
-  }
-}
-
-/**
- * Returns the friendly type name of the given value, for use in error messages.
- *
- * @param {*} val
- * @returns {string}
- */
-function friendlyType (val) {
-  let type = detectType(val);
-  let firstChar = String(type)[0].toLowerCase();
-
-  if (["a", "e", "i", "o", "u"].indexOf(firstChar) === -1) {
-    return `a ${type}.`;
-  }
-  else {
-    return `an ${type}.`;
+    // Return the results or throw an error
+    return normalizeResult(Object.assign({}, result, { command, args, options }));
   }
 }
 
@@ -1198,33 +751,6 @@ function escapeProperty(s) {
         .replace(/,/g, '%2C');
 }
 //# sourceMappingURL=command.js.map
-
-/***/ }),
-
-/***/ 458:
-/***/ (function(module) {
-
-"use strict";
-
-
-/**
- * An instance of this class is returned by {@link sync} and {@link async} when the process exits
- * with a non-zero status code.
- */
-module.exports = class ProcessError extends Error {
-  constructor (process) {
-    let message = `${process.toString()} exited with a status of ${process.status}.`;
-
-    if (process.stderr.length > 0) {
-      message += "\n\n" + process.stderr.toString().trim();
-    }
-
-    super(message);
-    Object.assign(this, process);
-    this.name = ProcessError.name;
-  }
-};
-
 
 /***/ }),
 
@@ -1392,6 +918,13 @@ exports.setFailed = setFailed;
 // Logging Commands
 //-----------------------------------------------------------------------
 /**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
  * Writes debug message to user log
  * @param message debug message
  */
@@ -1490,6 +1023,62 @@ exports.getState = getState;
 
 /***/ }),
 
+/***/ 483:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const nonJsonTypes = ["function", "symbol", "undefined"];
+const protectedProps = ["constructor", "prototype", "__proto__"];
+const objectPrototype = Object.getPrototypeOf({});
+/**
+ * Custom JSON serializer for Error objects.
+ * Returns all built-in error properties, as well as extended properties.
+ */
+function toJSON() {
+    // HACK: We have to cast the objects to `any` so we can use symbol indexers.
+    // see https://github.com/Microsoft/TypeScript/issues/1863
+    // tslint:disable: no-any no-unsafe-any
+    let pojo = {};
+    let error = this;
+    for (let key of getDeepKeys(error)) {
+        if (typeof key === "string") {
+            let value = error[key];
+            let type = typeof value;
+            if (!nonJsonTypes.includes(type)) {
+                pojo[key] = value;
+            }
+        }
+    }
+    // tslint:enable: no-any no-unsafe-any
+    return pojo;
+}
+exports.toJSON = toJSON;
+/**
+ * Returns own, inherited, enumerable, non-enumerable, string, and symbol keys of `obj`.
+ * Does NOT return members of the base Object prototype, or the specified omitted keys.
+ */
+function getDeepKeys(obj, omit = []) {
+    let keys = [];
+    // Crawl the prototype chain, finding all the string and symbol keys
+    while (obj && obj !== objectPrototype) {
+        keys = keys.concat(Object.getOwnPropertyNames(obj), Object.getOwnPropertySymbols(obj));
+        obj = Object.getPrototypeOf(obj);
+    }
+    // De-duplicate the list of keys
+    let uniqueKeys = new Set(keys);
+    // Remove any omitted keys
+    for (let key of omit.concat(protectedProps)) {
+        uniqueKeys.delete(key);
+    }
+    return uniqueKeys;
+}
+exports.getDeepKeys = getDeepKeys;
+//# sourceMappingURL=to-json.js.map
+
+/***/ }),
+
 /***/ 489:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -1549,6 +1138,59 @@ module.exports = resolveCommand;
 
 /***/ }),
 
+/***/ 507:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const extend_error_1 = __webpack_require__(326);
+const normalize_1 = __webpack_require__(673);
+const to_json_1 = __webpack_require__(483);
+const constructor = Ono;
+exports.Ono = constructor;
+/**
+ * Creates an `Ono` instance for a specifc error type.
+ */
+// tslint:disable-next-line: variable-name
+function Ono(ErrorConstructor, options) {
+    options = normalize_1.normalizeOptions(options);
+    function ono(...args) {
+        let { originalError, props, message } = normalize_1.normalizeArgs(args, options);
+        // Create a new error of the specified type
+        let newError = new ErrorConstructor(message);
+        // Extend the error with the properties of the original error and the `props` object
+        return extend_error_1.extendError(newError, originalError, props);
+    }
+    ono[Symbol.species] = ErrorConstructor;
+    return ono;
+}
+/**
+ * Returns an object containing all properties of the given Error object,
+ * which can be used with `JSON.stringify()`.
+ */
+Ono.toJSON = function toJSON(error) {
+    return to_json_1.toJSON.call(error);
+};
+/**
+ * Extends the given Error object with enhanced Ono functionality, such as nested stack traces,
+ * additional properties, and improved support for `JSON.stringify()`.
+ */
+Ono.extend = function extend(error, originalError, props) {
+    if (props || originalError instanceof Error) {
+        return extend_error_1.extendError(error, originalError, props);
+    }
+    else if (originalError) {
+        return extend_error_1.extendError(error, undefined, originalError);
+    }
+    else {
+        return extend_error_1.extendError(error);
+    }
+};
+//# sourceMappingURL=constructor.js.map
+
+/***/ }),
+
 /***/ 513:
 /***/ (function(module) {
 
@@ -1562,9 +1204,9 @@ module.exports = require("semver");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ezSpawn = __webpack_require__(260);
+const ezSpawn = __webpack_require__(733);
+const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
-const ono_1 = __webpack_require__(114);
 const os_1 = __webpack_require__(87);
 const path_1 = __webpack_require__(622);
 /**
@@ -1747,62 +1389,6 @@ module.exports = parse;
 /***/ (function(module) {
 
 module.exports = require("path");
-
-/***/ }),
-
-/***/ 648:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const nonJsonTypes = ["function", "symbol", "undefined"];
-const protectedProps = ["constructor", "prototype", "__proto__"];
-const objectPrototype = Object.getPrototypeOf({});
-/**
- * Custom JSON serializer for Error objects.
- * Returns all built-in error properties, as well as extended properties.
- */
-function toJSON() {
-    // HACK: We have to cast the objects to `any` so we can use symbol indexers.
-    // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
-    let pojo = {};
-    let error = this;
-    for (let key of getDeepKeys(error)) {
-        if (typeof key === "string") {
-            let value = error[key];
-            let type = typeof value;
-            if (!nonJsonTypes.includes(type)) {
-                pojo[key] = value;
-            }
-        }
-    }
-    // tslint:enable: no-any no-unsafe-any
-    return pojo;
-}
-exports.toJSON = toJSON;
-/**
- * Returns own, inherited, enumerable, non-enumerable, string, and symbol keys of `obj`.
- * Does NOT return members of the base Object prototype, or the specified omitted keys.
- */
-function getDeepKeys(obj, omit = []) {
-    let keys = [];
-    // Crawl the prototype chain, finding all the string and symbol keys
-    while (obj && obj !== objectPrototype) {
-        keys = keys.concat(Object.getOwnPropertyNames(obj), Object.getOwnPropertySymbols(obj));
-        obj = Object.getPrototypeOf(obj);
-    }
-    // De-duplicate the list of keys
-    let uniqueKeys = new Set(keys);
-    // Remove any omitted keys
-    for (let key of omit.concat(protectedProps)) {
-        uniqueKeys.delete(key);
-    }
-    return uniqueKeys;
-}
-exports.getDeepKeys = getDeepKeys;
-//# sourceMappingURL=to-json.js.map
 
 /***/ }),
 
@@ -2200,13 +1786,20 @@ return typeDetect;
 
 /***/ }),
 
-/***/ 661:
+/***/ 669:
+/***/ (function(module) {
+
+module.exports = require("util");
+
+/***/ }),
+
+/***/ 673:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const isomorphic_node_1 = __webpack_require__(665);
+const isomorphic_node_1 = __webpack_require__(757);
 /**
  * Normalizes Ono options, accounting for defaults and optional options.
  */
@@ -2265,62 +1858,59 @@ exports.normalizeArgs = normalizeArgs;
 
 /***/ }),
 
-/***/ 665:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 700:
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const util = __webpack_require__(669);
-const to_json_1 = __webpack_require__(648);
-// The `inspect()` method is actually a Symbol, not a string key.
-// https://nodejs.org/api/util.html#util_util_inspect_custom
-const inspectMethod = util.inspect.custom || Symbol.for("nodejs.util.inspect.custom");
+
+const Process = __webpack_require__(920);
+const ProcessError = __webpack_require__(152);
+
+module.exports = normalizeResult;
+
 /**
- * Ono supports Node's `util.format()` formatting for error messages.
- *
- * @see https://nodejs.org/api/util.html#util_util_format_format_args
+ * @param {string} [command] - The command used to run the process
+ * @param {string[]} [args] - The command-line arguments that were passed to the process
+ * @param {number} [pid] - The process ID
+ * @param {string|Buffer} [stdout] - The process's stdout
+ * @param {string|Buffer} [stderr] - The process's stderr
+ * @param {string[]|Buffer[]} [output] - The process's stdio
+ * @param {number} [status] - The process's status code
+ * @param {string} [signal] - The signal that was used to kill the process, if any
+ * @param {object} [options] - The options used to run the process
+ * @param {Error} [error] - An error, if one occurred
+ * @returns {Process}
  */
-exports.format = util.format;
-/**
- * Adds an `inspect()` method to support Node's `util.inspect()` function.
- *
- * @see https://nodejs.org/api/util.html#util_util_inspect_custom
- */
-function addInspectMethod(newError) {
-    // @ts-ignore
-    newError[inspectMethod] = inspect;
-}
-exports.addInspectMethod = addInspectMethod;
-/**
- * Returns a representation of the error for Node's `util.inspect()` method.
- *
- * @see https://nodejs.org/api/util.html#util_custom_inspection_functions_on_objects
- */
-function inspect() {
-    // HACK: We have to cast the objects to `any` so we can use symbol indexers.
-    // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
-    let pojo = {};
-    let error = this;
-    for (let key of to_json_1.getDeepKeys(error)) {
-        let value = error[key];
-        pojo[key] = value;
+function normalizeResult ({ command, args, pid, stdout, stderr, output, status, signal, options, error }) {
+  let process = new Process({ command, args, pid, stdout, stderr, output, status, signal, options });
+
+  if (error) {
+    if (process.status === undefined) {
+      process.status = null;
     }
-    // Don't include the `inspect()` method on the output object,
-    // otherwise it will cause `util.inspect()` to go into an infinite loop
-    delete pojo[inspectMethod]; // tslint:disable-line: no-dynamic-delete
-    // tslint:enable: no-any no-unsafe-any
-    return pojo;
+    throw Object.assign(error, process);
+  }
+  else if (process.status) {
+    throw new ProcessError(process);
+  }
+  else {
+    return process;
+  }
 }
-//# sourceMappingURL=isomorphic.node.js.map
+
 
 /***/ }),
 
-/***/ 669:
-/***/ (function(module) {
+/***/ 733:
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = require("util");
+"use strict";
+
+
+module.exports.sync = __webpack_require__(328);
+module.exports.async = __webpack_require__(983);
+
 
 /***/ }),
 
@@ -2419,6 +2009,101 @@ function normalizeOptions(options) {
 }
 exports.normalizeOptions = normalizeOptions;
 
+
+/***/ }),
+
+/***/ 755:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const constructor_1 = __webpack_require__(507);
+const singleton = ono;
+exports.ono = singleton;
+ono.error = new constructor_1.Ono(Error);
+ono.eval = new constructor_1.Ono(EvalError);
+ono.range = new constructor_1.Ono(RangeError);
+ono.reference = new constructor_1.Ono(ReferenceError);
+ono.syntax = new constructor_1.Ono(SyntaxError);
+ono.type = new constructor_1.Ono(TypeError);
+ono.uri = new constructor_1.Ono(URIError);
+const onoMap = ono;
+/**
+ * Creates a new error with the specified message, properties, and/or inner error.
+ * If an inner error is provided, then the new error will match its type, if possible.
+ */
+function ono(...args) {
+    let originalError = args[0];
+    // Is the first argument an Error-like object?
+    if (typeof originalError === "object" && typeof originalError.name === "string") {
+        // Try to find an Ono singleton method that matches this error type
+        for (let typedOno of Object.values(onoMap)) {
+            if (typeof typedOno === "function" && typedOno.name === "ono") {
+                let species = typedOno[Symbol.species];
+                if (species && species !== Error && (originalError instanceof species || originalError.name === species.name)) {
+                    // Create an error of the same type
+                    return typedOno.apply(undefined, args);
+                }
+            }
+        }
+    }
+    // By default, create a base Error object
+    return ono.error.apply(undefined, args);
+}
+//# sourceMappingURL=singleton.js.map
+
+/***/ }),
+
+/***/ 757:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const util = __webpack_require__(669);
+const to_json_1 = __webpack_require__(483);
+// The `inspect()` method is actually a Symbol, not a string key.
+// https://nodejs.org/api/util.html#util_util_inspect_custom
+const inspectMethod = util.inspect.custom || Symbol.for("nodejs.util.inspect.custom");
+/**
+ * Ono supports Node's `util.format()` formatting for error messages.
+ *
+ * @see https://nodejs.org/api/util.html#util_util_format_format_args
+ */
+exports.format = util.format;
+/**
+ * Adds an `inspect()` method to support Node's `util.inspect()` function.
+ *
+ * @see https://nodejs.org/api/util.html#util_util_inspect_custom
+ */
+function addInspectMethod(newError) {
+    // @ts-ignore
+    newError[inspectMethod] = inspect;
+}
+exports.addInspectMethod = addInspectMethod;
+/**
+ * Returns a representation of the error for Node's `util.inspect()` method.
+ *
+ * @see https://nodejs.org/api/util.html#util_custom_inspection_functions_on_objects
+ */
+function inspect() {
+    // HACK: We have to cast the objects to `any` so we can use symbol indexers.
+    // see https://github.com/Microsoft/TypeScript/issues/1863
+    // tslint:disable: no-any no-unsafe-any
+    let pojo = {};
+    let error = this;
+    for (let key of to_json_1.getDeepKeys(error)) {
+        let value = error[key];
+        pojo[key] = value;
+    }
+    // Don't include the `inspect()` method on the output object,
+    // otherwise it will cause `util.inspect()` to go into an infinite loop
+    delete pojo[inspectMethod]; // tslint:disable-line: no-dynamic-delete
+    // tslint:enable: no-any no-unsafe-any
+    return pojo;
+}
+//# sourceMappingURL=isomorphic.node.js.map
 
 /***/ }),
 
@@ -2679,50 +2364,6 @@ function sync (path, options) {
 
 /***/ }),
 
-/***/ 827:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const Process = __webpack_require__(252);
-const ProcessError = __webpack_require__(458);
-
-module.exports = normalizeResult;
-
-/**
- * @param {string} [command] - The command used to run the process
- * @param {string[]} [args] - The command-line arguments that were passed to the process
- * @param {number} [pid] - The process ID
- * @param {string|Buffer} [stdout] - The process's stdout
- * @param {string|Buffer} [stderr] - The process's stderr
- * @param {string[]|Buffer[]} [output] - The process's stdio
- * @param {number} [status] - The process's status code
- * @param {string} [signal] - The signal that was used to kill the process, if any
- * @param {object} [options] - The options used to run the process
- * @param {Error} [error] - An error, if one occurred
- * @returns {Process}
- */
-function normalizeResult ({ command, args, pid, stdout, stderr, output, status, signal, options, error }) {
-  let process = new Process({ command, args, pid, stdout, stderr, output, status, signal, options });
-
-  if (error) {
-    if (process.status === undefined) {
-      process.status = null;
-    }
-    throw Object.assign(error, process);
-  }
-  else if (process.status) {
-    throw new ProcessError(process);
-  }
-  else {
-    return process;
-  }
-}
-
-
-/***/ }),
-
 /***/ 835:
 /***/ (function(module) {
 
@@ -2753,6 +2394,230 @@ module.exports = (string = '') => {
 
 	return argument ? `${binary} ${argument}` : binary;
 };
+
+
+/***/ }),
+
+/***/ 874:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const { parseArgsStringToArgv } = __webpack_require__(982);  // possible alternative: parse-spawn-args
+const detectType = __webpack_require__(657);
+
+module.exports = normalizeArgs;
+
+/**
+ * This function normalizes the arguments of the {@link sync} and {@link async}
+ * so they can be passed to Node's {@link child_process.spawn} or
+ * {@link child_process.spawn} functions.
+ *
+ * @param {string|string[]} command
+ * The command to run (e.g. "git"), or the command and its arguments as a string
+ * (e.g. "git commit -a -m fixed_stuff"), or the command and its arguments as an
+ * array (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
+ *
+ * @param {string|string[]} [args]
+ * The command arguments as a string (e.g. "git commit -a -m fixed_stuff") or as an array
+ * (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
+ *
+ * @param {object} [options]
+ * The same options as {@link child_process.spawn} or {@link child_process.spawnSync}.
+ *
+ * @param {function} [callback]
+ * The callback that will receive the results, if applicable.
+ *
+ * @returns {object}
+ */
+function normalizeArgs (params) {
+  let command, args, options, callback, error;
+
+  try {
+    // Shift the arguments, if necessary
+    ({ command, args, options, callback } = shiftArgs(params));
+
+    let commandArgs = [];
+
+    if (typeof command === "string" && args === undefined) {
+      // The command parameter is actually the command AND arguments,
+      // so split the string into an array
+      command = splitArgString(command);
+    }
+
+    if (Array.isArray(command)) {
+      // Split the command from the arguments
+      commandArgs = command.slice(1);
+      command = command[0];
+    }
+
+    if (typeof args === "string") {
+      // Convert the `args` argument from a string an array
+      args = splitArgString(args);
+    }
+
+    if (Array.isArray(args)) {
+      // Add these arguments to any arguments from above
+      args = commandArgs.concat(args);
+    }
+
+    if (args === undefined || args === null) {
+      args = commandArgs;
+    }
+
+    if (options === undefined || options === null) {
+      options = {};
+    }
+
+    // Set default options
+    options.encoding = options.encoding || "utf8";
+
+    // Validate all arguments
+    validateArgs(command, args, options, callback);
+  }
+  catch (err) {
+    error = err;
+
+    // Sanitize args that are used as output
+    command = String(command || "");
+    args = (Array.isArray(args) ? args : []).map((arg) => String(arg || ""));
+  }
+
+  return { command, args, options, callback, error };
+}
+
+/**
+ * Detects whether any optional arguments have been omitted,
+ * and shifts the other arguments as needed.
+ *
+ * @param {string|string[]} command
+ * @param {string|string[]} [args]
+ * @param {object} [options]
+ * @param {function} [callback]
+ * @returns {object}
+ */
+function shiftArgs (params) {
+  params = Array.prototype.slice.call(params);
+  let command, args, options, callback;
+
+  // Check for a callback as the final parameter
+  let lastParam = params[params.length - 1];
+  if (typeof lastParam === "function") {
+    callback = lastParam;
+    params.pop();
+  }
+
+  // Check for an options object as the second-to-last parameter
+  lastParam = params[params.length - 1];
+  if (lastParam === null || lastParam === undefined ||
+  (typeof lastParam === "object" && !Array.isArray(lastParam))) {
+    options = lastParam;
+    params.pop();
+  }
+
+  // The first parameter is the command
+  command = params.shift();
+
+  // All remaining parameters are the args
+  if (params.length === 0) {
+    args = undefined;
+  }
+  else if (params.length === 1 && Array.isArray(params[0])) {
+    args = params[0];
+  }
+  else if (params.length === 1 && params[0] === "") {
+    args = [];
+  }
+  else {
+    args = params;
+  }
+
+  return { command, args, options, callback };
+}
+
+/**
+ * Validates all arguments, and throws an error if any are invalid.
+ *
+ * @param {string} command
+ * @param {string[]} args
+ * @param {object} options
+ * @param {function} [callback]
+ */
+function validateArgs (command, args, options, callback) {
+  if (command === undefined || command === null) {
+    throw new Error("The command to execute is missing.");
+  }
+
+  if (typeof command !== "string") {
+    throw new Error("The command to execute should be a string, not " + friendlyType(command));
+  }
+
+  if (!Array.isArray(args)) {
+    throw new Error(
+      "The command arguments should be a string or an array, not " +
+      friendlyType(args)
+    );
+  }
+
+  for (let i = 0; i < args.length; i++) {
+    let arg = args[i];
+
+    if (typeof arg !== "string") {
+      throw new Error(
+        `The command arguments should be strings, but argument #${i + 1} is ` +
+        friendlyType(arg)
+      );
+    }
+  }
+
+  if (typeof options !== "object") {
+    throw new Error(
+      "The options should be an object, not " +
+      friendlyType(options)
+    );
+  }
+
+  if (callback !== undefined && callback !== null) {
+    if (typeof callback !== "function") {
+      throw new Error("The callback should be a function, not " + friendlyType(callback));
+    }
+  }
+}
+
+/**
+ * Splits an argument string (e.g. git commit -a -m "fixed stuff")
+ * into an array (e.g. ["git", "commit", "-a", "-m", "fixed stuff"]).
+ *
+ * @param {string} argString
+ * @returns {string[]}
+ */
+function splitArgString (argString) {
+  try {
+    return parseArgsStringToArgv(argString);
+  }
+  catch (error) {
+    throw new Error(`Could not parse the string: ${argString}\n${error.message}`);
+  }
+}
+
+/**
+ * Returns the friendly type name of the given value, for use in error messages.
+ *
+ * @param {*} val
+ * @returns {string}
+ */
+function friendlyType (val) {
+  let type = detectType(val);
+  let firstChar = String(type)[0].toLowerCase();
+
+  if (["a", "e", "i", "o", "u"].indexOf(firstChar) === -1) {
+    return `a ${type}.`;
+  }
+  else {
+    return `an ${type}.`;
+  }
+}
 
 
 /***/ }),
@@ -2824,46 +2689,109 @@ module.exports = {
 
 /***/ }),
 
-/***/ 951:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 920:
+/***/ (function(module) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const constructor_1 = __webpack_require__(181);
-const singleton = ono;
-exports.ono = singleton;
-ono.error = new constructor_1.Ono(Error);
-ono.eval = new constructor_1.Ono(EvalError);
-ono.range = new constructor_1.Ono(RangeError);
-ono.reference = new constructor_1.Ono(ReferenceError);
-ono.syntax = new constructor_1.Ono(SyntaxError);
-ono.type = new constructor_1.Ono(TypeError);
-ono.uri = new constructor_1.Ono(URIError);
-const onoMap = ono;
+
 /**
- * Creates a new error with the specified message, properties, and/or inner error.
- * If an inner error is provided, then the new error will match its type, if possible.
+ * An instance of this class is returned by {@link sync} and {@link async}.
+ * It contains information about how the process was spawned, how it exited, and its output.
  */
-function ono(...args) {
-    let originalError = args[0];
-    // Is the first argument an Error-like object?
-    if (typeof originalError === "object" && typeof originalError.name === "string") {
-        // Try to find an Ono singleton method that matches this error type
-        for (let typedOno of Object.values(onoMap)) {
-            if (typeof typedOno === "function" && typedOno.name === "ono") {
-                let species = typedOno[Symbol.species];
-                if (species && species !== Error && (originalError instanceof species || originalError.name === species.name)) {
-                    // Create an error of the same type
-                    return typedOno.apply(undefined, args);
-                }
-            }
-        }
+module.exports = class Process {
+  /**
+   * @param {object} props - Initial property values
+   */
+  constructor ({ command, args, pid, stdout, stderr, output, status, signal, options }) {
+    options = options || {};
+    stdout = stdout || (options.encoding === "buffer" ? Buffer.from([]) : "");
+    stderr = stderr || (options.encoding === "buffer" ? Buffer.from([]) : "");
+    output = output || [options.input || null, stdout, stderr];
+
+    /**
+     * The command that was used to spawn the process
+     *
+     * @type {string}
+     */
+    this.command = command || "";
+
+    /**
+     * The command-line arguments that were passed to the process.
+     *
+     * @type {string[]}
+     */
+    this.args = args || [];
+
+    /**
+     * The numeric process ID assigned by the operating system
+     *
+     * @type {number}
+     */
+    this.pid = pid || 0;
+
+    /**
+     * The process's standard output
+     *
+     * @type {Buffer|string}
+     */
+
+    this.stdout = output[1];
+
+    /**
+     * The process's error output
+     *
+     * @type {Buffer|string}
+     */
+    this.stderr = output[2];
+
+    /**
+     * The process's stdio [stdin, stdout, stderr]
+     *
+     * @type {Buffer[]|string[]}
+     */
+    this.output = output;
+
+    /**
+     * The process's status code
+     *
+     * @type {number}
+     */
+    this.status = status;
+
+    /**
+     * The signal used to kill the process, if applicable
+     *
+     * @type {string}
+     */
+    this.signal = signal || null;
+  }
+
+  /**
+   * Returns the full command and arguments used to spawn the process
+   *
+   * @type {string}
+   */
+  toString () {
+    let string = this.command;
+
+    for (let arg of this.args) {
+      // Escape quotes
+      arg = arg.replace(/"/g, '\\"');
+
+      if (arg.indexOf(" ") >= 0) {
+        // Add quotes if the arg contains whitespace
+        string += ` "${arg}"`;
+      }
+      else {
+        string += ` ${arg}`;
+      }
     }
-    // By default, create a base Error object
-    return ono.error.apply(undefined, args);
-}
-//# sourceMappingURL=singleton.js.map
+
+    return string;
+  }
+};
+
 
 /***/ }),
 
@@ -2914,6 +2842,101 @@ function firstString() {
             return arg;
         }
     }
+}
+
+
+/***/ }),
+
+/***/ 983:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const normalizeArgs = __webpack_require__(874);
+const normalizeResult = __webpack_require__(700);
+const maybe = __webpack_require__(791);
+const spawn = __webpack_require__(20);
+
+module.exports = async;
+
+/**
+ * Executes the given command asynchronously, and returns the buffered
+ * results via a callback or Promise.
+ *
+ * @param {string|string[]} command - The command to run
+ * @param {string|string[]} [args] - The command arguments
+ * @param {object} [options] - options
+ * @param {function} [callback] - callback that will receive the results
+ *
+ * @returns {Promise<Process>|undefined}
+ * Returns a Promise if no callback is given. The promise resolves with
+ * a {@link Process} object.
+ *
+ * @see {@link normalizeArgs} for argument details
+ */
+function async () {
+  // Normalize the function arguments
+  let { command, args, options, callback, error } = normalizeArgs(arguments);
+
+  return maybe(callback, new Promise((resolve, reject) => {
+    if (error) {
+      // Invalid arguments
+      normalizeResult({ command, args, options, error });
+    }
+    else {
+      let spawnedProcess;
+
+      try {
+        // Spawn the program
+        spawnedProcess = spawn(command, args, options);
+      }
+      catch (error) {
+        // An error occurred while spawning the process
+        normalizeResult({ error, command, args, options });
+      }
+
+      let pid = spawnedProcess.pid;
+      let stdout = options.encoding === "buffer" ? Buffer.from([]) : "";
+      let stderr = options.encoding === "buffer" ? Buffer.from([]) : "";
+
+      spawnedProcess.stdout && spawnedProcess.stdout.on("data", (data) => {
+        if (typeof stdout === "string") {
+          stdout += data.toString();
+        }
+        else {
+          stdout = Buffer.concat([stdout, data]);
+        }
+      });
+
+      spawnedProcess.stderr && spawnedProcess.stderr.on("data", (data) => {
+        if (typeof stderr === "string") {
+          stderr += data.toString();
+        }
+        else {
+          stderr = Buffer.concat([stderr, data]);
+        }
+      });
+
+      spawnedProcess.on("error", (error) => {
+        try {
+          normalizeResult({ error, command, args, options, pid, stdout, stderr });
+        }
+        catch (error) {
+          reject(error);
+        }
+      });
+
+      spawnedProcess.on("exit", (status, signal) => {
+        try {
+          resolve(normalizeResult({ command, args, options, pid, stdout, stderr, status, signal }));
+        }
+        catch (error) {
+          reject(error);
+        }
+      });
+    }
+  }));
 }
 
 
