@@ -578,7 +578,7 @@ function retrieveSourceMapURL(source) {
 
   // Get the URL of the source map
   fileData = retrieveFile(source);
-  var re = /(?:\/\/[@#][\s]*sourceMappingURL=([^\s'"]+)[\s]*$)|(?:\/\*[@#][\s]*sourceMappingURL=([^\s*'"]+)[\s]*(?:\*\/)[\s]*$)/mg;
+  var re = /(?:\/\/[@#][ \t]+sourceMappingURL=([^\s'"]+?)[ \t]*$)|(?:\/\*[@#][ \t]+sourceMappingURL=([^\*]+?)[ \t]*(?:\*\/)[ \t]*$)/mg;
   // Keep executing the search to find the *last* sourceMappingURL to avoid
   // picking up sourceMappingURLs from comments, strings, etc.
   var lastMatch, match;
@@ -651,7 +651,7 @@ function mapSourcePosition(position) {
   }
 
   // Resolve the source URL relative to the URL of the source map
-  if (sourceMap && sourceMap.map && typeof sourceMap.map.originalPositionFor === 'function') {
+  if (sourceMap && sourceMap.map) {
     var originalPosition = sourceMap.map.originalPositionFor(position);
 
     // Only return the original position if a matching line was found. If no
@@ -776,13 +776,8 @@ function cloneCallSite(frame) {
   return object;
 }
 
-function wrapCallSite(frame, state) {
-  // provides interface backward compatibility
-  if (state === undefined) {
-    state = { nextPosition: null, curPosition: null }
-  }
+function wrapCallSite(frame) {
   if(frame.isNative()) {
-    state.curPosition = null;
     return frame;
   }
 
@@ -796,11 +791,7 @@ function wrapCallSite(frame, state) {
 
     // Fix position in Node where some (internal) code is prepended.
     // See https://github.com/evanw/node-source-map-support/issues/36
-    // Header removed in node at ^10.16 || >=11.11.0
-    // v11 is not an LTS candidate, we can just test the one version with it.
-    // Test node versions for: 10.16-19, 10.20+, 12-19, 20-99, 100+, or 11.11
-    var noHeader = /^v(10\.1[6-9]|10\.[2-9][0-9]|10\.[0-9]{3,}|1[2-9]\d*|[2-9]\d|\d{3,}|11\.11)/;
-    var headerLength = noHeader.test(process.version) ? 0 : 62;
+    var headerLength = 62;
     if (line === 1 && column > headerLength && !isInBrowser() && !frame.isEval()) {
       column -= headerLength;
     }
@@ -810,15 +801,9 @@ function wrapCallSite(frame, state) {
       line: line,
       column: column
     });
-    state.curPosition = position;
     frame = cloneCallSite(frame);
     var originalFunctionName = frame.getFunctionName;
-    frame.getFunctionName = function() {
-      if (state.nextPosition == null) {
-        return originalFunctionName();
-      }
-      return state.nextPosition.name || originalFunctionName();
-    };
+    frame.getFunctionName = function() { return position.name || originalFunctionName(); };
     frame.getFileName = function() { return position.source; };
     frame.getLineNumber = function() { return position.line; };
     frame.getColumnNumber = function() { return position.column + 1; };
@@ -840,25 +825,16 @@ function wrapCallSite(frame, state) {
 }
 
 // This function is part of the V8 stack trace API, for more info see:
-// https://v8.dev/docs/stack-trace-api
+// http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 function prepareStackTrace(error, stack) {
   if (emptyCacheBetweenOperations) {
     fileContentsCache = {};
     sourceMapCache = {};
   }
 
-  var name = error.name || 'Error';
-  var message = error.message || '';
-  var errorString = name + ": " + message;
-
-  var state = { nextPosition: null, curPosition: null };
-  var processedStack = [];
-  for (var i = stack.length - 1; i >= 0; i--) {
-    processedStack.push('\n    at ' + wrapCallSite(stack[i], state));
-    state.nextPosition = state.curPosition;
-  }
-  state.curPosition = state.nextPosition = null;
-  return errorString + processedStack.reverse().join('');
+  return error + stack.map(function(frame) {
+    return '\n    at ' + wrapCallSite(frame);
+  }).join('');
 }
 
 // Generate position and snippet of original source with pointer
@@ -1022,9 +998,6 @@ exports.resetRetrieveHandlers = function() {
 
   retrieveFileHandlers = originalRetrieveFileHandlers.slice(0);
   retrieveMapHandlers = originalRetrieveMapHandlers.slice(0);
-
-  retrieveSourceMap = handlerExec(retrieveMapHandlers);
-  retrieveFile = handlerExec(retrieveFileHandlers);
 }
 
 
