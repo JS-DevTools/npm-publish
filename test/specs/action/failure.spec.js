@@ -127,6 +127,11 @@ describe("GitHub Action - failure tests", () => {
     ]);
 
     npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
       args: ["view", "my-lib", "version"],
       stderr: "BOOM!",
       exitCode: 1,
@@ -144,7 +149,7 @@ describe("GitHub Action - failure tests", () => {
     expect(cli).stdout.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
-    npm.assert.ran(1);
+    npm.assert.ran(2);
   });
 
   it("should fail if the .npmrc file is invalid", () => {
@@ -152,11 +157,6 @@ describe("GitHub Action - failure tests", () => {
       { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
       { path: "home/.npmrc/file.txt", contents: "~/.npmrc is a directory, not a file" },
     ]);
-
-    npm.mock({
-      args: ["view", "my-lib", "version"],
-      stdout: `1.0.0${EOL}`,
-    });
 
     npm.mock({
       args: ["config", "get", "userconfig"],
@@ -174,18 +174,13 @@ describe("GitHub Action - failure tests", () => {
     expect(cli).stdout.to.include("Error: EISDIR: illegal operation on a directory, read");
     expect(cli).to.have.exitCode(1);
 
-    npm.assert.ran(2);
+    npm.assert.ran(1);
   });
 
   it('should fail if the "npm config" command errors', () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
     ]);
-
-    npm.mock({
-      args: ["view", "my-lib", "version"],
-      stdout: `1.0.0${EOL}`,
-    });
 
     npm.mock({
       args: ["config", "get", "userconfig"],
@@ -205,13 +200,18 @@ describe("GitHub Action - failure tests", () => {
     expect(cli).stdout.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
-    npm.assert.ran(2);
+    npm.assert.ran(1);
   });
 
   it('should fail if the "npm publish" command errors', () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -241,7 +241,7 @@ describe("GitHub Action - failure tests", () => {
     expect(cli).stdout.not.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
 });

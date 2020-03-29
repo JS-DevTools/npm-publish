@@ -15,18 +15,24 @@ export const npm = {
   /**
    * Gets the latest published version of the specified package.
    */
-  async getLatestVersion(name: string, { debug }: NormalizedOptions): Promise<SemVer> {
+  async getLatestVersion(name: string, options: NormalizedOptions): Promise<SemVer> {
+    // Update the NPM config with the specified registry and token
+    await setNpmConfig(options);
+
     try {
-      debug(`Running command: npm view ${name} version`);
+      // Get the environment variables to pass to NPM
+      let env = getNpmEnvironment(options);
+
+      options.debug(`Running command: npm view ${name} version`);
 
       // Run NPM to get the latest published versiono of the package
-      let process = await ezSpawn.async("npm", "view", name, "version");
-      let version = process.stdout.trim();
+      let { stdout } = await ezSpawn.async("npm", ["view", name, "version"], { env });
+      let version = stdout.trim();
 
       // Parse/validate the version number
       let semver = new SemVer(version);
 
-      debug(`The local version of ${name} is at v${semver}`);
+      options.debug(`The local version of ${name} is at v${semver}`);
       return semver;
     }
     catch (error) {
@@ -49,20 +55,29 @@ export const npm = {
       // Determine whether to suppress NPM's output
       let stdio: StdioOptions = options.quiet ? "pipe" : "inherit";
 
-      // Only pass environment variables if we need to set the NPM token
-      let env = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+      // Get the environment variables to pass to NPM
+      let env = getNpmEnvironment(options);
 
       options.debug("Running command: npm publish", { stdio, cwd, env });
 
       // Run NPM to publish the package
-      await ezSpawn.async("npm", ["publish"], {
-        cwd,
-        stdio,
-        env: env ? { ...process.env, INPUT_TOKEN: options.token } : undefined
-      });
+      await ezSpawn.async("npm", ["publish"], { cwd, stdio, env });
     }
     catch (error) {
       throw ono(error, `Unable to publish ${name} v${version} to NPM.`);
     }
   },
 };
+
+
+/**
+ * Returns the environment variables that should be passed to NPM, based on the given options.
+ */
+function getNpmEnvironment(options: NormalizedOptions): NodeJS.ProcessEnv | undefined {
+  // Determine if we need to set the NPM token
+  let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+
+  if (needsToken) {
+    return { ...process.env, INPUT_TOKEN: options.token };
+  }
+}

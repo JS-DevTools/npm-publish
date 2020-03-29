@@ -26,6 +26,11 @@ describe("NPM package - success tests", () => {
     ]);
 
     npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
       args: ["view", "my-lib", "version"],
       stdout: `1.0.0${EOL}`,
     });
@@ -54,13 +59,18 @@ describe("NPM package - success tests", () => {
       `registry=https://registry.npmjs.org/${EOL}`
     );
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
   it("should not publish a new version to NPM if the version number hasn't changed", async () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -76,14 +86,23 @@ describe("NPM package - success tests", () => {
       oldVersion: "1.0.0"
     });
 
-    files.assert.doesNotExist("home/.npmrc");
-    npm.assert.ran(1);
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(2);
   });
 
   it("should use the specified NPM token to publish the package", async () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0-beta.1" }},
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -118,7 +137,7 @@ describe("NPM package - success tests", () => {
       `registry=https://registry.npmjs.org/${EOL}`
     );
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
   it("should append to an existing .npmrc file", async () => {
@@ -126,6 +145,11 @@ describe("NPM package - success tests", () => {
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
       { path: "home/.npmrc", contents: "This is my NPM config.\nThere are many like it,\nbut this one is mine." },
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -155,11 +179,12 @@ describe("NPM package - success tests", () => {
       `This is my NPM config.${EOL}` +
       `There are many like it,${EOL}` +
       `but this one is mine.${EOL}` +
+      `${EOL}` +
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
       `registry=https://registry.npmjs.org/${EOL}`
     );
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
   it("should update an existing .npmrc file's settings", async () => {
@@ -179,6 +204,11 @@ describe("NPM package - success tests", () => {
           "registry=https://registry.example.com/\n"
       },
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -211,17 +241,23 @@ describe("NPM package - success tests", () => {
       `${EOL}` +
       `# Use some other package registry${EOL}` +
       `${EOL}` +
+      `${EOL}` +
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
       `registry=https://registry.npmjs.org/${EOL}`
     );
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
   it("should publish a package that's not in the root of the workspace directory", async () => {
     files.create([
       { path: "workspace/subdir/my-lib/package.json", contents: { name: "my-lib", version: "1.0.0-beta" }},
     ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
 
     npm.mock({
       args: ["view", "my-lib", "version"],
@@ -256,7 +292,7 @@ describe("NPM package - success tests", () => {
       `registry=https://registry.npmjs.org/${EOL}`
     );
 
-    npm.assert.ran(3);
+    npm.assert.ran(4);
   });
 
 });
