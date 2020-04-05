@@ -94,7 +94,7 @@ steps:
 
   - if: steps.publish.type != 'none'
     run: |
-      echo "Version changed: ${{ steps.publish.old-version }} => ${{ steps.publish.version }}"
+      echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 ```
 
 
