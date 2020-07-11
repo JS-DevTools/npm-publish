@@ -18,14 +18,18 @@ async function main(): Promise<void> {
       registry: getInput("registry", { required: true }),
       package: getInput("package", { required: true }),
       checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
+      dryRun: getInput("dry-run").toLowerCase() === "true",
       debug: debugHandler,
     };
 
-    // Puglish to NPM
+    // Publish to NPM
     let results = await npmPublish(options);
 
     if (results.type === "none") {
       console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
+    }
+    else if (results.type === "dry-run") {
+      console.log(`\n📦 ${results.package} v${results.version} successfully built but not published to NPM`);
     }
     else {
       console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);

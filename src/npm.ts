@@ -25,7 +25,7 @@ export const npm = {
 
       options.debug(`Running command: npm view ${name} version`);
 
-      // Run NPM to get the latest published versiono of the package
+      // Run NPM to get the latest published version of the package
       let { stdout } = await ezSpawn.async("npm", ["view", name, "version"], { env });
       let version = stdout.trim();
 
@@ -60,8 +60,10 @@ export const npm = {
 
       options.debug("Running command: npm publish", { stdio, cwd, env });
 
+      let command = options.dryRun ? ["publish", "--dry-run"] : ["publish"];
+
       // Run NPM to publish the package
-      await ezSpawn.async("npm", ["publish"], { cwd, stdio, env });
+      await ezSpawn.async("npm", command, { cwd, stdio, env });
     }
     catch (error) {
       throw ono(error, `Unable to publish ${name} v${version} to NPM.`);

@@ -32,6 +32,15 @@ export interface Options {
   checkVersion?: boolean;
 
   /**
+   * If true, run npm publish with the --dry-run flag
+   * so that the package is not published. Used for
+   * testing workflows.
+   *
+   * Defaults to `false`
+   */
+  dryRun?: boolean;
+
+  /**
    * Suppress console output from NPM and npm-publish.
    *
    * Defaults to `false`

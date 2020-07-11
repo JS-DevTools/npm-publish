@@ -9,7 +9,7 @@ export interface Results {
   /**
    * The type of version change that occurred
    */
-  type: ReleaseType | "none";
+  type: ReleaseType | "none" | "dry-run";
 
   /**
    * The name of the NPM package that was published

@@ -295,4 +295,50 @@ describe("NPM package - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should return a type of dry-run when called with --dry-run", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--dry-run"],
+      stdout: `my-lib 1.1.0${EOL}`,
+    });
+
+    let results = await npmPublish({
+      quiet: true,
+      package: "package.json",
+      dryRun: true
+    });
+
+    expect(results).to.deep.equal({
+      type: "dry-run",
+      package: "my-lib",
+      version: "1.1.0",
+      oldVersion: "1.0.0"
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
 });
