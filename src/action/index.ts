@@ -24,7 +24,6 @@ async function main(): Promise<void> {
     // Puglish to NPM
     let results = await npmPublish(options);
 
-    // tslint:disable: no-console
     if (results.type === "none") {
       console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
     }
@@ -62,5 +61,5 @@ function debugHandler(message: string, data?: object) {
   debug(message);
 }
 
-// tslint:disable-next-line: no-floating-promises
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();

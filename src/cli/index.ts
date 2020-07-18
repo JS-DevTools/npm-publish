@@ -1,4 +1,3 @@
-// tslint:disable: no-console
 import { join } from "path";
 import { npmPublish } from "../npm-publish";
 import { readManifest } from "../read-manifest";
@@ -35,7 +34,6 @@ export async function main(args: string[]): Promise<void> {
       let results = await npmPublish(options);
 
       if (!options.quiet) {
-        // tslint:disable: no-console
         if (results.type === "none") {
           console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
         }

@@ -32,7 +32,7 @@ export async function readManifest(path: string, debug?: Debug): Promise<Manifes
     let { name, version } = JSON.parse(json) as Record<string, unknown>;
 
     if (typeof name !== "string" || name.trim().length === 0) {
-      throw new TypeError(`Invalid package name`);
+      throw new TypeError("Invalid package name");
     }
 
     let manifest: Manifest = {

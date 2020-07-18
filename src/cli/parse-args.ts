@@ -1,4 +1,3 @@
-// tslint:disable: no-console
 import * as commandLineArgs from "command-line-args";
 import { Options } from "../options";
 import { ExitCode } from "./exit-code";

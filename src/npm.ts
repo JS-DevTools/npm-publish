@@ -78,6 +78,7 @@ function getNpmEnvironment(options: NormalizedOptions): NodeJS.ProcessEnv | unde
   let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
 
   if (needsToken) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     return { ...process.env, INPUT_TOKEN: options.token };
   }
 }

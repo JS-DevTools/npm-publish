@@ -51,13 +51,13 @@ function updateConfig(config: string, { registry, debug }: NormalizedOptions): s
  */
 async function getNpmConfigPath({ debug }: NormalizedOptions): Promise<string> {
   try {
-    debug(`Running command: npm config get userconfig`);
+    debug("Running command: npm config get userconfig");
 
     let process = await ezSpawn.async("npm", "config", "get", "userconfig");
     return process.stdout.trim();
   }
   catch (error) {
-    throw ono(error, `Unable to determine the NPM config file path.`);
+    throw ono(error, "Unable to determine the NPM config file path.");
   }
 }
 
@@ -76,7 +76,7 @@ async function readNpmConfig(configPath: string, { debug }: NormalizedOptions): 
   }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      debug(`OLD NPM CONFIG: <none>`);
+      debug("OLD NPM CONFIG: <none>");
       return "";
     }
 
