@@ -20,10 +20,6 @@
 
     "typeRoots": [
       "node_modules/@types"
-    ],
-
-    "plugins": [
-      { "name": "typescript-tslint-plugin" }
     ]
   },
   "include": [

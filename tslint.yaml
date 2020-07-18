@@ -1,7 +1,0 @@
-# TSLint config
-# https://palantir.github.io/tslint/usage/configuration/
-# https://jstools.dev/tslint-modular/
-
-extends:
-  - "@jsdevtools/tslint-modular/best-practices"
-  - "@jsdevtools/tslint-modular/style"
