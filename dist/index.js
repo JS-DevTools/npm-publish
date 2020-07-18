@@ -19,7 +19,13 @@ require('./sourcemap-register.js');module.exports =
 /******/ 		};
 /******/
 /******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete installedModules[moduleId];
+/******/ 		}
 /******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
@@ -141,7 +147,6 @@ async function main() {
         };
         // Puglish to NPM
         let results = await npm_publish_1.npmPublish(options);
-        // tslint:disable: no-console
         if (results.type === "none") {
             console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
         }
@@ -174,7 +179,7 @@ function debugHandler(message, data) {
     }
     core_1.debug(message);
 }
-// tslint:disable-next-line: no-floating-promises
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();
 
 
@@ -186,6 +191,7 @@ main();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.npm = void 0;
 const ezSpawn = __webpack_require__(733);
 const ono_1 = __webpack_require__(271);
 const path_1 = __webpack_require__(622);
@@ -247,6 +253,7 @@ function getNpmEnvironment(options) {
     // Determine if we need to set the NPM token
     let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
     if (needsToken) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         return { ...process.env, INPUT_TOKEN: options.token };
     }
 }
@@ -267,6 +274,7 @@ module.exports = require("os");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.lazyJoinStacks = exports.joinStacks = exports.isWritableStack = exports.isLazyStack = void 0;
 const newline = /\r?\n/;
 const onoCall = /\bono[ @]/;
 /**
@@ -456,16 +464,28 @@ function checkMode (stat, options) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ono = void 0;
+/* eslint-env commonjs */
 const singleton_1 = __webpack_require__(755);
-exports.ono = singleton_1.ono;
+Object.defineProperty(exports, "ono", { enumerable: true, get: function () { return singleton_1.ono; } });
 var constructor_1 = __webpack_require__(507);
-exports.Ono = constructor_1.Ono;
-// tslint:disable-next-line: no-default-export
+Object.defineProperty(exports, "Ono", { enumerable: true, get: function () { return constructor_1.Ono; } });
+__exportStar(__webpack_require__(430), exports);
 exports.default = singleton_1.ono;
 // CommonJS default export hack
 if ( true && typeof module.exports === "object") {
-    module.exports = Object.assign(module.exports.default, module.exports); // tslint:disable-line: no-unsafe-any
+    module.exports = Object.assign(module.exports.default, module.exports);
 }
 //# sourceMappingURL=index.js.map
 
@@ -477,6 +497,7 @@ if ( true && typeof module.exports === "object") {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.readManifest = void 0;
 const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
@@ -497,7 +518,7 @@ async function readManifest(path, debug) {
     try {
         let { name, version } = JSON.parse(json);
         if (typeof name !== "string" || name.trim().length === 0) {
-            throw new TypeError(`Invalid package name`);
+            throw new TypeError("Invalid package name");
         }
         let manifest = {
             name,
@@ -521,6 +542,7 @@ exports.readManifest = readManifest;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.extendError = void 0;
 const isomorphic_node_1 = __webpack_require__(757);
 const stack_1 = __webpack_require__(116);
 const to_json_1 = __webpack_require__(483);
@@ -543,6 +565,7 @@ function extendError(error, originalError, props) {
     // So replace it with one that outputs every property of the error.
     onoError.toJSON = to_json_1.toJSON;
     // On Node.js, add support for the `util.inspect()` method
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (isomorphic_node_1.addInspectMethod) {
         isomorphic_node_1.addInspectMethod(onoError);
     }
@@ -580,7 +603,6 @@ function mergeErrors(newError, originalError) {
     let keys = to_json_1.getDeepKeys(originalError, protectedProps);
     // HACK: We have to cast the errors to `any` so we can use symbol indexers.
     // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
     let _newError = newError;
     let _originalError = originalError;
     for (let key of keys) {
@@ -679,6 +701,17 @@ module.exports = readShebang;
 
 /***/ }),
 
+/***/ 430:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const util_1 = __webpack_require__(669);
+//# sourceMappingURL=types.js.map
+
+/***/ }),
+
 /***/ 431:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -746,14 +779,28 @@ class Command {
         return cmdStr;
     }
 }
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
 function escapeData(s) {
-    return (s || '')
+    return toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A');
 }
 function escapeProperty(s) {
-    return (s || '')
+    return toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
@@ -862,11 +909,13 @@ var ExitCode;
 /**
  * Sets env variable for this action and future actions in the job
  * @param name the name of the variable to set
- * @param val the value of the variable
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    process.env[name] = val;
-    command_1.issueCommand('set-env', { name }, val);
+    const convertedVal = command_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    command_1.issueCommand('set-env', { name }, convertedVal);
 }
 exports.exportVariable = exportVariable;
 /**
@@ -905,12 +954,22 @@ exports.getInput = getInput;
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
 //-----------------------------------------------------------------------
 // Results
 //-----------------------------------------------------------------------
@@ -944,18 +1003,18 @@ function debug(message) {
 exports.debug = debug;
 /**
  * Adds an error issue
- * @param message error issue message
+ * @param message error issue message. Errors will be converted to string via toString()
  */
 function error(message) {
-    command_1.issue('error', message);
+    command_1.issue('error', message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
  * Adds an warning issue
- * @param message warning issue message
+ * @param message warning issue message. Errors will be converted to string via toString()
  */
 function warning(message) {
-    command_1.issue('warning', message);
+    command_1.issue('warning', message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
 /**
@@ -1013,8 +1072,9 @@ exports.group = group;
  * Saves state for current action, the state can only be retrieved by this action's post job execution.
  *
  * @param     name     name of the state to store
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saveState(name, value) {
     command_1.issueCommand('save-state', { name }, value);
 }
@@ -1039,6 +1099,7 @@ exports.getState = getState;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDeepKeys = exports.toJSON = void 0;
 const nonJsonTypes = ["function", "symbol", "undefined"];
 const protectedProps = ["constructor", "prototype", "__proto__"];
 const objectPrototype = Object.getPrototypeOf({});
@@ -1049,7 +1110,6 @@ const objectPrototype = Object.getPrototypeOf({});
 function toJSON() {
     // HACK: We have to cast the objects to `any` so we can use symbol indexers.
     // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
     let pojo = {};
     let error = this;
     for (let key of getDeepKeys(error)) {
@@ -1061,7 +1121,6 @@ function toJSON() {
             }
         }
     }
-    // tslint:enable: no-any no-unsafe-any
     return pojo;
 }
 exports.toJSON = toJSON;
@@ -1097,13 +1156,14 @@ exports.getDeepKeys = getDeepKeys;
 
 const path = __webpack_require__(622);
 const which = __webpack_require__(814);
-const pathKey = __webpack_require__(39)();
+const getPathKey = __webpack_require__(39);
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
+    const env = parsed.options.env || process.env;
     const cwd = process.cwd();
     const hasCustomCwd = parsed.options.cwd != null;
     // Worker threads do not have process.chdir()
-    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined;
+    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
 
     // If a custom `cwd` was specified, we need to change the process cwd
     // because `which` will do stat calls but does not support a custom cwd
@@ -1119,7 +1179,7 @@ function resolveCommandAttempt(parsed, withoutPathExt) {
 
     try {
         resolved = which.sync(parsed.command, {
-            path: (parsed.options.env || process.env)[pathKey],
+            path: env[getPathKey({ env })],
             pathExt: withoutPathExt ? path.delimiter : undefined,
         });
     } catch (e) {
@@ -1154,6 +1214,7 @@ module.exports = resolveCommand;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Ono = void 0;
 const extend_error_1 = __webpack_require__(326);
 const normalize_1 = __webpack_require__(673);
 const to_json_1 = __webpack_require__(483);
@@ -1162,7 +1223,7 @@ exports.Ono = constructor;
 /**
  * Creates an `Ono` instance for a specifc error type.
  */
-// tslint:disable-next-line: variable-name
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function Ono(ErrorConstructor, options) {
     options = normalize_1.normalizeOptions(options);
     function ono(...args) {
@@ -1214,6 +1275,7 @@ module.exports = require("semver");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.setNpmConfig = void 0;
 const ezSpawn = __webpack_require__(733);
 const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
@@ -1253,12 +1315,12 @@ function updateConfig(config, { registry, debug }) {
  */
 async function getNpmConfigPath({ debug }) {
     try {
-        debug(`Running command: npm config get userconfig`);
+        debug("Running command: npm config get userconfig");
         let process = await ezSpawn.async("npm", "config", "get", "userconfig");
         return process.stdout.trim();
     }
     catch (error) {
-        throw ono_1.ono(error, `Unable to determine the NPM config file path.`);
+        throw ono_1.ono(error, "Unable to determine the NPM config file path.");
     }
 }
 /**
@@ -1273,7 +1335,7 @@ async function readNpmConfig(configPath, { debug }) {
     }
     catch (error) {
         if (error.code === "ENOENT") {
-            debug(`OLD NPM CONFIG: <none>`);
+            debug("OLD NPM CONFIG: <none>");
             return "";
         }
         throw ono_1.ono(error, `Unable to read the NPM config file: ${configPath}`);
@@ -1809,6 +1871,7 @@ module.exports = require("util");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizeArgs = exports.normalizeOptions = void 0;
 const isomorphic_node_1 = __webpack_require__(757);
 /**
  * Normalizes Ono options, accounting for defaults and optional options.
@@ -2001,6 +2064,7 @@ module.exports = require("fs");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizeOptions = void 0;
 const url_1 = __webpack_require__(835);
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
@@ -2028,6 +2092,7 @@ exports.normalizeOptions = normalizeOptions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ono = void 0;
 const constructor_1 = __webpack_require__(507);
 const singleton = ono;
 exports.ono = singleton;
@@ -2071,6 +2136,7 @@ function ono(...args) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addInspectMethod = exports.format = void 0;
 const util = __webpack_require__(669);
 const to_json_1 = __webpack_require__(483);
 // The `inspect()` method is actually a Symbol, not a string key.
@@ -2088,7 +2154,7 @@ exports.format = util.format;
  * @see https://nodejs.org/api/util.html#util_util_inspect_custom
  */
 function addInspectMethod(newError) {
-    // @ts-ignore
+    // @ts-expect-error - TypeScript doesn't support symbol indexers
     newError[inspectMethod] = inspect;
 }
 exports.addInspectMethod = addInspectMethod;
@@ -2100,7 +2166,6 @@ exports.addInspectMethod = addInspectMethod;
 function inspect() {
     // HACK: We have to cast the objects to `any` so we can use symbol indexers.
     // see https://github.com/Microsoft/TypeScript/issues/1863
-    // tslint:disable: no-any no-unsafe-any
     let pojo = {};
     let error = this;
     for (let key of to_json_1.getDeepKeys(error)) {
@@ -2109,8 +2174,8 @@ function inspect() {
     }
     // Don't include the `inspect()` method on the output object,
     // otherwise it will cause `util.inspect()` to go into an infinite loop
-    delete pojo[inspectMethod]; // tslint:disable-line: no-dynamic-delete
-    // tslint:enable: no-any no-unsafe-any
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete pojo[inspectMethod];
     return pojo;
 }
 //# sourceMappingURL=isomorphic.node.js.map
@@ -2123,6 +2188,7 @@ function inspect() {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.npmPublish = void 0;
 const semver = __webpack_require__(513);
 const normalize_options_1 = __webpack_require__(751);
 const npm_1 = __webpack_require__(62);
