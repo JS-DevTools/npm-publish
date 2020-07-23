@@ -10,6 +10,7 @@ export interface NormalizedOptions {
   registry: URL;
   package: string;
   checkVersion: boolean;
+  dryRun: boolean;
   quiet: boolean;
   debug: Debug;
 }
@@ -26,6 +27,7 @@ export function normalizeOptions(options: Options): NormalizedOptions {
     registry: registryURL || new URL("https://registry.npmjs.org/"),
     package: options.package || "package.json",
     checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
+    dryRun: options.dryRun || false,
     quiet: options.quiet || false,
     debug: options.debug || (() => undefined),
   };

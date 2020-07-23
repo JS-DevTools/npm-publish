@@ -266,4 +266,38 @@ describe("CLI - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should not publish the package if publish is called with --dry-run", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--dry-run"],
+      stdout: `my-lib 1.1.0${EOL}`,
+    });
+
+    let cli = exec.cli("--dry-run");
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 1.1.0");
+    expect(cli).stdout.to.include("📦 my-lib v1.1.0 successfully built but not published to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    npm.assert.ran(4);
+  });
 });

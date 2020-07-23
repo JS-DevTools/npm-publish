@@ -28,6 +28,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
         { name: "quiet", alias: "q", type: Boolean },
         { name: "version", alias: "v", type: Boolean },
         { name: "help", alias: "h", type: Boolean },
+        { name: "dry-run", type: Boolean, defaultOption: false }
       ],
       { argv }
     );
@@ -49,6 +50,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
         package: args.package as string,
         debug: args.debug ? console.debug : undefined,
         quiet: args.quiet as boolean,
+        dryRun: args["dry-run"] as boolean
       }
     };
 

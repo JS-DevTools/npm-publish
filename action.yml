@@ -29,6 +29,11 @@ inputs:
     required: false
     default: "true"
 
+  dry-run:
+    description: If true, run with the --dry-run flag
+    required: false
+    default: "false"
+
 outputs:
   type:
     description: The type of version change that occurred ("none", "major", "minor", "patch", etc.)

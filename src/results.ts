@@ -3,7 +3,7 @@ import { ReleaseType } from "semver";
 export { ReleaseType };
 
 /**
- * Results of the `publish
+ * Results of the publish
  */
 export interface Results {
   /**
@@ -25,4 +25,9 @@ export interface Results {
    * The version number that was previously published to NPM
    */
   oldVersion: string;
+
+  /**
+   * Whether this was a dry run (not published to NPM)
+   */
+  dryRun: boolean;
 }

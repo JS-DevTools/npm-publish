@@ -265,4 +265,49 @@ describe("GitHub Action - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should not publish a package if dryRun is true", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
+      { path: "home/.npmrc", contents: "This is my NPM config.\nThere are many like it,\nbut this one is mine." },
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--dry-run"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `my-lib 1.1.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        "INPUT_DRY-RUN": "true"
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("::set-output name=type::minor");
+    expect(cli).stdout.to.include("::set-output name=version::1.1.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("my-lib 1.1.0");
+    expect(cli).stdout.to.include("📦 my-lib v1.1.0 successfully built but not published to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    npm.assert.ran(4);
+  });
+
 });

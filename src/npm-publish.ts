@@ -28,6 +28,7 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
     type: diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
+    dryRun: options.dryRun
   };
 
   options.debug("OUTPUT:", results);

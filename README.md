@@ -78,6 +78,7 @@ You can set any or all of the following input parameters:
 |`registry`      |string  |no        |https://registry.npmjs.org/ |The NPM registry URL to use
 |`package`       |string  |no        |./package.json              |The path of your package.json file
 |`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|`dry-run` |boolean |no        |false                        |Run NPM publish with the `--dry-run` flag to prevent publication.
 
 
 
@@ -193,6 +194,8 @@ options:
   --version, -v       Print the version number
 
   --help, -h          Show help
+
+  --dry-run           Pass the `--dry-run` flag to NPM
 
 package_path          The absolute or relative path of the NPM package to publish.
                       Can be a directory path, or the path of a package.json file.
