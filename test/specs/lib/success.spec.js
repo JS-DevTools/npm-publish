@@ -51,7 +51,8 @@ describe("NPM package - success tests", () => {
       type: "major",
       package: "my-lib",
       version: "2.0.0",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -83,7 +84,8 @@ describe("NPM package - success tests", () => {
       type: "none",
       package: "my-lib",
       version: "1.0.0",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -129,7 +131,8 @@ describe("NPM package - success tests", () => {
       type: "prerelease",
       package: "my-lib",
       version: "1.0.0-beta.1",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -172,7 +175,8 @@ describe("NPM package - success tests", () => {
       type: "minor",
       package: "my-lib",
       version: "1.1.0",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -231,7 +235,8 @@ describe("NPM package - success tests", () => {
       type: "patch",
       package: "my-lib",
       version: "1.0.1",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -284,7 +289,8 @@ describe("NPM package - success tests", () => {
       type: "prerelease",
       package: "my-lib",
       version: "1.0.0-beta",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: false
     });
 
     files.assert.contents("home/.npmrc",
@@ -295,7 +301,7 @@ describe("NPM package - success tests", () => {
     npm.assert.ran(4);
   });
 
-  it("should return a type of dry-run when called with --dry-run", async () => {
+  it("results.dryRun should be true when called with --dry-run", async () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
     ]);
@@ -327,10 +333,11 @@ describe("NPM package - success tests", () => {
     });
 
     expect(results).to.deep.equal({
-      type: "dry-run",
+      type: "minor",
       package: "my-lib",
       version: "1.1.0",
-      oldVersion: "1.0.0"
+      oldVersion: "1.0.0",
+      dryRun: true
     });
 
     files.assert.contents("home/.npmrc",

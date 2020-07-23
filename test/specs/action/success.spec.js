@@ -300,7 +300,7 @@ describe("GitHub Action - success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("::set-output name=type::dry-run");
+    expect(cli).stdout.to.include("::set-output name=type::minor");
     expect(cli).stdout.to.include("::set-output name=version::1.1.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).stdout.to.include("my-lib 1.1.0");
