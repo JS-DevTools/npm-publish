@@ -28,7 +28,7 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          - 10
+          # - 10 - The library supports Node 10, but the tests don't
           - 12
           - 14
 
