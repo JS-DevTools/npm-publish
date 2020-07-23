@@ -78,7 +78,7 @@ You can set any or all of the following input parameters:
 |`registry`      |string  |no        |https://registry.npmjs.org/ |The NPM registry URL to use
 |`package`       |string  |no        |./package.json              |The path of your package.json file
 |`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
-|`dry-run` |boolean |no        |false                        |Run NPM publish with the `--dry-run` flag to prevent publication.
+|`dry-run`       |boolean |no        |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
 
 
 
@@ -104,6 +104,7 @@ steps:
 |`type`        |string  |The type of version change that occurred ("major", "minor", "patch", etc.). If there was no version change, then type will be "none".
 |`version`     |string  |The version that was published
 |`old-version` |string  |The version number that was previously published to NPM
+|`dry-run`     |boolean |Indicates whether NPM was run in "dry run" mode
 
 
 
@@ -139,6 +140,7 @@ As shown in the example above, you can pass options to the `npmPublish()` functi
 |`registry`      |string   |https://registry.npmjs.org/ |The NPM registry URL to use
 |`package`       |string   |./package.json              |The path of your package.json file
 |`checkVersion`  |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|`dryRun`        |boolean  |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
 |`quiet`         |boolean  |false                       |Suppress console output from NPM and npm-publish
 |`debug`         |function |no-op                       |A function to log debug messages. You can set this to a custom function to receive debug messages, or just set it to `console.debug` to print debug messages to the console.
 
@@ -151,6 +153,7 @@ The `npmPublish()` function asynchronously returns an object with the following 
 |`package`       |string   |The name of the NPM package that was published
 |`version`       |string   |The version number that was published
 |`oldVersion`    |string   |The version number that was previously published to NPM
+|`dryRun`        |boolean  |Indicates whether NPM was run in "dry run" mode
 
 
 
@@ -195,7 +198,8 @@ options:
 
   --help, -h          Show help
 
-  --dry-run           Pass the `--dry-run` flag to NPM
+  --dry-run           Don't actually publish to NPM, but report what would have
+                      been published
 
 package_path          The absolute or relative path of the NPM package to publish.
                       Can be a directory path, or the path of a package.json file.
