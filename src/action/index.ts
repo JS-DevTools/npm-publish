@@ -39,6 +39,7 @@ async function main(): Promise<void> {
     setOutput("type", results.type);
     setOutput("version", results.version);
     setOutput("old-version", results.oldVersion);
+    setOutput("dry-run", results.dryRun);
   }
   catch (error) {
     errorHandler(error as Error);
