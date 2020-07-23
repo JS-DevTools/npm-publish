@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import { EOL } from "os";
 import { dirname } from "path";
 import { NormalizedOptions } from "./normalize-options";
+import { getNpmEnvironment } from "./npm-env";
 
 /**
  * Sets/updates the NPM config based on the options.
@@ -49,11 +50,14 @@ function updateConfig(config: string, { registry, debug }: NormalizedOptions): s
 /**
  * Gets the path of the NPM config file.
  */
-async function getNpmConfigPath({ debug }: NormalizedOptions): Promise<string> {
+async function getNpmConfigPath(options: NormalizedOptions): Promise<string> {
   try {
-    debug("Running command: npm config get userconfig");
+    // Get the environment variables to pass to NPM
+    let env = getNpmEnvironment(options);
 
-    let process = await ezSpawn.async("npm", "config", "get", "userconfig");
+    options.debug("Running command: npm config get userconfig");
+
+    let process = await ezSpawn.async("npm", "config", "get", "userconfig", { env });
     return process.stdout.trim();
   }
   catch (error) {

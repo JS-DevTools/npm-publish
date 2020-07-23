@@ -17,6 +17,7 @@ module.exports = {
       ...options,
       env: {
         ...process.env,
+        NODE_OPTIONS: "",
         INPUT_REGISTRY: "https://registry.npmjs.org/",
         INPUT_PACKAGE: "package.json",
         "INPUT_CHECK-VERSION": "true",

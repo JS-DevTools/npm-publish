@@ -5,6 +5,7 @@ import { dirname, resolve } from "path";
 import { SemVer } from "semver";
 import { NormalizedOptions } from "./normalize-options";
 import { setNpmConfig } from "./npm-config";
+import { getNpmEnvironment } from "./npm-env";
 import { Manifest } from "./read-manifest";
 
 /**
@@ -70,17 +71,3 @@ export const npm = {
     }
   },
 };
-
-
-/**
- * Returns the environment variables that should be passed to NPM, based on the given options.
- */
-function getNpmEnvironment(options: NormalizedOptions): NodeJS.ProcessEnv | undefined {
-  // Determine if we need to set the NPM token
-  let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
-
-  if (needsToken) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    return { ...process.env, INPUT_TOKEN: options.token };
-  }
-}
