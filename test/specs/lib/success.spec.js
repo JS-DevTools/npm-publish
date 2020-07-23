@@ -52,7 +52,7 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "2.0.0",
       oldVersion: "1.0.0",
-      dryRun: false
+      dryRun: false,
     });
 
     files.assert.contents("home/.npmrc",
@@ -85,7 +85,7 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0",
       oldVersion: "1.0.0",
-      dryRun: false
+      dryRun: false,
     });
 
     files.assert.contents("home/.npmrc",
@@ -132,7 +132,7 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0-beta.1",
       oldVersion: "1.0.0",
-      dryRun: false
+      dryRun: false,
     });
 
     files.assert.contents("home/.npmrc",
@@ -290,7 +290,7 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0-beta",
       oldVersion: "1.0.0",
-      dryRun: false
+      dryRun: false,
     });
 
     files.assert.contents("home/.npmrc",

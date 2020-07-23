@@ -268,7 +268,6 @@ describe("GitHub Action - success tests", () => {
   it("should not publish a package if dryRun is true", () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
-      { path: "home/.npmrc", contents: "This is my NPM config.\nThere are many like it,\nbut this one is mine." },
     ]);
 
     npm.mock({

@@ -28,7 +28,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
         { name: "quiet", alias: "q", type: Boolean },
         { name: "version", alias: "v", type: Boolean },
         { name: "help", alias: "h", type: Boolean },
-        { name: "dry-run", type: Boolean, defaultOption: false }
+        { name: "dry-run", type: Boolean }
       ],
       { argv }
     );

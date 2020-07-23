@@ -140,11 +140,4 @@ describe("CLI - argument tests", () => {
     });
   });
 
-
-  describe("npm-publish --dry-run", () => {
-    it("should call npm publish with the --dry-run flag", () => {
-      let cli = exec.cli("--dry-run");
-      expect(cli.args).to.include("--dry-run");
-    });
-  });
 });
