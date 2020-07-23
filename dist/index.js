@@ -143,12 +143,16 @@ async function main() {
             registry: core_1.getInput("registry", { required: true }),
             package: core_1.getInput("package", { required: true }),
             checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
+            dryRun: core_1.getInput("dry-run").toLowerCase() === "true",
             debug: debugHandler,
         };
-        // Puglish to NPM
+        // Publish to NPM
         let results = await npm_publish_1.npmPublish(options);
         if (results.type === "none") {
             console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
+        }
+        else if (results.dryRun) {
+            console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to NPM (dry run)`);
         }
         else {
             console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
@@ -157,6 +161,7 @@ async function main() {
         core_1.setOutput("type", results.type);
         core_1.setOutput("version", results.version);
         core_1.setOutput("old-version", results.oldVersion);
+        core_1.setOutput("dry-run", results.dryRun);
     }
     catch (error) {
         errorHandler(error);
@@ -197,6 +202,7 @@ const ono_1 = __webpack_require__(271);
 const path_1 = __webpack_require__(622);
 const semver_1 = __webpack_require__(513);
 const npm_config_1 = __webpack_require__(566);
+const npm_env_1 = __webpack_require__(850);
 /**
  * Runs NPM commands.
  * @internal
@@ -210,9 +216,9 @@ exports.npm = {
         await npm_config_1.setNpmConfig(options);
         try {
             // Get the environment variables to pass to NPM
-            let env = getNpmEnvironment(options);
+            let env = npm_env_1.getNpmEnvironment(options);
             options.debug(`Running command: npm view ${name} version`);
-            // Run NPM to get the latest published versiono of the package
+            // Run NPM to get the latest published version of the package
             let { stdout } = await ezSpawn.async("npm", ["view", name, "version"], { env });
             let version = stdout.trim();
             // Parse/validate the version number
@@ -236,27 +242,17 @@ exports.npm = {
             // Determine whether to suppress NPM's output
             let stdio = options.quiet ? "pipe" : "inherit";
             // Get the environment variables to pass to NPM
-            let env = getNpmEnvironment(options);
+            let env = npm_env_1.getNpmEnvironment(options);
             options.debug("Running command: npm publish", { stdio, cwd, env });
+            let command = options.dryRun ? ["publish", "--dry-run"] : ["publish"];
             // Run NPM to publish the package
-            await ezSpawn.async("npm", ["publish"], { cwd, stdio, env });
+            await ezSpawn.async("npm", command, { cwd, stdio, env });
         }
         catch (error) {
             throw ono_1.ono(error, `Unable to publish ${name} v${version} to NPM.`);
         }
     },
 };
-/**
- * Returns the environment variables that should be passed to NPM, based on the given options.
- */
-function getNpmEnvironment(options) {
-    // Determine if we need to set the NPM token
-    let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
-    if (needsToken) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        return { ...process.env, INPUT_TOKEN: options.token };
-    }
-}
 
 
 /***/ }),
@@ -1281,6 +1277,7 @@ const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
 const os_1 = __webpack_require__(87);
 const path_1 = __webpack_require__(622);
+const npm_env_1 = __webpack_require__(850);
 /**
  * Sets/updates the NPM config based on the options.
  * @internal
@@ -1313,10 +1310,12 @@ function updateConfig(config, { registry, debug }) {
 /**
  * Gets the path of the NPM config file.
  */
-async function getNpmConfigPath({ debug }) {
+async function getNpmConfigPath(options) {
     try {
-        debug("Running command: npm config get userconfig");
-        let process = await ezSpawn.async("npm", "config", "get", "userconfig");
+        // Get the environment variables to pass to NPM
+        let env = npm_env_1.getNpmEnvironment(options);
+        options.debug("Running command: npm config get userconfig");
+        let process = await ezSpawn.async("npm", "config", "get", "userconfig", { env });
         return process.stdout.trim();
     }
     catch (error) {
@@ -2077,6 +2076,7 @@ function normalizeOptions(options) {
         registry: registryURL || new url_1.URL("https://registry.npmjs.org/"),
         package: options.package || "package.json",
         checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
+        dryRun: options.dryRun || false,
         quiet: options.quiet || false,
         debug: options.debug || (() => undefined),
     };
@@ -2212,6 +2212,7 @@ async function npmPublish(opts = {}) {
         type: diff || "none",
         version: manifest.version.raw,
         oldVersion: publishedVersion.raw,
+        dryRun: options.dryRun
     };
     options.debug("OUTPUT:", results);
     return results;
@@ -2444,6 +2445,37 @@ function sync (path, options) {
 /***/ (function(module) {
 
 module.exports = require("url");
+
+/***/ }),
+
+/***/ 850:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getNpmEnvironment = void 0;
+/**
+ * Returns the environment variables that should be passed to NPM, based on the given options.
+ */
+function getNpmEnvironment(options) {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    let env = {
+        // Copy all the host's environment variables
+        ...process.env,
+        // Don't pass Node.js runtime variables to NPM
+        NODE_ENV: "",
+        NODE_OPTIONS: "",
+    };
+    // Determine if we need to set the NPM token
+    let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+    if (needsToken) {
+        env.INPUT_TOKEN = options.token;
+    }
+    return env;
+}
+exports.getNpmEnvironment = getNpmEnvironment;
+
 
 /***/ }),
 
