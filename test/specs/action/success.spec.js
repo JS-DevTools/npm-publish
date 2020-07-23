@@ -304,7 +304,7 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=version::1.1.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
     expect(cli).stdout.to.include("my-lib 1.1.0");
-    expect(cli).stdout.to.include("📦 my-lib v1.1.0 successfully built but not published to NPM");
+    expect(cli).stdout.to.include("📦 my-lib v1.1.0 was NOT actually published to NPM (dry run)");
     expect(cli).to.have.exitCode(0);
 
     npm.assert.ran(4);
