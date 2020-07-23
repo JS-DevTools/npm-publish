@@ -3,13 +3,13 @@ import { ReleaseType } from "semver";
 export { ReleaseType };
 
 /**
- * Results of the `publish
+ * Results of the publish
  */
 export interface Results {
   /**
    * The type of version change that occurred
    */
-  type: ReleaseType | "none" | "dry-run";
+  type: ReleaseType | "none";
 
   /**
    * The name of the NPM package that was published
@@ -25,4 +25,9 @@ export interface Results {
    * The version number that was previously published to NPM
    */
   oldVersion: string;
+
+  /**
+   * Whether this was a dry run (not published to NPM)
+   */
+  dryRun: boolean;
 }

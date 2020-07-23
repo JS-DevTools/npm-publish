@@ -28,7 +28,7 @@ async function main(): Promise<void> {
     if (results.type === "none") {
       console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
     }
-    else if (results.type === "dry-run") {
+    else if (results.dryRun) {
       console.log(`\n📦 ${results.package} v${results.version} successfully built but not published to NPM`);
     }
     else {

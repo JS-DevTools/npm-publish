@@ -25,9 +25,10 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
 
   let results: Results = {
     package: manifest.name,
-    type: options.dryRun ? "dry-run" : (diff || "none"),
+    type: diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
+    dryRun: options.dryRun
   };
 
   options.debug("OUTPUT:", results);
