@@ -31,7 +31,7 @@
         "kind": "test",
         "isDefault": true
       },
-      "problemMatcher": "$tslint5"
+      "problemMatcher": "$eslint-stylish"
     },
   ]
 }
