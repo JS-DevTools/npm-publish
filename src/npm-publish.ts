@@ -13,15 +13,22 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
 
   // Get the old and new version numbers
   let manifest = await readManifest(options.package, options.debug);
-  let publishedVersion = await npm.getLatestVersion(manifest.name, options);
-
-  // Determine if/how the version has changed
-  let diff = semver.diff(manifest.version, publishedVersion);
-
-  if (diff || !options.checkVersion) {
+  
+  //If checkVersion is false then publish.
+  if (!options.checkVersion) {
     // Publish the new version to NPM
     await npm.publish(manifest, options);
-  }
+  }else {
+    let publishedVersion = await npm.getLatestVersion(manifest.name, options);
+
+    // Determine if/how the version has changed
+    let diff = semver.diff(manifest.version, publishedVersion);
+
+    if (diff) {
+      // Publish the new version to NPM
+      await npm.publish(manifest, options);
+    }
+  }    
 
   let results: Results = {
     package: manifest.name,
