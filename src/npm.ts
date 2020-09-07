@@ -27,13 +27,20 @@ export const npm = {
       options.debug(`Running command: npm view ${name} version`);
 
       // Run NPM to get the latest published version of the package
-      let { stdout } = await ezSpawn.async("npm", ["view", name, "version"], { env });
+      let { stdout, stderr } = await ezSpawn.async("npm", ["view", name, "version"], { env });
+
+      // If the package was not previously published, return version 0.0.0.
+      if (stderr && stderr.indexOf("E404") !== -1) {
+        options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
+        return new SemVer("0.0.0");
+      }
+
       let version = stdout.trim();
 
       // Parse/validate the version number
       let semver = new SemVer(version);
 
-      options.debug(`The local version of ${name} is at v${semver}`);
+      options.debug(`The latest version of ${name} is at v${semver}`);
       return semver;
     }
     catch (error) {
