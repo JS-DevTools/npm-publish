@@ -13,12 +13,9 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
 
   // Get the old and new version numbers
   let manifest = await readManifest(options.package, options.debug);
-  
-  //If checkVersion is false then publish.
-  if (!options.checkVersion) {
-    // Publish the new version to NPM
-    await npm.publish(manifest, options);
-  }else {
+
+  // If checkVersion is false then publish.
+  if (options.checkVersion) {
     let publishedVersion = await npm.getLatestVersion(manifest.name, options);
 
     // Determine if/how the version has changed
@@ -28,13 +25,25 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
       // Publish the new version to NPM
       await npm.publish(manifest, options);
     }
-  }    
 
+    let results: Results = {
+      package: manifest.name,
+      type: diff || "none",
+      version: manifest.version.raw,
+      oldVersion: publishedVersion.raw,
+      dryRun: options.dryRun
+    };
+
+    options.debug("OUTPUT:", results);
+    return results;
+  }
+
+  await npm.publish(manifest, options);
   let results: Results = {
     package: manifest.name,
-    type: diff || "none",
+    type: "none",
     version: manifest.version.raw,
-    oldVersion: publishedVersion.raw,
+    oldVersion: "",
     dryRun: options.dryRun
   };
 
