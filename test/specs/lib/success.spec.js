@@ -63,6 +63,50 @@ describe("NPM package - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should publish a new version to NPM if no package exists", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `${EOL}`,
+      stderr: `npm ERR! code E404${EOL}`
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      stdout: `my-lib 2.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "my-lib",
+      version: "2.0.0",
+      oldVersion: "0.0.0",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
   it("should not publish a new version to NPM if the version number hasn't changed", async () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
