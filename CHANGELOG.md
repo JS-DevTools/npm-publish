@@ -5,6 +5,15 @@ NPM Publish adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+[v1.3.0](https://github.com/JS-DevTools/npm-publish/tree/v1.3.0) (2020-10-01)
+----------------------------------------------------------------------------------------------------
+
+- NPM-Publish can now successfully publish a brand-new package to NPM. Previously it failed because it couldn't determine the previous package version. ([PR #12](https://github.com/JS-DevTools/npm-publish/pull/12) from [@ZitRos](https://github.com/ZitRos))
+
+[Full Changelog](https://github.com/JS-DevTools/npm-publish/compare/v1.2.0...v1.3.0)
+
+
+
 [v1.2.0](https://github.com/JS-DevTools/npm-publish/tree/v1.2.0) (2020-07-23)
 ----------------------------------------------------------------------------------------------------
 
