@@ -1,5 +1,5 @@
 import { URL } from "url";
-import { Debug, Options } from "./options";
+import { Access, Debug, Options } from "./options";
 
 /**
  * Normalized and sanitized options
@@ -9,8 +9,10 @@ export interface NormalizedOptions {
   token: string;
   registry: URL;
   package: string;
-  checkVersion: boolean;
+  tag: string;
+  access?: Access;
   dryRun: boolean;
+  checkVersion: boolean;
   quiet: boolean;
   debug: Debug;
 }
@@ -26,8 +28,10 @@ export function normalizeOptions(options: Options): NormalizedOptions {
     token: options.token || "",
     registry: registryURL || new URL("https://registry.npmjs.org/"),
     package: options.package || "package.json",
-    checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
+    tag: options.tag || "latest",
+    access: options.access,
     dryRun: options.dryRun || false,
+    checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
     quiet: options.quiet || false,
     debug: options.debug || (() => undefined),
   };

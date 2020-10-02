@@ -21,16 +21,26 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
+      let command = ["npm", "view"];
+
+      if (options.tag === "latest") {
+        command.push(name);
+      }
+      else {
+        command.push(`${name}@${options.tag}`);
+      }
+
+      command.push("version");
+
       // Get the environment variables to pass to NPM
       let env = getNpmEnvironment(options);
 
-      options.debug(`Running command: npm view ${name} version`);
-
       // Run NPM to get the latest published version of the package
-      let { stdout, stderr } = await ezSpawn.async("npm", ["view", name, "version"], { env });
+      options.debug(`Running command: npm view ${name} version`, { command, env });
+      let { stdout, stderr } = await ezSpawn.async(command, { env });
 
       // If the package was not previously published, return version 0.0.0.
-      if (stderr && stderr.indexOf("E404") !== -1) {
+      if (stderr && stderr.includes("E404")) {
         options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
         return new SemVer("0.0.0");
       }
@@ -57,6 +67,20 @@ export const npm = {
     await setNpmConfig(options);
 
     try {
+      let command = ["npm", "publish"];
+
+      if (options.tag !== "latest") {
+        command.push("--tag", options.tag);
+      }
+
+      if (options.access) {
+        command.push("--access", options.access);
+      }
+
+      if (options.dryRun) {
+        command.push("--dry-run");
+      }
+
       // Run "npm publish" in the package.json directory
       let cwd = resolve(dirname(options.package));
 
@@ -66,12 +90,9 @@ export const npm = {
       // Get the environment variables to pass to NPM
       let env = getNpmEnvironment(options);
 
-      options.debug("Running command: npm publish", { stdio, cwd, env });
-
-      let command = options.dryRun ? ["publish", "--dry-run"] : ["publish"];
-
       // Run NPM to publish the package
-      await ezSpawn.async("npm", command, { cwd, stdio, env });
+      options.debug("Running command: npm publish", { command, stdio, cwd, env });
+      await ezSpawn.async(command, { cwd, stdio, env });
     }
     catch (error) {
       throw ono(error, `Unable to publish ${name} v${version} to NPM.`);

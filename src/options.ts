@@ -24,12 +24,21 @@ export interface Options {
   package?: string;
 
   /**
-   * Only publish the package if the version number in package.json
-   * differs from the latest on NPM.
+   * The tag to publish to. This allows people to install the package
+   * using "npm install <package-name>@<tag>".
    *
-   * Defaults to `true`
+   * Defaults to "latest"
    */
-  checkVersion?: boolean;
+  tag?: string;
+
+  /**
+   * Determines whether the published package should be publicly visible,
+   * or restricted to members of your NPM organization. This only applies
+   * to scoped packages.
+   *
+   * Defaults to "restricted" for scoped packages and "public" for non-scoped packages.
+   */
+  access?: Access;
 
   /**
    * If true, run npm publish with the --dry-run flag
@@ -39,6 +48,14 @@ export interface Options {
    * Defaults to `false`
    */
   dryRun?: boolean;
+
+  /**
+   * Only publish the package if the version number in package.json
+   * differs from the latest on NPM.
+   *
+   * Defaults to `true`
+   */
+  checkVersion?: boolean;
 
   /**
    * Suppress console output from NPM and npm-publish.
@@ -54,6 +71,11 @@ export interface Options {
    */
   debug?: Debug;
 }
+
+/**
+ * The possible access levels for an NPM package
+ */
+export type Access = "public" | "restricted";
 
 /**
  * A function that receives debug messages

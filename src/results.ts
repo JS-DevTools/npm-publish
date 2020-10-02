@@ -1,4 +1,5 @@
 import { ReleaseType } from "semver";
+import { Access } from "./options";
 
 export { ReleaseType };
 
@@ -25,6 +26,17 @@ export interface Results {
    * The version number that was previously published to NPM
    */
   oldVersion: string;
+
+  /**
+   * The tag that the package was published to.
+   */
+  tag: string;
+
+  /**
+   * Indicates whether the published package is publicly visible
+   * or restricted to members of your NPM organization.
+   */
+  access: Access;
 
   /**
    * Whether this was a dry run (not published to NPM)

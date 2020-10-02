@@ -28,6 +28,8 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
     type: diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
+    tag: options.tag,
+    access: options.access || (manifest.name.startsWith("@") ? "restricted" : "public"),
     dryRun: options.dryRun
   };
 
