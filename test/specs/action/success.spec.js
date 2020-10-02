@@ -48,6 +48,60 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::2.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a new version to NPM if no package exists", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `${EOL}`,
+      stderr: `npm ERR! code E404${EOL}`
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      stdout: `my-lib 1.0.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 1.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::0.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -84,6 +138,9 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::none");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -133,6 +190,9 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::minor");
     expect(cli).stdout.to.include("::set-output name=version::1.1.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -198,6 +258,9 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::patch");
     expect(cli).stdout.to.include("::set-output name=version::1.0.1");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -255,6 +318,164 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::prerelease");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0-beta");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::2.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::restricted");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish to a specific tag", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@next", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "next"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        INPUT_TAG: "next",
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::2.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::next");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package with public access", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--access", "public"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        INPUT_ACCESS: "public"
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::2.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -302,6 +523,8 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=type::minor");
     expect(cli).stdout.to.include("::set-output name=version::1.1.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
     expect(cli).stdout.to.include("::set-output name=dry-run::true");
     expect(cli).stdout.to.include("my-lib 1.1.0");
     expect(cli).stdout.to.include("📦 my-lib v1.1.0 was NOT actually published to NPM (dry run)");

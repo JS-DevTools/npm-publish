@@ -52,6 +52,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "2.0.0",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false,
     });
 
@@ -65,7 +67,7 @@ describe("NPM package - success tests", () => {
 
   it("should publish a new version to NPM if no package exists", async () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
     ]);
 
     npm.mock({
@@ -86,7 +88,7 @@ describe("NPM package - success tests", () => {
 
     npm.mock({
       args: ["publish"],
-      stdout: `my-lib 2.0.0${EOL}`,
+      stdout: `my-lib 1.0.0${EOL}`,
     });
 
     let results = await npmPublish({ quiet: true });
@@ -94,8 +96,10 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "my-lib",
-      version: "2.0.0",
+      version: "1.0.0",
       oldVersion: "0.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false,
     });
 
@@ -129,6 +133,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false,
     });
 
@@ -176,6 +182,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0-beta.1",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false,
     });
 
@@ -220,6 +228,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.1.0",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false
     });
 
@@ -280,6 +290,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.1",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false
     });
 
@@ -334,6 +346,143 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.0.0-beta",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "@my-scope/my-lib",
+      version: "2.0.0",
+      oldVersion: "1.0.0",
+      tag: "latest",
+      access: "restricted",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish to a specific tag", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@next", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "next"],
+      stdout: `my-lib 2.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ tag: "next", quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "my-lib",
+      version: "2.0.0",
+      oldVersion: "1.0.0",
+      tag: "next",
+      access: "public",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package with public access", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--access", "public"],
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ access: "public", quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "@my-scope/my-lib",
+      version: "2.0.0",
+      oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: false,
     });
 
@@ -381,6 +530,8 @@ describe("NPM package - success tests", () => {
       package: "my-lib",
       version: "1.1.0",
       oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
       dryRun: true
     });
 

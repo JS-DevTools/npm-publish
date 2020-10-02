@@ -50,6 +50,47 @@ describe("CLI - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should publish a new version to NPM if no package exists", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `${EOL}`,
+      stderr: `npm ERR! code E404${EOL}`
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      stdout: `my-lib 1.0.0${EOL}`,
+    });
+
+    let cli = exec.cli();
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 1.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
   it("should not publish a new version to NPM if the version number hasn't changed", () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
@@ -256,6 +297,126 @@ describe("CLI - success tests", () => {
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0-beta");
     expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.0-beta to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.cli();
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish to a specific tag", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@next", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "next"],
+      stdout: `my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.cli("--tag", "next");
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a scoped package with public access", () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "@my-scope/my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--access", "public"],
+      stdout: `@my-scope/my-lib 2.0.0${EOL}`,
+    });
+
+    let cli = exec.cli("--access", "public");
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
