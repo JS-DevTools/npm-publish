@@ -5,6 +5,17 @@ NPM Publish adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+[v1.4.0](https://github.com/JS-DevTools/npm-publish/tree/v1.4.0) (2020-10-02)
+----------------------------------------------------------------------------------------------------
+
+- Added support NPM's `--tag` argument, which allows packages to be published to a named tag that can then be installed using `npm install <package-name>@<tag>`
+
+- Added support for NPM's `--access` argument, which controls whether scoped packages are publicly accessible, or restricted to members of your NPM organization
+
+[Full Changelog](https://github.com/JS-DevTools/npm-publish/compare/v1.3.0...v1.4.0)
+
+
+
 [v1.3.0](https://github.com/JS-DevTools/npm-publish/tree/v1.3.0) (2020-10-01)
 ----------------------------------------------------------------------------------------------------
 
