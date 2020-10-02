@@ -1,6 +1,6 @@
 import { debug, getInput, setFailed, setOutput } from "@actions/core";
 import { npmPublish } from "../npm-publish";
-import { Options } from "../options";
+import { Access, Options } from "../options";
 
 /**
  * The main entry point of the GitHub Action
@@ -18,6 +18,8 @@ async function main(): Promise<void> {
       registry: getInput("registry", { required: true }),
       package: getInput("package", { required: true }),
       checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
+      tag: getInput("tag"),
+      access: getInput("access") as Access,
       dryRun: getInput("dry-run").toLowerCase() === "true",
       debug: debugHandler,
     };
@@ -39,6 +41,8 @@ async function main(): Promise<void> {
     setOutput("type", results.type);
     setOutput("version", results.version);
     setOutput("old-version", results.oldVersion);
+    setOutput("tag", results.tag);
+    setOutput("access", results.access);
     setOutput("dry-run", results.dryRun);
   }
   catch (error) {

@@ -143,6 +143,8 @@ async function main() {
             registry: core_1.getInput("registry", { required: true }),
             package: core_1.getInput("package", { required: true }),
             checkVersion: core_1.getInput("check-version", { required: true }).toLowerCase() === "true",
+            tag: core_1.getInput("tag"),
+            access: core_1.getInput("access"),
             dryRun: core_1.getInput("dry-run").toLowerCase() === "true",
             debug: debugHandler,
         };
@@ -161,6 +163,8 @@ async function main() {
         core_1.setOutput("type", results.type);
         core_1.setOutput("version", results.version);
         core_1.setOutput("old-version", results.oldVersion);
+        core_1.setOutput("tag", results.tag);
+        core_1.setOutput("access", results.access);
         core_1.setOutput("dry-run", results.dryRun);
     }
     catch (error) {
@@ -215,13 +219,21 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
+            let command = ["npm", "view"];
+            if (options.tag === "latest") {
+                command.push(name);
+            }
+            else {
+                command.push(`${name}@${options.tag}`);
+            }
+            command.push("version");
             // Get the environment variables to pass to NPM
             let env = npm_env_1.getNpmEnvironment(options);
-            options.debug(`Running command: npm view ${name} version`);
             // Run NPM to get the latest published version of the package
-            let { stdout, stderr } = await ezSpawn.async("npm", ["view", name, "version"], { env });
+            options.debug(`Running command: npm view ${name} version`, { command, env });
+            let { stdout, stderr } = await ezSpawn.async(command, { env });
             // If the package was not previously published, return version 0.0.0.
-            if (stderr && stderr.indexOf("E404") !== -1) {
+            if (stderr && stderr.includes("E404")) {
                 options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
                 return new semver_1.SemVer("0.0.0");
             }
@@ -242,16 +254,25 @@ exports.npm = {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
         try {
+            let command = ["npm", "publish"];
+            if (options.tag !== "latest") {
+                command.push("--tag", options.tag);
+            }
+            if (options.access) {
+                command.push("--access", options.access);
+            }
+            if (options.dryRun) {
+                command.push("--dry-run");
+            }
             // Run "npm publish" in the package.json directory
             let cwd = path_1.resolve(path_1.dirname(options.package));
             // Determine whether to suppress NPM's output
             let stdio = options.quiet ? "pipe" : "inherit";
             // Get the environment variables to pass to NPM
             let env = npm_env_1.getNpmEnvironment(options);
-            options.debug("Running command: npm publish", { stdio, cwd, env });
-            let command = options.dryRun ? ["publish", "--dry-run"] : ["publish"];
             // Run NPM to publish the package
-            await ezSpawn.async("npm", command, { cwd, stdio, env });
+            options.debug("Running command: npm publish", { command, stdio, cwd, env });
+            await ezSpawn.async(command, { cwd, stdio, env });
         }
         catch (error) {
             throw ono_1.ono(error, `Unable to publish ${name} v${version} to NPM.`);
@@ -2145,8 +2166,10 @@ function normalizeOptions(options) {
         token: options.token || "",
         registry: registryURL || new url_1.URL("https://registry.npmjs.org/"),
         package: options.package || "package.json",
-        checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
+        tag: options.tag || "latest",
+        access: options.access,
         dryRun: options.dryRun || false,
+        checkVersion: options.checkVersion === undefined ? true : Boolean(options.checkVersion),
         quiet: options.quiet || false,
         debug: options.debug || (() => undefined),
     };
@@ -2282,6 +2305,8 @@ async function npmPublish(opts = {}) {
         type: diff || "none",
         version: manifest.version.raw,
         oldVersion: publishedVersion.raw,
+        tag: options.tag,
+        access: options.access || (manifest.name.startsWith("@") ? "restricted" : "public"),
         dryRun: options.dryRun
     };
     options.debug("OUTPUT:", results);

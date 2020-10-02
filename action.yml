@@ -24,15 +24,26 @@ inputs:
     required: false
     default: package.json
 
-  check-version:
-    description: Only publish if the version in package.json differs from the latest on NPM
+  tag:
+    description: The tag to publish to. This allows people to install the package using "npm install <package-name>@<tag>".
     required: false
-    default: "true"
+    default: "latest"
+
+  access:
+    description:
+      Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
+      This only applies to scoped packages.
+    required: false
 
   dry-run:
     description: If true, run with the --dry-run flag
     required: false
     default: "false"
+
+  check-version:
+    description: Only publish if the version in package.json differs from the latest on NPM
+    required: false
+    default: "true"
 
 outputs:
   type:
