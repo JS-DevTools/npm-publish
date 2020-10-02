@@ -1,5 +1,5 @@
 import * as commandLineArgs from "command-line-args";
-import { Options } from "../options";
+import { Access, Options } from "../options";
 import { ExitCode } from "./exit-code";
 import { usageText } from "./help";
 
@@ -24,11 +24,13 @@ export function parseArgs(argv: string[]): ParsedArgs {
         { name: "token", type: String },
         { name: "registry", type: String },
         { name: "package", type: String, defaultOption: true },
+        { name: "tag", type: String },
+        { name: "access", type: String },
+        { name: "dry-run", type: Boolean },
         { name: "debug", alias: "d", type: Boolean },
         { name: "quiet", alias: "q", type: Boolean },
         { name: "version", alias: "v", type: Boolean },
         { name: "help", alias: "h", type: Boolean },
-        { name: "dry-run", type: Boolean }
       ],
       { argv }
     );
@@ -48,9 +50,11 @@ export function parseArgs(argv: string[]): ParsedArgs {
         token: args.token as string,
         registry: args.registry as string,
         package: args.package as string,
+        tag: args.tag as string,
+        access: args.access as Access,
+        dryRun: args["dry-run"] as boolean,
         debug: args.debug ? console.debug : undefined,
         quiet: args.quiet as boolean,
-        dryRun: args["dry-run"] as boolean
       }
     };
 
