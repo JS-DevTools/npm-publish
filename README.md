@@ -77,8 +77,10 @@ You can set any or all of the following input parameters:
 |`token`         |string  |yes       |                            |The NPM auth token to use for publishing
 |`registry`      |string  |no        |https://registry.npmjs.org/ |The NPM registry URL to use
 |`package`       |string  |no        |./package.json              |The path of your package.json file
-|`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|`tag`           |string  |no        |"latest"                    |The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.
+|`access`        |string  |no        |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
 |`dry-run`       |boolean |no        |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
+|`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
 
 
 
@@ -104,6 +106,8 @@ steps:
 |`type`        |string  |The type of version change that occurred ("major", "minor", "patch", etc.). If there was no version change, then type will be "none".
 |`version`     |string  |The version that was published
 |`old-version` |string  |The version number that was previously published to NPM
+|`tag`         |string  |The tag that the package was published to.
+|`access`      |string  |Indicates whether the published package is publicly visible or restricted to members of your NPM organization.
 |`dry-run`     |boolean |Indicates whether NPM was run in "dry run" mode
 
 
@@ -139,8 +143,10 @@ As shown in the example above, you can pass options to the `npmPublish()` functi
 |`token`         |string   |NPM's default credentials   |The NPM auth token to use for publishing. If not set, then NPM will
 |`registry`      |string   |https://registry.npmjs.org/ |The NPM registry URL to use
 |`package`       |string   |./package.json              |The path of your package.json file
-|`checkVersion`  |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|`tag`           |string   |"latest"                    |The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.
+|`access`        |string   |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
 |`dryRun`        |boolean  |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
+|`checkVersion`  |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
 |`quiet`         |boolean  |false                       |Suppress console output from NPM and npm-publish
 |`debug`         |function |no-op                       |A function to log debug messages. You can set this to a custom function to receive debug messages, or just set it to `console.debug` to print debug messages to the console.
 
@@ -153,6 +159,8 @@ The `npmPublish()` function asynchronously returns an object with the following 
 |`package`       |string   |The name of the NPM package that was published
 |`version`       |string   |The version number that was published
 |`oldVersion`    |string   |The version number that was previously published to NPM
+|`tag`           |string   |The tag that the package was published to.
+|`access`        |string   |Indicates whether the published package is publicly visible or restricted to members of your NPM organization.
 |`dryRun`        |boolean  |Indicates whether NPM was run in "dry run" mode
 
 
@@ -190,6 +198,16 @@ options:
 
   --registry <url>    The NPM registry URL to use
 
+  --tag <tag>         The tag to publish to. Allows the package to be installed
+                      using "npm install <package-name>@<tag>"
+
+  --access <access>   "public" = The package will be publicly visible.
+                      "restricted" = The package will only be visible to members
+                      of your NPM organization.
+
+  --dry-run           Don't actually publish to NPM, but report what would have
+                      been published
+
   --debug, -d         Enable debug mode, with increased logging
 
   --quiet, -q         Suppress unnecessary output
@@ -197,9 +215,6 @@ options:
   --version, -v       Print the version number
 
   --help, -h          Show help
-
-  --dry-run           Don't actually publish to NPM, but report what would have
-                      been published
 
 package_path          The absolute or relative path of the NPM package to publish.
                       Can be a directory path, or the path of a package.json file.
