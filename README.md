@@ -95,7 +95,7 @@ steps:
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
-  - if: steps.publish.type != 'none'
+  - if: steps.publish.outputs.type != 'none'
     run: |
       echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 ```
