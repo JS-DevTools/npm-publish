@@ -218,33 +218,27 @@ exports.npm = {
     async getLatestVersion(name, options) {
         // Update the NPM config with the specified registry and token
         await npm_config_1.setNpmConfig(options);
+        let taggedName = options.tag === "latest" ? name : `${name}@${options.tag}`;
         try {
-            let command = ["npm", "view"];
-            if (options.tag === "latest") {
-                command.push(name);
-            }
-            else {
-                command.push(`${name}@${options.tag}`);
-            }
-            command.push("version");
+            let command = ["npm", "view", taggedName, "version"];
             // Get the environment variables to pass to NPM
             let env = npm_env_1.getNpmEnvironment(options);
             // Run NPM to get the latest published version of the package
-            options.debug(`Running command: npm view ${name} version`, { command, env });
+            options.debug(`Running command: ${command.join(" ")}`, { command, env });
             let { stdout, stderr } = await ezSpawn.async(command, { env });
+            let version = stdout.trim();
             // If the package was not previously published, return version 0.0.0.
-            if (stderr && stderr.includes("E404")) {
-                options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
+            if (stderr && stderr.includes("E404") || !version) {
+                options.debug(`The latest version of ${taggedName} is at v0.0.0, as it was never published.`);
                 return new semver_1.SemVer("0.0.0");
             }
-            let version = stdout.trim();
             // Parse/validate the version number
             let semver = new semver_1.SemVer(version);
-            options.debug(`The latest version of ${name} is at v${semver}`);
+            options.debug(`The latest version of ${taggedName} is at v${semver}`);
             return semver;
         }
         catch (error) {
-            throw ono_1.ono(error, `Unable to determine the current version of ${name} on NPM.`);
+            throw ono_1.ono(error, `Unable to determine the current version of ${taggedName} on NPM.`);
         }
     },
     /**
