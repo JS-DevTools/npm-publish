@@ -231,13 +231,24 @@ exports.npm = {
             let env = npm_env_1.getNpmEnvironment(options);
             // Run NPM to get the latest published version of the package
             options.debug(`Running command: npm view ${name} version`, { command, env });
-            let { stdout, stderr } = await ezSpawn.async(command, { env });
+            let result;
+            try {
+                result = await ezSpawn.async(command, { env });
+            }
+            catch (err) {
+                // In case ezSpawn.async throws, it still has stdout and stderr properties.
+                result = err;
+            }
             // If the package was not previously published, return version 0.0.0.
-            if (stderr && stderr.includes("E404")) {
+            if (result.stderr && result.stderr.includes("E404")) {
                 options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
                 return new semver_1.SemVer("0.0.0");
             }
-            let version = stdout.trim();
+            else if (result instanceof Error) {
+                // NPM failed for some reason
+                throw result;
+            }
+            let version = result.stdout.trim();
             // Parse/validate the version number
             let semver = new semver_1.SemVer(version);
             options.debug(`The latest version of ${name} is at v${semver}`);
