@@ -37,12 +37,25 @@ export const npm = {
 
       // Run NPM to get the latest published version of the package
       options.debug(`Running command: npm view ${name} version`, { command, env });
-      let { stdout, stderr } = await ezSpawn.async(command, { env });
+      let result: ezSpawn.Process<string>|Error;
+      try {
+        result = await ezSpawn.async(command, { env });
+      }
+      catch (e) {
+        result = e as Error;
+      }
+      // In case ezSpawn.async throws, it still has stdout and stderr properties.
+      const { stdout, stderr } = result as ezSpawn.Process<string>;
 
       // If the package was not previously published, return version 0.0.0.
       if (stderr && stderr.includes("E404")) {
         options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
         return new SemVer("0.0.0");
+      }
+      else if (stderr) {
+        // Rethrow an error. See https://github.com/JS-DevTools/npm-publish/issues/14 for more details.
+        const error = result as Error;
+        throw error;
       }
 
       let version = stdout.trim();

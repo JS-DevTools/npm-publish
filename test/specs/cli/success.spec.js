@@ -63,7 +63,8 @@ describe("CLI - success tests", () => {
     npm.mock({
       args: ["view", "my-lib", "version"],
       stdout: `${EOL}`,
-      stderr: `npm ERR! code E404${EOL}`
+      stderr: `npm ERR! code E404${EOL}`,
+      exitCode: 1,
     });
 
     npm.mock({
