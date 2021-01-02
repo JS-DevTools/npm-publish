@@ -1,6 +1,6 @@
 import { npmPublish } from "./npm-publish";
 
-// Exprot the external type definitions as named exports
+// Export the external type definitions as named exports
 export * from "./options";
 export * from "./results";
 
