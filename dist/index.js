@@ -239,8 +239,11 @@ exports.npm = {
                 // In case ezSpawn.async throws, it still has stdout and stderr properties.
                 result = err;
             }
+            let version = result.stdout.trim();
+            let error = result.stderr.trim();
+            let status = result.status || 0;
             // If the package was not previously published, return version 0.0.0.
-            if (result.stderr && result.stderr.includes("E404")) {
+            if ((status === 0 && !version) || error.includes("E404")) {
                 options.debug(`The latest version of ${name} is at v0.0.0, as it was never published.`);
                 return new semver_1.SemVer("0.0.0");
             }
@@ -248,7 +251,6 @@ exports.npm = {
                 // NPM failed for some reason
                 throw result;
             }
-            let version = result.stdout.trim();
             // Parse/validate the version number
             let semver = new semver_1.SemVer(version);
             options.debug(`The latest version of ${name} is at v${semver}`);

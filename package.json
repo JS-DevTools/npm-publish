@@ -1,7 +1,7 @@
 {
   "name": "@jsdevtools/npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "keywords": [
     "github-action",
     "npm",
