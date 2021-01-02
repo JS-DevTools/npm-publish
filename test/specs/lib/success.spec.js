@@ -78,7 +78,8 @@ describe("NPM package - success tests", () => {
     npm.mock({
       args: ["view", "my-lib", "version"],
       stdout: `${EOL}`,
-      stderr: `npm ERR! code E404${EOL}`
+      stderr: `npm ERR! code E404${EOL}`,
+      exitCode: 1,
     });
 
     npm.mock({
@@ -99,6 +100,51 @@ describe("NPM package - success tests", () => {
       version: "1.0.0",
       oldVersion: "0.0.0",
       tag: "latest",
+      access: "public",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a new version to NPM if the tag does not exist", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@my-tag", "version"],
+      stdout: `${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "my-tag"],
+      stdout: `my-lib 1.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ tag: "my-tag", quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "my-lib",
+      version: "1.0.0",
+      oldVersion: "0.0.0",
+      tag: "my-tag",
       access: "public",
       dryRun: false,
     });

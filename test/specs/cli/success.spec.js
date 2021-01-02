@@ -92,6 +92,46 @@ describe("CLI - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should publish a new version to NPM if the tag does not exist", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@my-tag", "version"],
+      stdout: `${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "my-tag"],
+      stdout: `my-lib 1.0.0${EOL}`,
+    });
+
+    let cli = exec.cli("--tag", "my-tag");
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 1.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
   it("should not publish a new version to NPM if the version number hasn't changed", () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},

@@ -74,7 +74,8 @@ describe("GitHub Action - success tests", () => {
     npm.mock({
       args: ["view", "my-lib", "version"],
       stdout: `${EOL}`,
-      stderr: `npm ERR! code E404${EOL}`
+      stderr: `npm ERR! code E404${EOL}`,
+      exitCode: 1,
     });
 
     npm.mock({
@@ -100,6 +101,57 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=version::1.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::0.0.0");
     expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a new version to NPM if the tag does not exist", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib@my-tag", "version"],
+      stdout: `${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "--tag", "my-tag"],
+      stdout: `my-lib 1.0.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        INPUT_TAG: "my-tag",
+      }
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 1.0.0");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::0.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::my-tag");
     expect(cli).stdout.to.include("::set-output name=access::public");
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
