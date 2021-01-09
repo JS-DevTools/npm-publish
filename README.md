@@ -72,15 +72,15 @@ Input Parameters
 --------------------------
 You can set any or all of the following input parameters:
 
-|Name            |Type    |Required? |Default                     |Description
-|----------------|--------|----------|----------------------------|------------------------------------
-|`token`         |string  |yes       |                            |The NPM auth token to use for publishing
-|`registry`      |string  |no        |https://registry.npmjs.org/ |The NPM registry URL to use
-|`package`       |string  |no        |./package.json              |The path of your package.json file
-|`tag`           |string  |no        |"latest"                    |The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.
-|`access`        |string  |no        |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
-|`dry-run`       |boolean |no        |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
-|`check-version` |boolean |no        |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
+|Name            |Type     |Default                     |Description
+|----------------|-------- |----------------------------|------------------------------------
+|`token`         |string   |**required**                |The NPM auth token to use for publishing
+|`registry`      |string   |https://registry.npmjs.org/ |The NPM registry URL to use
+|`package`       |string   |./package.json              |The path of your package.json file
+|`tag`           |string   |"latest"                    |The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.
+|`access`        |string   |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
+|`dry-run`       |boolean  |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
+|`check-version` |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
 
 
 
