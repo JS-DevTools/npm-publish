@@ -1,4 +1,6 @@
+import { canNpmPublish } from "can-npm-publish";
 import * as semver from "semver";
+
 import { normalizeOptions } from "./normalize-options";
 import { npm } from "./npm";
 import { Options } from "./options";
@@ -17,20 +19,30 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
 
   // Determine if/how the version has changed
   let diff = semver.diff(manifest.version, publishedVersion);
+  let canPublish;
+  try {
+    await canNpmPublish(options.package);
+    canPublish = true;
+  } catch (err) {
+    console.error(err);
+    canPublish = false;
+  }
 
-  if (diff || !options.checkVersion) {
+  if ((diff && canPublish) || !options.checkVersion) {
     // Publish the new version to NPM
     await npm.publish(manifest, options);
   }
 
   let results: Results = {
     package: manifest.name,
-    type: diff || "none",
+    type: diff && canPublish ? diff : "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
     tag: options.tag,
-    access: options.access || (manifest.name.startsWith("@") ? "restricted" : "public"),
-    dryRun: options.dryRun
+    access:
+      options.access ||
+      (manifest.name.startsWith("@") ? "restricted" : "public"),
+    dryRun: options.dryRun,
   };
 
   options.debug("OUTPUT:", results);

@@ -1,7 +1,7 @@
 {
   "name": "@jsdevtools/npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "keywords": [
     "github-action",
     "npm",
@@ -68,6 +68,7 @@
   "dependencies": {
     "@jsdevtools/ez-spawn": "^3.0.4",
     "@jsdevtools/ono": "^7.1.3",
+    "can-npm-publish": "^1.3.5",
     "command-line-args": "^5.1.1",
     "semver": "^7.3.4"
   }
