@@ -17,10 +17,12 @@ async function main(): Promise<void> {
       token: getInput("token", { required: true }),
       registry: getInput("registry", { required: true }),
       package: getInput("package", { required: true }),
-      checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
+      checkVersion:
+        getInput("check-version", { required: true }).toLowerCase() === "true",
       tag: getInput("tag"),
       access: getInput("access") as Access,
       dryRun: getInput("dry-run").toLowerCase() === "true",
+      greaterVersion: getInput("greater-version").toLowerCase() === "true",
       debug: debugHandler,
     };
 
@@ -28,13 +30,17 @@ async function main(): Promise<void> {
     let results = await npmPublish(options);
 
     if (results.type === "none") {
-      console.log(`\n📦 ${results.package} v${results.version} is already published to NPM`);
-    }
-    else if (results.dryRun) {
-      console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to NPM (dry run)`);
-    }
-    else {
-      console.log(`\n📦 Successfully published ${results.package} v${results.version} to NPM`);
+      console.log(
+        `\n📦 ${results.package} v${results.version} is already published to NPM`
+      );
+    } else if (results.dryRun) {
+      console.log(
+        `\n📦 ${results.package} v${results.version} was NOT actually published to NPM (dry run)`
+      );
+    } else {
+      console.log(
+        `\n📦 Successfully published ${results.package} v${results.version} to NPM`
+      );
     }
 
     // Set the GitHub Actions output variables
@@ -44,8 +50,7 @@ async function main(): Promise<void> {
     setOutput("tag", results.tag);
     setOutput("access", results.access);
     setOutput("dry-run", results.dryRun);
-  }
-  catch (error) {
+  } catch (error) {
     errorHandler(error as Error);
   }
 }

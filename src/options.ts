@@ -65,6 +65,14 @@ export interface Options {
   quiet?: boolean;
 
   /**
+   * Only publish the package if the version number in package.json
+   * is greater than the latest on NPM.
+   *
+   * Defaults to `false`
+   */
+  greaterVersion?: boolean;
+
+  /**
    * A function to call to log debug messages.
    *
    * Defaults to a no-op function
