@@ -123,6 +123,64 @@ describe("GitHub Action - success tests", () => {
     npm.assert.ran(4);
   });
 
+  it("should not publish a new version to NPM if the version is lower and greaterVersion flag is set", () => {
+    files.create([
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "0.1.0" },
+      },
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `my-lib 0.1.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+        "INPUT_GREATER-VERSION": "true",
+      },
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 0.1.0");
+    expect(cli).stdout.to.include(
+      "my-lib v0.1.0 is lower than the version published to NPM"
+    );
+    expect(cli).stdout.to.include("::set-output name=type::lower");
+    expect(cli).stdout.to.include("::set-output name=version::0.1.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents(
+      "home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+        `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
   it("should publish a new version to NPM if no package exists", async () => {
     files.create([
       {
