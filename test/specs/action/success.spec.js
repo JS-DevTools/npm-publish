@@ -9,10 +9,12 @@ const { EOL } = require("os");
 const { join } = require("path");
 
 describe("GitHub Action - success tests", () => {
-
   it("should publish a new version to NPM", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -39,12 +41,14 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published my-lib v2.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::2.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -53,9 +57,67 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+  it("should publish a new version to NPM if the version is lower", () => {
+    files.create([
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "0.1.0" },
+      },
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish"],
+      env: { INPUT_TOKEN: "my-secret-token" },
+      stdout: `my-lib 0.1.0${EOL}`,
+    });
+
+    let cli = exec.action({
+      env: {
+        INPUT_TOKEN: "my-secret-token",
+      },
+    });
+
+    expect(cli).to.have.stderr("");
+    expect(cli).stdout.to.include("my-lib 0.1.0");
+    expect(cli).stdout.to.include(
+      "Successfully published my-lib v0.1.0 to NPM"
+    );
+    expect(cli).stdout.to.include("::set-output name=type::major");
+    expect(cli).stdout.to.include("::set-output name=version::0.1.0");
+    expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
+    expect(cli).stdout.to.include("::set-output name=tag::latest");
+    expect(cli).stdout.to.include("::set-output name=access::public");
+    expect(cli).stdout.to.include("::set-output name=dry-run::false");
+    expect(cli).to.have.exitCode(0);
+
+    files.assert.contents(
+      "home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -63,7 +125,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish a new version to NPM if no package exists", async () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -91,12 +156,14 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published my-lib v1.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::0.0.0");
@@ -105,9 +172,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -115,7 +183,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish a new version to NPM if the tag does not exist", async () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -142,12 +213,14 @@ describe("GitHub Action - success tests", () => {
       env: {
         INPUT_TOKEN: "my-secret-token",
         INPUT_TAG: "my-tag",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published my-lib v1.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::0.0.0");
@@ -156,9 +229,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -166,7 +240,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should not publish a new version to NPM if the version number hasn't changed", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -182,11 +259,13 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("📦 my-lib v1.0.0 is already published to NPM");
+    expect(cli).stdout.to.include(
+      "📦 my-lib v1.0.0 is already published to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::none");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -195,9 +274,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(2);
@@ -205,8 +285,15 @@ describe("GitHub Action - success tests", () => {
 
   it("should append to an existing .npmrc file", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
-      { path: "home/.npmrc", contents: "This is my NPM config.\nThere are many like it,\nbut this one is mine." },
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.1.0" },
+      },
+      {
+        path: "home/.npmrc",
+        contents:
+          "This is my NPM config.\nThere are many like it,\nbut this one is mine.",
+      },
     ]);
 
     npm.mock({
@@ -233,12 +320,14 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.1.0");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.1.0 to NPM");
+    expect(cli).stdout.to.include(
+      "📦 Successfully published my-lib v1.1.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::minor");
     expect(cli).stdout.to.include("::set-output name=version::1.1.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -247,13 +336,14 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `This is my NPM config.${EOL}` +
-      `There are many like it,${EOL}` +
-      `but this one is mine.${EOL}` +
-      `${EOL}` +
-      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `There are many like it,${EOL}` +
+        `but this one is mine.${EOL}` +
+        `${EOL}` +
+        `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -261,7 +351,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should update an existing .npmrc file's settings", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.1" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.0.1" },
+      },
       {
         path: "home/.npmrc",
         contents:
@@ -273,7 +366,7 @@ describe("GitHub Action - success tests", () => {
           "registry=https://registry.npmjs.org/\n" +
           "\n" +
           "# Use some other package registry\n" +
-          "registry=https://registry.example.com/\n"
+          "registry=https://registry.example.com/\n",
       },
     ]);
 
@@ -301,12 +394,14 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.1");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.1 to NPM");
+    expect(cli).stdout.to.include(
+      "📦 Successfully published my-lib v1.0.1 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::patch");
     expect(cli).stdout.to.include("::set-output name=version::1.0.1");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -315,16 +410,17 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `# Use the GitHub package registry${EOL}` +
-      `${EOL}` +
-      `# Use the NPM registry with no auth${EOL}` +
-      `${EOL}` +
-      `# Use some other package registry${EOL}` +
-      `${EOL}` +
-      `${EOL}` +
-      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `${EOL}` +
+        `# Use the NPM registry with no auth${EOL}` +
+        `${EOL}` +
+        `# Use some other package registry${EOL}` +
+        `${EOL}` +
+        `${EOL}` +
+        `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -332,7 +428,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish a package that's not in the root of the workspace directory", () => {
     files.create([
-      { path: "workspace/subdir/my-lib/package.json", contents: { name: "my-lib", version: "1.0.0-beta" }},
+      {
+        path: "workspace/subdir/my-lib/package.json",
+        contents: { name: "my-lib", version: "1.0.0-beta" },
+      },
     ]);
 
     npm.mock({
@@ -361,12 +460,14 @@ describe("GitHub Action - success tests", () => {
       env: {
         INPUT_TOKEN: "my-secret-token",
         INPUT_PACKAGE: "subdir/my-lib/package.json",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0-beta");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.0-beta to NPM");
+    expect(cli).stdout.to.include(
+      "📦 Successfully published my-lib v1.0.0-beta to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::prerelease");
     expect(cli).stdout.to.include("::set-output name=version::1.0.0-beta");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -375,9 +476,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -385,7 +487,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish a scoped package", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "@my-scope/my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -412,12 +517,14 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published @my-scope/my-lib v2.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::2.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -426,9 +533,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -436,7 +544,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish to a specific tag", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -464,12 +575,14 @@ describe("GitHub Action - success tests", () => {
       env: {
         INPUT_TOKEN: "my-secret-token",
         INPUT_TAG: "next",
-      }
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published my-lib v2.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::2.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -478,9 +591,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -488,7 +602,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should publish a scoped package with public access", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "@my-scope/my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "@my-scope/my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -515,13 +632,15 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-        INPUT_ACCESS: "public"
-      }
+        INPUT_ACCESS: "public",
+      },
     });
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include(
+      "Successfully published @my-scope/my-lib v2.0.0 to NPM"
+    );
     expect(cli).stdout.to.include("::set-output name=type::major");
     expect(cli).stdout.to.include("::set-output name=version::2.0.0");
     expect(cli).stdout.to.include("::set-output name=old-version::1.0.0");
@@ -530,9 +649,10 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
-    files.assert.contents("home/.npmrc",
+    files.assert.contents(
+      "home/.npmrc",
       `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
-      `registry=https://registry.npmjs.org/${EOL}`
+        `registry=https://registry.npmjs.org/${EOL}`
     );
 
     npm.assert.ran(4);
@@ -540,7 +660,10 @@ describe("GitHub Action - success tests", () => {
 
   it("should not publish a package if dryRun is true", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.1.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "1.1.0" },
+      },
     ]);
 
     npm.mock({
@@ -567,8 +690,8 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-        "INPUT_DRY-RUN": "true"
-      }
+        "INPUT_DRY-RUN": "true",
+      },
     });
 
     expect(cli).to.have.stderr("");
@@ -579,10 +702,11 @@ describe("GitHub Action - success tests", () => {
     expect(cli).stdout.to.include("::set-output name=access::public");
     expect(cli).stdout.to.include("::set-output name=dry-run::true");
     expect(cli).stdout.to.include("my-lib 1.1.0");
-    expect(cli).stdout.to.include("📦 my-lib v1.1.0 was NOT actually published to NPM (dry run)");
+    expect(cli).stdout.to.include(
+      "📦 my-lib v1.1.0 was NOT actually published to NPM (dry run)"
+    );
     expect(cli).to.have.exitCode(0);
 
     npm.assert.ran(4);
   });
-
 });

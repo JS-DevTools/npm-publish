@@ -4,6 +4,7 @@ import { Access, Options } from "../options";
 
 /**
  * The main entry point of the GitHub Action
+ *
  * @internal
  */
 async function main(): Promise<void> {
@@ -33,11 +34,13 @@ async function main(): Promise<void> {
       console.log(
         `\n📦 ${results.package} v${results.version} is already published to NPM`
       );
-    } else if (results.dryRun) {
+    }
+    else if (results.dryRun) {
       console.log(
         `\n📦 ${results.package} v${results.version} was NOT actually published to NPM (dry run)`
       );
-    } else {
+    }
+    else {
       console.log(
         `\n📦 Successfully published ${results.package} v${results.version} to NPM`
       );
@@ -50,7 +53,8 @@ async function main(): Promise<void> {
     setOutput("tag", results.tag);
     setOutput("access", results.access);
     setOutput("dry-run", results.dryRun);
-  } catch (error) {
+  }
+  catch (error) {
     errorHandler(error as Error);
   }
 }
