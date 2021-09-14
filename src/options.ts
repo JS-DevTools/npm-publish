@@ -70,7 +70,7 @@ export interface Options {
    *
    * Defaults to `false`
    */
-  greaterVersion?: boolean;
+  greaterVersionOnly?: boolean;
 
   /**
    * A function to call to log debug messages.

@@ -155,7 +155,7 @@ describe("GitHub Action - success tests", () => {
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "my-secret-token",
-        "INPUT_GREATER-VERSION": "true",
+        "INPUT_GREATER-VERSION-ONLY": "true",
       },
     });
 

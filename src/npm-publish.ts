@@ -24,7 +24,7 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
   let shouldPublish =
     !options.checkVersion ||
     // compare returns 1 if manifest is higher than published
-    (options.greaterVersion && cmp === 1) ||
+    (options.greaterVersionOnly && cmp === 1) ||
     // compare returns 0 if the manifest is the same as published
     cmp !== 0;
 
@@ -33,13 +33,11 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
     await npm.publish(manifest, options);
   }
 
-  // The version should be marked as lower if we disallow decrementing the version
-  let type =
-    (options.greaterVersion && cmp === -1 && "lower") || diff || "none";
-
   let results: Results = {
     package: manifest.name,
-    type,
+    // The version should be marked as lower if we disallow decrementing the version
+    type:
+      (options.greaterVersionOnly && cmp === -1 && "lower") || diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
     tag: options.tag,

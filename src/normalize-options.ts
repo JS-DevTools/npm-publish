@@ -13,7 +13,7 @@ export interface NormalizedOptions {
   access?: Access;
   dryRun: boolean;
   checkVersion: boolean;
-  greaterVersion: boolean;
+  greaterVersionOnly: boolean;
   quiet: boolean;
   debug: Debug;
 }
@@ -37,10 +37,10 @@ export function normalizeOptions(options: Options): NormalizedOptions {
     dryRun: options.dryRun || false,
     checkVersion:
       options.checkVersion === undefined ? true : Boolean(options.checkVersion),
-    greaterVersion:
-      options.greaterVersion === undefined
+    greaterVersionOnly:
+      options.greaterVersionOnly === undefined
         ? false
-        : Boolean(options.greaterVersion),
+        : Boolean(options.greaterVersionOnly),
     quiet: options.quiet || false,
     debug: options.debug || (() => undefined),
   };

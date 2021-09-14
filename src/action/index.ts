@@ -23,7 +23,7 @@ async function main(): Promise<void> {
       tag: getInput("tag"),
       access: getInput("access") as Access,
       dryRun: getInput("dry-run").toLowerCase() === "true",
-      greaterVersion: getInput("greater-version").toLowerCase() === "true",
+      greaterVersionOnly: getInput("greater-version-only").toLowerCase() === "true",
       debug: debugHandler,
     };
 
