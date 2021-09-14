@@ -35,7 +35,7 @@ async function main(): Promise<void> {
         `\n📦 ${results.package} v${results.version} is already published to NPM`
       );
     }
-    else if (options.greaterVersion && results.type === "lower") {
+    if (results.type === "lower") {
       console.log(
         `\n📦 ${results.package} v${results.version} is lower than the version published to NPM`
       );

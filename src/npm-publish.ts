@@ -35,7 +35,7 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
 
   let results: Results = {
     package: manifest.name,
-    type: (cmp === -1 && "lower") || diff || "none",
+    type: (options.greaterVersion && cmp === -1 && "lower") || diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
     tag: options.tag,
