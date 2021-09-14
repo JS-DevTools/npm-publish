@@ -160,7 +160,6 @@ describe("GitHub Action - success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("my-lib 0.1.0");
     expect(cli).stdout.to.include(
       "my-lib v0.1.0 is lower than the version published to NPM"
     );
