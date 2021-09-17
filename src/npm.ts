@@ -109,7 +109,7 @@ export const npm = {
       await ezSpawn.async(command, { cwd, stdio, env });
     }
     catch (error) {
-      throw ono(error, `Unable to publish ${name} v${version} to NPM.`);
+      throw ono(error, `Unable to publish ${name} v${version} to ${options.registry}.`);
     }
   },
 };
