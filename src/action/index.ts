@@ -4,6 +4,7 @@ import { Access, Options } from "../options";
 
 /**
  * The main entry point of the GitHub Action
+ *
  * @internal
  */
 async function main(): Promise<void> {
@@ -17,10 +18,12 @@ async function main(): Promise<void> {
       token: getInput("token", { required: true }),
       registry: getInput("registry", { required: true }),
       package: getInput("package", { required: true }),
-      checkVersion: getInput("check-version", { required: true }).toLowerCase() === "true",
+      checkVersion:
+        getInput("check-version", { required: true }).toLowerCase() === "true",
       tag: getInput("tag"),
       access: getInput("access") as Access,
       dryRun: getInput("dry-run").toLowerCase() === "true",
+      greaterVersionOnly: getInput("greater-version-only").toLowerCase() === "true",
       debug: debugHandler,
     };
 
@@ -28,13 +31,24 @@ async function main(): Promise<void> {
     let results = await npmPublish(options);
 
     if (results.type === "none") {
-      console.log(`\n📦 ${results.package} v${results.version} is already published to ${options.registry}`);
+      console.log(
+        `\n📦 ${results.package} v${results.version} is already published to ${options.registry}`
+      );
+    }
+    if (results.type === "lower") {
+      console.log(
+        `\n📦 ${results.package} v${results.version} is lower than the version published to ${options.registry}`
+      );
     }
     else if (results.dryRun) {
-      console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`);
+      console.log(
+        `\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`
+      );
     }
     else {
-      console.log(`\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`);
+      console.log(
+        `\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`
+      );
     }
 
     // Set the GitHub Actions output variables

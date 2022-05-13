@@ -18,19 +18,33 @@ export async function npmPublish(opts: Options = {}): Promise<Results> {
   // Determine if/how the version has changed
   let diff = semver.diff(manifest.version, publishedVersion);
 
-  if (diff || !options.checkVersion) {
+  // Compare both versions to see if it's changed
+  let cmp = semver.compare(manifest.version, publishedVersion);
+
+  let shouldPublish =
+    !options.checkVersion ||
+    // compare returns 1 if manifest is higher than published
+    (options.greaterVersionOnly && cmp === 1) ||
+    // compare returns 0 if the manifest is the same as published
+    cmp !== 0;
+
+  if (shouldPublish) {
     // Publish the new version to NPM
     await npm.publish(manifest, options);
   }
 
   let results: Results = {
     package: manifest.name,
-    type: diff || "none",
+    // The version should be marked as lower if we disallow decrementing the version
+    type:
+      (options.greaterVersionOnly && cmp === -1 && "lower") || diff || "none",
     version: manifest.version.raw,
     oldVersion: publishedVersion.raw,
     tag: options.tag,
-    access: options.access || (manifest.name.startsWith("@") ? "restricted" : "public"),
-    dryRun: options.dryRun
+    access:
+      options.access ||
+      (manifest.name.startsWith("@") ? "restricted" : "public"),
+    dryRun: options.dryRun,
   };
 
   options.debug("OUTPUT:", results);
