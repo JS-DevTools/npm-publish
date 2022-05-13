@@ -48,10 +48,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 10
+          node-version: 12
       - run: npm install
       - run: npm test
       - uses: JS-DevTools/npm-publish@v1
