@@ -32,22 +32,22 @@ async function main(): Promise<void> {
 
     if (results.type === "none") {
       console.log(
-        `\n📦 ${results.package} v${results.version} is already published to NPM`
+        `\n📦 ${results.package} v${results.version} is already published to ${options.registry}`
       );
     }
     if (results.type === "lower") {
       console.log(
-        `\n📦 ${results.package} v${results.version} is lower than the version published to NPM`
+        `\n📦 ${results.package} v${results.version} is lower than the version published to ${options.registry}`
       );
     }
     else if (results.dryRun) {
       console.log(
-        `\n📦 ${results.package} v${results.version} was NOT actually published to NPM (dry run)`
+        `\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`
       );
     }
     else {
       console.log(
-        `\n📦 Successfully published ${results.package} v${results.version} to NPM`
+        `\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`
       );
     }
 
