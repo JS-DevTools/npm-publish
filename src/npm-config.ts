@@ -10,30 +10,32 @@ import { getNpmEnvironment } from "./npm-env";
  * Sets/updates the NPM config based on the options.
  * @internal
  */
-export async function setNpmConfig(options: NormalizedOptions): Promise<void> {
-  // Read the current NPM config
-  let configPath = await getNpmConfigPath(options);
-  let config = await readNpmConfig(configPath, options);
-
+export async function setUpdatedNpmConfig(
+  config: string,
+  configPath: string,
+  options: NormalizedOptions
+): Promise<void> {
   // Update the config
   config = updateConfig(config, options);
 
   // Save the new config
-  await writeNpmConfig(configPath, config, options);
+  await writeNpmConfig(configPath, config, options.debug);
 }
-
 
 /**
  * Updates the given NPM config with the specified options.
  */
-function updateConfig(config: string, { registry, debug }: NormalizedOptions): string {
+function updateConfig(
+  config: string,
+  { registry, debug }: NormalizedOptions
+): string {
   let authDomain = registry.origin.slice(registry.protocol.length);
 
   let lines = config.split(/\r?\n/);
 
   // Remove any existing lines that set the registry or token
-  lines = lines.filter((line) =>
-    !(line.startsWith("registry=") || line.includes("_authToken="))
+  lines = lines.filter(
+    (line) => !(line.startsWith("registry=") || line.includes("_authToken="))
   );
 
   // Append the new registry and token to the end of the file
@@ -46,30 +48,34 @@ function updateConfig(config: string, { registry, debug }: NormalizedOptions): s
   return config;
 }
 
-
 /**
  * Gets the path of the NPM config file.
  */
-async function getNpmConfigPath(options: NormalizedOptions): Promise<string> {
+export async function getNpmConfigPath(
+  options: NormalizedOptions
+): Promise<string> {
   try {
     // Get the environment variables to pass to NPM
     let env = getNpmEnvironment(options);
 
     options.debug("Running command: npm config get userconfig");
 
-    let process = await ezSpawn.async("npm", "config", "get", "userconfig", { env });
+    let process = await ezSpawn.async("npm", "config", "get", "userconfig", {
+      env,
+    });
     return process.stdout.trim();
-  }
-  catch (error) {
+  } catch (error) {
     throw ono(error, "Unable to determine the NPM config file path.");
   }
 }
 
-
 /**
  * Reads the NPM config file.
  */
-async function readNpmConfig(configPath: string, { debug }: NormalizedOptions): Promise<string> {
+export async function readNpmConfig(
+  configPath: string,
+  { debug }: NormalizedOptions
+): Promise<string> {
   try {
     debug(`Reading NPM config from ${configPath}`);
 
@@ -77,8 +83,7 @@ async function readNpmConfig(configPath: string, { debug }: NormalizedOptions): 
 
     debug(`OLD NPM CONFIG: \n${config}`);
     return config;
-  }
-  catch (error) {
+  } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       debug("OLD NPM CONFIG: <none>");
       return "";
@@ -88,18 +93,20 @@ async function readNpmConfig(configPath: string, { debug }: NormalizedOptions): 
   }
 }
 
-
 /**
  * Writes the NPM config file.
  */
-async function writeNpmConfig(configPath: string, config: string, { debug }: NormalizedOptions): Promise<void> {
+export async function writeNpmConfig(
+  configPath: string,
+  config: string,
+  debug: NormalizedOptions["debug"]
+): Promise<void> {
   try {
     debug(`Writing new NPM config to ${configPath}`);
 
     await fs.mkdir(dirname(configPath), { recursive: true });
     await fs.writeFile(configPath, config);
-  }
-  catch (error) {
+  } catch (error) {
     throw ono(error, `Unable to update the NPM config file: ${configPath}`);
   }
 }

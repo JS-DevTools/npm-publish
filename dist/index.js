@@ -229,7 +229,10 @@ exports.npm = {
      */
     async getLatestVersion(name, options) {
         // Update the NPM config with the specified registry and token
-        await (0, npm_config_1.setNpmConfig)(options);
+        const configPath = await (0, npm_config_1.getNpmConfigPath)(options);
+        const initialConfig = await (0, npm_config_1.readNpmConfig)(configPath, options);
+        // Update the NPM config with the specified registry and token
+        await (0, npm_config_1.setUpdatedNpmConfig)(initialConfig, configPath, options);
         try {
             let command = ["npm", "view"];
             if (options.tag === "latest") {
@@ -242,7 +245,10 @@ exports.npm = {
             // Get the environment variables to pass to NPM
             let env = (0, npm_env_1.getNpmEnvironment)(options);
             // Run NPM to get the latest published version of the package
-            options.debug(`Running command: npm view ${name} version`, { command, env });
+            options.debug(`Running command: npm view ${name} version`, {
+                command,
+                env,
+            });
             let result;
             try {
                 result = await ezSpawn.async(command, { env });
@@ -271,13 +277,18 @@ exports.npm = {
         catch (error) {
             throw (0, ono_1.ono)(error, `Unable to determine the current version of ${name} on NPM.`);
         }
+        finally {
+            await (0, npm_config_1.writeNpmConfig)(configPath, initialConfig, options.debug);
+        }
     },
     /**
      * Publishes the specified package to NPM
      */
     async publish({ name, version }, options) {
+        const configPath = await (0, npm_config_1.getNpmConfigPath)(options);
+        const initialConfig = await (0, npm_config_1.readNpmConfig)(configPath, options);
         // Update the NPM config with the specified registry and token
-        await (0, npm_config_1.setNpmConfig)(options);
+        await (0, npm_config_1.setUpdatedNpmConfig)(initialConfig, configPath, options);
         try {
             let command = ["npm", "publish"];
             if (options.tag !== "latest") {
@@ -296,11 +307,20 @@ exports.npm = {
             // Get the environment variables to pass to NPM
             let env = (0, npm_env_1.getNpmEnvironment)(options);
             // Run NPM to publish the package
-            options.debug("Running command: npm publish", { command, stdio, cwd, env });
+            options.debug("Running command: npm publish", {
+                command,
+                stdio,
+                cwd,
+                env,
+            });
             await ezSpawn.async(command, { cwd, stdio, env });
         }
         catch (error) {
             throw (0, ono_1.ono)(error, `Unable to publish ${name} v${version} to ${options.registry}.`);
+        }
+        finally {
+            // Restore the npm config
+            await (0, npm_config_1.writeNpmConfig)(configPath, initialConfig, options.debug);
         }
     },
 };
@@ -2580,7 +2600,7 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setNpmConfig = void 0;
+exports.writeNpmConfig = exports.readNpmConfig = exports.getNpmConfigPath = exports.setUpdatedNpmConfig = void 0;
 const ezSpawn = __webpack_require__(733);
 const ono_1 = __webpack_require__(271);
 const fs_1 = __webpack_require__(747);
@@ -2591,16 +2611,13 @@ const npm_env_1 = __webpack_require__(850);
  * Sets/updates the NPM config based on the options.
  * @internal
  */
-async function setNpmConfig(options) {
-    // Read the current NPM config
-    let configPath = await getNpmConfigPath(options);
-    let config = await readNpmConfig(configPath, options);
+async function setUpdatedNpmConfig(config, configPath, options) {
     // Update the config
     config = updateConfig(config, options);
     // Save the new config
-    await writeNpmConfig(configPath, config, options);
+    await writeNpmConfig(configPath, config, options.debug);
 }
-exports.setNpmConfig = setNpmConfig;
+exports.setUpdatedNpmConfig = setUpdatedNpmConfig;
 /**
  * Updates the given NPM config with the specified options.
  */
@@ -2624,13 +2641,16 @@ async function getNpmConfigPath(options) {
         // Get the environment variables to pass to NPM
         let env = (0, npm_env_1.getNpmEnvironment)(options);
         options.debug("Running command: npm config get userconfig");
-        let process = await ezSpawn.async("npm", "config", "get", "userconfig", { env });
+        let process = await ezSpawn.async("npm", "config", "get", "userconfig", {
+            env,
+        });
         return process.stdout.trim();
     }
     catch (error) {
         throw (0, ono_1.ono)(error, "Unable to determine the NPM config file path.");
     }
 }
+exports.getNpmConfigPath = getNpmConfigPath;
 /**
  * Reads the NPM config file.
  */
@@ -2649,10 +2669,11 @@ async function readNpmConfig(configPath, { debug }) {
         throw (0, ono_1.ono)(error, `Unable to read the NPM config file: ${configPath}`);
     }
 }
+exports.readNpmConfig = readNpmConfig;
 /**
  * Writes the NPM config file.
  */
-async function writeNpmConfig(configPath, config, { debug }) {
+async function writeNpmConfig(configPath, config, debug) {
     try {
         debug(`Writing new NPM config to ${configPath}`);
         await fs_1.promises.mkdir((0, path_1.dirname)(configPath), { recursive: true });
@@ -2662,6 +2683,7 @@ async function writeNpmConfig(configPath, config, { debug }) {
         throw (0, ono_1.ono)(error, `Unable to update the NPM config file: ${configPath}`);
     }
 }
+exports.writeNpmConfig = writeNpmConfig;
 
 
 /***/ }),
