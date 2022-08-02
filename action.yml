@@ -45,6 +45,11 @@ inputs:
     required: false
     default: "true"
 
+  greater-version-only:
+    description: Only publish to NPM if the version number in package.json is greater than the latest on NPM
+    required: false
+    default: "false"
+
 outputs:
   type:
     description: The type of version change that occurred ("none", "major", "minor", "patch", etc.)
