@@ -72,7 +72,6 @@ You can set any or all of the following input parameters:
 |`access`              |string   |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
 |`dry-run`             |boolean  |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
 |`check-version`       |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
-|`greater-version-only`|boolean  |false                       |Only publish to NPM if the version number in `package.json` is greater than the latest on NPM                           |
 
 
 ## Output Variables
