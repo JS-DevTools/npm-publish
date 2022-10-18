@@ -28,9 +28,7 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          # - 10 - The library supports Node 10, but the tests don't
-          - 12
-          - 14
+          - 16
 
     steps:
       - name: Checkout source
@@ -84,6 +82,8 @@ jobs:
 
       - name: Install Node
         uses: actions/setup-node@v3
+        with: 
+          version: 16
 
       - name: Install dependencies
         run: npm ci
