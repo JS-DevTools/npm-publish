@@ -1,7 +1,7 @@
 {
   "name": "@bluecargo/npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "keywords": [
     "github-action",
     "npm",
@@ -17,7 +17,7 @@
   "homepage": "https://jstools.dev/npm-publish",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JS-DevTools/npm-publish.git"
+    "url": "https://github.com/bluecargo/npm-publish.git"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
