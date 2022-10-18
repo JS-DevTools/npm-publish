@@ -147,7 +147,6 @@ describe("CLI - success tests", () => {
     });
 
     let cli = exec.cli();
-    console.log(cli.stdout);
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("📦 my-lib v1.0.0 is already published to");
     expect(cli).to.have.exitCode(0);
