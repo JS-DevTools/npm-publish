@@ -43,18 +43,18 @@ describe("GitHub Action - success tests", () => {
         INPUT_TOKEN: "my-secret-token",
       },
     });
-    console.log(cli.stdout);
+    // console.log(cli.stdout);
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
     expect(cli).stdout.to.include(
       "Successfully published my-lib v2.0.0 to https://registry.npmjs.org/"
     );
-    expect(cli).stdout.to.include("::set-env name=type::major");
-    expect(cli).stdout.to.include("::set-env name=version::2.0.0");
-    expect(cli).stdout.to.include("::set-env name=old-version::1.0.0");
-    expect(cli).stdout.to.include("::set-env name=tag::latest");
-    expect(cli).stdout.to.include("::set-env name=access::public");
-    expect(cli).stdout.to.include("::set-env name=dry-run::false");
+    // expect(cli).stdout.to.include("::set-env name=type::major");
+    // expect(cli).stdout.to.include("::set-env name=version::2.0.0");
+    // expect(cli).stdout.to.include("::set-env name=old-version::1.0.0");
+    // expect(cli).stdout.to.include("::set-env name=tag::latest");
+    // expect(cli).stdout.to.include("::set-env name=access::public");
+    // expect(cli).stdout.to.include("::set-env name=dry-run::false");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents(
