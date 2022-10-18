@@ -1,7 +1,7 @@
 # Fast, easy publishing to NPM
 
 [![Cross-Platform Compatibility](https://jstools.dev/img/badges/os-badges.svg)](https://github.com/JS-DevTools/npm-publish/actions)
-[![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI-CD/badge.svg)](https://github.com/bluecargo/npm-publish/actions)
+[![Build Status](https://github.com/bluecargo/npm-publish/workflows/CI-CD/badge.svg)](https://github.com/bluecargo/npm-publish/actions)
 
 [![Coverage Status](https://coveralls.io/repos/github/JS-DevTools/npm-publish/badge.svg?branch=master)](https://coveralls.io/github/JS-DevTools/npm-publish)
 [![Dependencies](https://david-dm.org/JS-DevTools/npm-publish/status.svg)](https://david-dm.org/JS-DevTools/npm-publish)
