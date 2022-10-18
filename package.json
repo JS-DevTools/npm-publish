@@ -1,7 +1,7 @@
 {
-  "name": "@jsdevtools/npm-publish",
+  "name": "@bluecargo/npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "1.4.3",
+  "version": "2.0.0",
   "keywords": [
     "github-action",
     "npm",
@@ -10,8 +10,8 @@
     "bump"
   ],
   "author": {
-    "name": "James Messinger",
-    "url": "https://jamesmessinger.com"
+    "name": "bluecargo",
+    "url": "https://bluecargo.io"
   },
   "license": "MIT",
   "homepage": "https://jstools.dev/npm-publish",
@@ -37,13 +37,13 @@
     "build:node_modules": "shx mkdir -p dist/node_modules && shx cp -r node_modules/semver dist/node_modules",
     "watch": "tsc --watch",
     "test": "mocha && npm run lint",
-    "coverage": "nyc -x test -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
+    "coverage": "nyc -x test -x dist/sourcemap-register.js mocha",
     "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump --tag --push --all && git tag -afm v1 v1 && git push --tags --force",
     "release": "npm run clean && npm run build && npm test && npm run bump"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=16"
   },
   "devDependencies": {
     "@actions/core": "^1.2.6",
@@ -59,8 +59,8 @@
     "@zeit/ncc": "^0.22.3",
     "chai": "^4.2.0",
     "eslint": "^7.17.0",
-    "mocha": "^8.2.1",
-    "npm-check": "^5.9.0",
+    "mocha": "^10.1.0",
+    "npm-check": "^6.0.1",
     "nyc": "^15.1.0",
     "shx": "^0.3.3",
     "typescript": "^4.1.3"

@@ -12,9 +12,6 @@ on:
     tags-ignore:
       - "*"
 
-  schedule:
-    - cron: "0 0 1 * *"
-
 jobs:
   test:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
@@ -28,9 +25,7 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          # - 10 - The library supports Node 10, but the tests don't
-          - 12
-          - 14
+          - 16
 
     steps:
       - name: Checkout source
@@ -66,7 +61,7 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@1.1.3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
@@ -84,6 +79,8 @@ jobs:
 
       - name: Install Node
         uses: actions/setup-node@v3
+        with: 
+          version: 16
 
       - name: Install dependencies
         run: npm ci

@@ -1,4 +1,4 @@
-import { debug, getInput, setFailed, setOutput } from "@actions/core";
+import { debug, getInput, setFailed, exportVariable } from "@actions/core";
 import { npmPublish } from "../npm-publish";
 import { Access, Options } from "../options";
 
@@ -52,12 +52,12 @@ async function main(): Promise<void> {
     }
 
     // Set the GitHub Actions output variables
-    setOutput("type", results.type);
-    setOutput("version", results.version);
-    setOutput("old-version", results.oldVersion);
-    setOutput("tag", results.tag);
-    setOutput("access", results.access);
-    setOutput("dry-run", results.dryRun);
+    exportVariable("type", results.type);
+    exportVariable("version", results.version);
+    exportVariable("old-version", results.oldVersion);
+    exportVariable("tag", results.tag);
+    exportVariable("access", results.access);
+    exportVariable("dry-run", results.dryRun);
   }
   catch (error) {
     errorHandler(error as Error);

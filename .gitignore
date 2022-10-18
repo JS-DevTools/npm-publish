@@ -29,6 +29,9 @@ nbproject
 # Logs
 /logs
 *.log
+.vscode
+.vscode/*
+
 
 # Runtime data
 pids

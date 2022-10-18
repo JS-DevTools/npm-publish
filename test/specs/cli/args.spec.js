@@ -132,7 +132,8 @@ describe("CLI - argument tests", () => {
       let cli = exec.cli("--registry", "example.com");
 
       expect(cli).to.have.stdout("");
-      expect(cli).stderr.to.include("Invalid URL: example.com");
+      console.log(cli.stderr);
+      expect(cli).stderr.to.include("Invalid URL\n");
       expect(cli).to.have.exitCode(1);
 
       files.assert.doesNotExist("home/.npmrc");

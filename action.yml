@@ -56,5 +56,5 @@ outputs:
     description: The version number that was previously published to NPM
 
 runs:
-  using: node12
+  using: node16
   main: dist/index.js
