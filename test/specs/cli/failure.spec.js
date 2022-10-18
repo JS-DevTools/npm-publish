@@ -167,7 +167,7 @@ describe("CLI - failure tests", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).stderr.to.include("Unable to publish my-lib v2.0.0 to NPM.");
+    expect(cli).stderr.to.include("Unable to publish my-lib v2.0.0 ");
     expect(cli).stderr.to.include("npm publish exited with a status of 1");
     expect(cli).stderr.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);

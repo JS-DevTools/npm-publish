@@ -38,7 +38,7 @@ describe("GitHub Action - failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("::error::TypeError [ERR_INVALID_URL] [ERR_INVALID_URL]: Invalid URL: example.com");
+    expect(cli).stdout.to.include("::error::TypeError [ERR_INVALID_URL]:");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -236,7 +236,7 @@ describe("GitHub Action - failure tests", () => {
     });
 
     expect(cli).to.have.stderr("BOOM!");
-    expect(cli).stdout.to.include("::error::Error: Unable to publish my-lib v2.0.0 to NPM.");
+    expect(cli).stdout.to.include("::error::Error: Unable to publish my-lib v2.0.0 to https://registry.npmjs.org/.");
     expect(cli).stdout.to.include("npm publish exited with a status of 1");
     expect(cli).stdout.not.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
