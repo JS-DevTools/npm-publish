@@ -1,7 +1,7 @@
 {
   "name": "@bluecargo/npm-publish",
   "description": "Fast, easy publishing to NPM",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "keywords": [
     "github-action",
     "npm",

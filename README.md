@@ -54,7 +54,7 @@ jobs:
           node-version: 12
       - run: npm install
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: bluecargo/npm-publish@v2
         with:
           token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -82,7 +82,7 @@ npm-publish writes env variables, which you can use in later steps of your workf
 ```yaml
 steps:
   - id: publish
-    uses: JS-DevTools/npm-publish@v1
+    uses: bluecargo/npm-publish@v2
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
@@ -219,7 +219,7 @@ Contributions, enhancements, and bug-fixes are welcome! [Open an issue](https://
 To build the project locally on your computer:
 
 1. **Clone this repo**<br>
-   `git clone https://github.com/JS-DevTools/npm-publish.git`
+   `git clone https://github.com/bluecargo/npm-publish.git`
 
 2. **Install dependencies**<br>
    `npm install`
