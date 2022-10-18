@@ -12,9 +12,6 @@ on:
     tags-ignore:
       - "*"
 
-  schedule:
-    - cron: "0 0 1 * *"
-
 jobs:
   test:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
