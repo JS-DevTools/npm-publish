@@ -1,10 +1,10 @@
 # GitHub Action
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/metadata-syntax-for-github-actions
 
-name: NPM Publish
+name: NPM Publish V2
 description: Fast, easy publishing to NPM
 
-author: James Messinger
+author: James Messinger/ Bluecargo
 branding:
   color: blue
   icon: package
