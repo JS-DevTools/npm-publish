@@ -77,7 +77,7 @@ You can set any or all of the following input parameters:
 
 ## Output Variables
 
-npm-publish exposes some output variables, which you can use in later steps of your workflow. To access the output variables, you'll need to set an `id` for the npm-publish step.
+npm-publish writes env variables, which you can use in later steps of your workflow. 
 
 ```yaml
 steps:
@@ -86,9 +86,8 @@ steps:
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
-  - if: steps.publish.outputs.type != 'none'
-    run: |
-      echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
+  - run: |
+      echo "Version changed: ${{ env.old-version }} => ${{ env.version }}"
 ```
 
 | Variable      | Type    | Description                                                                                                                                                                                                                 |
