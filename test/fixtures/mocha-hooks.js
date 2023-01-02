@@ -3,6 +3,8 @@
 const { promises: fs } = require("fs");
 const paths = require("../utils/paths");
 
+process.env.NODE_ENV = "test";
+
 /**
  * Re-create the .tmp directories before each test
  */

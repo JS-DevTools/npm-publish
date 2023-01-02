@@ -5517,16 +5517,26 @@ async function main() {
             console.log(`\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`);
         }
         // Set the GitHub Actions output variables
-        (0, core_1.setOutput)("type", results.type);
-        (0, core_1.setOutput)("version", results.version);
-        (0, core_1.setOutput)("old-version", results.oldVersion);
-        (0, core_1.setOutput)("tag", results.tag);
-        (0, core_1.setOutput)("access", results.access);
-        (0, core_1.setOutput)("dry-run", results.dryRun);
+        setOutput("type", results.type);
+        setOutput("version", results.version);
+        setOutput("old-version", results.oldVersion);
+        setOutput("tag", results.tag);
+        setOutput("access", results.access);
+        setOutput("dry-run", results.dryRun);
     }
     catch (error) {
         errorHandler(error);
     }
+}
+/**
+ * Set output with logging to stdout for test support
+ */
+function setOutput(...args) {
+    if (process.env.NODE_ENV === "test") {
+        console.log(`TEST::set-output name=${args[0]}::${args[1]}`);
+        return;
+    }
+    return (0, core_1.setOutput)(...args);
 }
 /**
  * Prints errors to the GitHub Actions console
