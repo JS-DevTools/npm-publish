@@ -5,6 +5,7 @@ import { usageText } from "./help";
 
 /**
  * The parsed command-line arguments
+ *
  * @internal
  */
 export interface ParsedArgs {
@@ -15,6 +16,7 @@ export interface ParsedArgs {
 
 /**
  * Parses the command-line arguments
+ *
  * @internal
  */
 export function parseArgs(argv: string[]): ParsedArgs {

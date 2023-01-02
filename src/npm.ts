@@ -10,6 +10,7 @@ import { Manifest } from "./read-manifest";
 
 /**
  * Runs NPM commands.
+ *
  * @internal
  */
 export const npm = {

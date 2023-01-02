@@ -8,6 +8,7 @@ import { getNpmEnvironment } from "./npm-env";
 
 /**
  * Sets/updates the NPM config based on the options.
+ *
  * @internal
  */
 export async function setNpmConfig(options: NormalizedOptions): Promise<void> {

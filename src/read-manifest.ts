@@ -6,6 +6,7 @@ import { Debug } from "./options";
 
 /**
  * A package manifest (package.json)
+ *
  * @internal
  */
 export interface Manifest {
@@ -15,6 +16,7 @@ export interface Manifest {
 
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
+ *
  * @internal
  */
 export async function readManifest(path: string, debug?: Debug): Promise<Manifest> {

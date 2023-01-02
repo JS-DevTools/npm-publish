@@ -221,6 +221,7 @@ const npm_config_1 = __webpack_require__(566);
 const npm_env_1 = __webpack_require__(850);
 /**
  * Runs NPM commands.
+ *
  * @internal
  */
 exports.npm = {
@@ -994,6 +995,7 @@ const path_1 = __webpack_require__(622);
 const semver_1 = __webpack_require__(513);
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
+ *
  * @internal
  */
 async function readManifest(path, debug) {
@@ -2589,6 +2591,7 @@ const path_1 = __webpack_require__(622);
 const npm_env_1 = __webpack_require__(850);
 /**
  * Sets/updates the NPM config based on the options.
+ *
  * @internal
  */
 async function setNpmConfig(options) {
@@ -3707,6 +3710,7 @@ exports.normalizeOptions = void 0;
 const url_1 = __webpack_require__(835);
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
+ *
  * @internal
  */
 function normalizeOptions(options) {
