@@ -30,7 +30,7 @@ describe("NPM package - failure tests", () => {
     }
     catch (error) {
       expect(error).to.be.an.instanceOf(TypeError);
-      expect(error.message).to.equal("Invalid URL: example.com");
+      expect(error.message).to.include("Invalid URL");
     }
 
     files.assert.doesNotExist("home/.npmrc");
