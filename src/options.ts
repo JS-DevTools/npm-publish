@@ -41,6 +41,14 @@ export interface Options {
   access?: Access;
 
   /**
+   * The package to publish.
+   * This is the first argument to npm publish.
+   *
+   * Defaults to "" which is the default behavior of npm publish.
+   */
+  target?: string;
+
+  /**
    * If true, run npm publish with the --dry-run flag
    * so that the package is not published. Used for
    * testing workflows.

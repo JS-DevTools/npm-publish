@@ -192,6 +192,53 @@ describe("NPM package - success tests", () => {
     npm.assert.ran(2);
   });
 
+  it("should pass target option as argument to npm publish", async () => {
+    files.create([
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+    ]);
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["view", "my-lib", "version"],
+      stdout: `1.0.0${EOL}`,
+    });
+
+    npm.mock({
+      args: ["config", "get", "userconfig"],
+      stdout: `${paths.npmrc}${EOL}`,
+    });
+
+    npm.mock({
+      args: ["publish", "my-lib-2.0.0.tgz"],
+      stdout: `my-lib 2.0.0${EOL}`,
+    });
+
+    let results = await npmPublish({ target: "my-lib-2.0.0.tgz", quiet: true });
+
+    expect(results).to.deep.equal({
+      type: "major",
+      package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
+      version: "2.0.0",
+      oldVersion: "1.0.0",
+      tag: "latest",
+      access: "public",
+      dryRun: false,
+    });
+
+    files.assert.contents("home/.npmrc",
+      `//registry.npmjs.org/:_authToken=\${INPUT_TOKEN}${EOL}` +
+      `registry=https://registry.npmjs.org/${EOL}`
+    );
+
+    npm.assert.ran(4);
+  });
+
+
   it("should use the specified NPM token to publish the package", async () => {
     files.create([
       { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0-beta.1" }},

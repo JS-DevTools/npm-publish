@@ -52,6 +52,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
         package: args.package as string,
         tag: args.tag as string,
         access: args.access as Access,
+        target: args.target as string,
         dryRun: args["dry-run"] as boolean,
         debug: args.debug ? console.debug : undefined,
         quiet: args.quiet as boolean,

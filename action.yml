@@ -35,6 +35,11 @@ inputs:
       This only applies to scoped packages.
     required: false
 
+  target:
+    description: The package to publish (the first argument to npm publish).
+    required: false
+    default: ""
+
   dry-run:
     description: If true, run with the --dry-run flag
     required: false
