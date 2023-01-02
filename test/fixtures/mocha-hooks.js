@@ -8,7 +8,13 @@ const paths = require("../utils/paths");
  */
 beforeEach("clean the .tmp directory", async () => {
   // Delete the .tmp directory, if it exists
-  await fs.rmdir(paths.tmp, { recursive: true });
+  try {
+    await fs.rmdir(paths.tmp, { recursive: true });
+  }
+  catch (err) {
+    if (err.code === "ENOENT") return;
+    throw err;
+  }
 
   // Create the home and workspace directories
   await fs.mkdir(paths.home, { recursive: true });
