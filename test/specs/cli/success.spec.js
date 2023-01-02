@@ -39,7 +39,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -81,7 +81,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -121,7 +121,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published my-lib v1.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -150,7 +150,7 @@ describe("CLI - success tests", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("📦 my-lib v1.0.0 is already published to NPM");
+    expect(cli).stdout.to.include("📦 my-lib v1.0.0 is already published to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -191,7 +191,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -232,7 +232,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.1.0");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.1.0 to NPM");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.1.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -289,7 +289,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.1");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.1 to NPM");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.1 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -337,7 +337,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.0.0-beta");
-    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.0-beta to NPM");
+    expect(cli).stdout.to.include("📦 Successfully published my-lib v1.0.0-beta to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -377,7 +377,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -417,7 +417,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published my-lib v2.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -457,7 +457,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("@my-scope/my-lib 2.0.0");
-    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to NPM");
+    expect(cli).stdout.to.include("Successfully published @my-scope/my-lib v2.0.0 to https://registry.npmjs.org/");
     expect(cli).to.have.exitCode(0);
 
     files.assert.contents("home/.npmrc",
@@ -497,7 +497,7 @@ describe("CLI - success tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include("my-lib 1.1.0");
-    expect(cli).stdout.to.include("📦 my-lib v1.1.0 was NOT actually published to NPM (dry run)");
+    expect(cli).stdout.to.include("📦 my-lib v1.1.0 was NOT actually published to https://registry.npmjs.org/ (dry run)");
     expect(cli).to.have.exitCode(0);
 
     npm.assert.ran(4);
