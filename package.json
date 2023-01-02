@@ -46,7 +46,7 @@
     "node": ">=12"
   },
   "devDependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.10.0",
     "@jsdevtools/chai-exec": "^2.1.1",
     "@jsdevtools/eslint-config": "^1.1.4",
     "@jsdevtools/version-bump-prompt": "^6.1.0",
