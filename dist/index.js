@@ -3867,6 +3867,7 @@ async function npmPublish(opts = {}) {
     }
     let results = {
         package: manifest.name,
+        registry: options.registry,
         // The version should be marked as lower if we disallow decrementing the version
         type: (options.greaterVersionOnly && cmp === -1 && "lower") || diff || "none",
         version: manifest.version.raw,

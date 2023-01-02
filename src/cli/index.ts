@@ -35,13 +35,13 @@ export async function main(args: string[]): Promise<void> {
 
       if (!options.quiet) {
         if (results.type === "none") {
-          console.log(`\n📦 ${results.package} v${results.version} is already published to ${options.registry}`);
+          console.log(`\n📦 ${results.package} v${results.version} is already published to ${results.registry}`);
         }
         else if (results.dryRun) {
-          console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`);
+          console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to ${results.registry} (dry run)`);
         }
         else {
-          console.log(`\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`);
+          console.log(`\n📦 Successfully published ${results.package} v${results.version} to ${results.registry}`);
         }
       }
     }
