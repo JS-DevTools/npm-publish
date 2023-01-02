@@ -39,11 +39,10 @@
     "test": "mocha && npm run lint",
     "coverage": "nyc -x test -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
-    "bump": "bump --tag --push --all && git tag -afm v1 v1 && git push --tags --force",
     "release": "npm run clean && npm run build && npm test && npm run bump"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",

@@ -9,7 +9,7 @@ const paths = require("../utils/paths");
 beforeEach("clean the .tmp directory", async () => {
   // Delete the .tmp directory, if it exists
   try {
-    await fs.rmdir(paths.tmp, { recursive: true });
+    await fs.rm(paths.tmp, { recursive: true });
   }
   catch (err) {
     if (err.code === "ENOENT") return;
