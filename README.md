@@ -63,17 +63,16 @@ jobs:
 
 You can set any or all of the following input parameters:
 
-|Name                  |Type     |Default                     |Description
-|----------------------|-------- |----------------------------|------------------------------------
-|`token`               |string   |**required**                |The NPM auth token to use for publishing
-|`registry`            |string   |https://registry.npmjs.org/ |The NPM registry URL to use
-|`package`             |string   |./package.json              |The path of your package.json file
-|`tag`                 |string   |"latest"                    |The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.
-|`access`              |string   |"public" for non-scoped packages. "restricted" for scoped packages.|Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.
-|`dry-run`             |boolean  |false                       |Run NPM publish with the `--dry-run` flag to prevent publication
-|`check-version`       |boolean  |true                        |Only publish to NPM if the version number in `package.json` differs from the latest on NPM
-|`greater-version-only`|boolean  |false                       |Only publish to NPM if the version number in `package.json` is greater than the latest on NPM                           |
-
+| Name                   | Type    | Default                                                             | Description                                                                                                             |
+| ---------------------- | ------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `token`                | string  | **required**                                                        | The NPM auth token to use for publishing                                                                                |
+| `registry`             | string  | https://registry.npmjs.org/                                         | The NPM registry URL to use                                                                                             |
+| `package`              | string  | ./package.json                                                      | The path of your package.json file                                                                                      |
+| `tag`                  | string  | "latest"                                                            | The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.              |
+| `access`               | string  | "public" for non-scoped packages. "restricted" for scoped packages. | Determines whether the published package should be publicly visible, or restricted to members of your NPM organization. |
+| `dry-run`              | boolean | false                                                               | Run NPM publish with the `--dry-run` flag to prevent publication                                                        |
+| `check-version`        | boolean | true                                                                | Only publish to NPM if the version number in `package.json` differs from the latest on NPM                              |
+| `greater-version-only` | boolean | false                                                               | Only publish to NPM if the version number in `package.json` is greater than the latest on NPM                           |
 
 ## Output Variables
 
@@ -210,26 +209,6 @@ package_path          The absolute or relative path of the NPM package to publis
                       Can be a directory path, or the path of a package.json file.
                       Defaults to the current directory.
 ```
-
-## Contributing
-
-Contributions, enhancements, and bug-fixes are welcome! [Open an issue](https://github.com/JS-DevTools/npm-publish/issues) on GitHub and [submit a pull request](https://github.com/JS-DevTools/npm-publish/pulls).
-
-#### Building
-
-To build the project locally on your computer:
-
-1. **Clone this repo**<br>
-   `git clone https://github.com/JS-DevTools/npm-publish.git`
-
-2. **Install dependencies**<br>
-   `npm install`
-
-3. **Build the code**<br>
-   `npm run build`
-
-4. **Run the tests**<br>
-   `npm test`
 
 ## License
 

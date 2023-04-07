@@ -23,7 +23,8 @@ async function main(): Promise<void> {
       tag: getInput("tag"),
       access: getInput("access") as Access,
       dryRun: getInput("dry-run").toLowerCase() === "true",
-      greaterVersionOnly: getInput("greater-version-only").toLowerCase() === "true",
+      greaterVersionOnly:
+        getInput("greater-version-only").toLowerCase() === "true",
       debug: debugHandler,
     };
 
@@ -39,13 +40,11 @@ async function main(): Promise<void> {
       console.log(
         `\n📦 ${results.package} v${results.version} is lower than the version published to ${options.registry}`
       );
-    }
-    else if (results.dryRun) {
+    } else if (results.dryRun) {
       console.log(
         `\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`
       );
-    }
-    else {
+    } else {
       console.log(
         `\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`
       );
@@ -58,8 +57,7 @@ async function main(): Promise<void> {
     setOutput("tag", results.tag);
     setOutput("access", results.access);
     setOutput("dry-run", results.dryRun);
-  }
-  catch (error) {
+  } catch (error) {
     errorHandler(error as Error);
   }
 }

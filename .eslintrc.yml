@@ -3,7 +3,10 @@
 # https://jstools.dev/eslint-config/
 
 root: true
-extends: "@jsdevtools"
+
+extends:
+  - "@jsdevtools"
+  - "prettier"
 
 env:
   node: true

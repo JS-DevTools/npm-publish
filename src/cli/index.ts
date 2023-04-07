@@ -23,30 +23,31 @@ export async function main(args: string[]): Promise<void> {
       // Show the help text and exit
       console.log(usageText);
       process.exit(ExitCode.Success);
-    }
-    else if (version) {
+    } else if (version) {
       // Show the version number and exit
       let manifest = await readManifest(join(__dirname, "../../package.json"));
       console.log(manifest.version.toString());
       process.exit(ExitCode.Success);
-    }
-    else {
+    } else {
       let results = await npmPublish(options);
 
       if (!options.quiet) {
         if (results.type === "none") {
-          console.log(`\n📦 ${results.package} v${results.version} is already published to ${options.registry}`);
-        }
-        else if (results.dryRun) {
-          console.log(`\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`);
-        }
-        else {
-          console.log(`\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`);
+          console.log(
+            `\n📦 ${results.package} v${results.version} is already published to ${options.registry}`
+          );
+        } else if (results.dryRun) {
+          console.log(
+            `\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`
+          );
+        } else {
+          console.log(
+            `\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`
+          );
         }
       }
     }
-  }
-  catch (error) {
+  } catch (error) {
     errorHandler(error as Error);
   }
 }

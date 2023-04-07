@@ -3,6 +3,7 @@ import { Access, Debug, Options } from "./options";
 
 /**
  * Normalized and sanitized options
+ *
  * @internal
  */
 export interface NormalizedOptions {
@@ -20,6 +21,7 @@ export interface NormalizedOptions {
 
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
+ *
  * @internal
  */
 export function normalizeOptions(options: Options): NormalizedOptions {

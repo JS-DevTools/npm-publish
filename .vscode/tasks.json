@@ -23,7 +23,6 @@
       "problemMatcher": "$tsc"
     },
 
-
     {
       "type": "npm",
       "script": "test",
@@ -32,6 +31,6 @@
         "isDefault": true
       },
       "problemMatcher": "$eslint-stylish"
-    },
+    }
   ]
 }
