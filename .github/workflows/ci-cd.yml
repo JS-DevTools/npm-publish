@@ -26,11 +26,11 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          # TODO(mc, 2023-04-07): investigate and fix coverage-related failures on Windows
+          # - windows-latest
         node:
-          # - 10 - The library supports Node 10, but the tests don't
-          - 12
-          - 14
+          - 16
+          - 18
 
     steps:
       - name: Checkout source
