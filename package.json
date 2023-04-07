@@ -43,7 +43,7 @@
     "release": "npm run clean && npm run build && npm test && npm run bump"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=16"
   },
   "devDependencies": {
     "@actions/core": "^1.2.6",

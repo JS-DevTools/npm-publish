@@ -22,7 +22,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     let args = commandLineArgs(
       [
         { name: "token", type: String },
-        { name: "registry", type: String },
+        { name: "registry", type: String, defaultValue: "https://registry.npmjs.org/" },
         { name: "package", type: String, defaultOption: true },
         { name: "tag", type: String },
         { name: "access", type: String },

@@ -28,9 +28,8 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          # - 10 - The library supports Node 10, but the tests don't
-          - 12
-          - 14
+          - 16
+          - 18
 
     steps:
       - name: Checkout source
