@@ -5,6 +5,7 @@ import { usageText } from "./help";
 
 /**
  * The parsed command-line arguments
+ *
  * @internal
  */
 export interface ParsedArgs {
@@ -15,6 +16,7 @@ export interface ParsedArgs {
 
 /**
  * Parses the command-line arguments
+ *
  * @internal
  */
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -22,7 +24,11 @@ export function parseArgs(argv: string[]): ParsedArgs {
     let args = commandLineArgs(
       [
         { name: "token", type: String },
-        { name: "registry", type: String, defaultValue: "https://registry.npmjs.org/" },
+        {
+          name: "registry",
+          type: String,
+          defaultValue: "https://registry.npmjs.org/",
+        },
         { name: "package", type: String, defaultOption: true },
         { name: "tag", type: String },
         { name: "access", type: String },
@@ -55,12 +61,11 @@ export function parseArgs(argv: string[]): ParsedArgs {
         dryRun: args["dry-run"] as boolean,
         debug: args.debug ? console.debug : undefined,
         quiet: args.quiet as boolean,
-      }
+      },
     };
 
     return parsedArgs;
-  }
-  catch (error) {
+  } catch (error) {
     // There was an error parsing the command-line args
     return errorHandler(error as Error);
   }

@@ -4207,6 +4207,7 @@ exports.normalizeOptions = void 0;
 const url_1 = __nccwpck_require__(7310);
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
+ *
  * @internal
  */
 function normalizeOptions(options) {
@@ -4248,6 +4249,7 @@ const path_1 = __nccwpck_require__(1017);
 const npm_env_1 = __nccwpck_require__(5728);
 /**
  * Sets/updates the NPM config based on the options.
+ *
  * @internal
  */
 async function setNpmConfig(options) {
@@ -4283,7 +4285,9 @@ async function getNpmConfigPath(options) {
         // Get the environment variables to pass to NPM
         let env = (0, npm_env_1.getNpmEnvironment)(options);
         options.debug("Running command: npm config get userconfig");
-        let process = await ezSpawn.async("npm", "config", "get", "userconfig", { env });
+        let process = await ezSpawn.async("npm", "config", "get", "userconfig", {
+            env,
+        });
         return process.stdout.trim();
     }
     catch (error) {
@@ -4422,6 +4426,7 @@ const npm_config_1 = __nccwpck_require__(4328);
 const npm_env_1 = __nccwpck_require__(5728);
 /**
  * Runs NPM commands.
+ *
  * @internal
  */
 exports.npm = {
@@ -4443,7 +4448,10 @@ exports.npm = {
             // Get the environment variables to pass to NPM
             let env = (0, npm_env_1.getNpmEnvironment)(options);
             // Run NPM to get the latest published version of the package
-            options.debug(`Running command: npm view ${name} version`, { command, env });
+            options.debug(`Running command: npm view ${name} version`, {
+                command,
+                env,
+            });
             let result;
             try {
                 result = await ezSpawn.async(command, { env });
@@ -4497,7 +4505,12 @@ exports.npm = {
             // Get the environment variables to pass to NPM
             let env = (0, npm_env_1.getNpmEnvironment)(options);
             // Run NPM to publish the package
-            options.debug("Running command: npm publish", { command, stdio, cwd, env });
+            options.debug("Running command: npm publish", {
+                command,
+                stdio,
+                cwd,
+                env,
+            });
             await ezSpawn.async(command, { cwd, stdio, env });
         }
         catch (error) {
@@ -4522,6 +4535,7 @@ const path_1 = __nccwpck_require__(1017);
 const semver_1 = __nccwpck_require__(7710);
 /**
  * Reads the package manifest (package.json) and returns its parsed contents
+ *
  * @internal
  */
 async function readManifest(path, debug) {
