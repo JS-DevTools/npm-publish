@@ -17,18 +17,11 @@
       "request": "launch",
       "name": "Run Mocha",
       "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "--timeout=60000",
-        "--retries=0",
-      ],
-      "outFiles": [
-        "${workspaceFolder}/lib/**/*.js"
-      ],
+      "args": ["--timeout=60000", "--retries=0"],
+      "outFiles": ["${workspaceFolder}/lib/**/*.js"],
       "smartStep": true,
-      "skipFiles": [
-        "<node_internals>/**/*.js"
-      ],
+      "skipFiles": ["<node_internals>/**/*.js"],
       "outputCapture": "std"
-    },
+    }
   ]
 }

@@ -8,7 +8,7 @@ module.exports = {
   /**
    * Adds a stub behavior for our mock NPM binary
    */
-  mock ({ args, cwd, env, stdout, stderr, exitCode }) {
+  mock({ args, cwd, env, stdout, stderr, exitCode }) {
     args = args || [];
     cwd = cwd || paths.workspace;
     env = env || {};
@@ -27,7 +27,7 @@ module.exports = {
    *
    * @returns {{ args: string[], cwd: string, env: object, stdout: string, stderr: string, exitCode: number }}
    */
-  stub () {
+  stub() {
     let mocks = readMocks();
     let stub = mocks.find((mock) => !mock.ran);
     stub.ran = true;
@@ -39,7 +39,7 @@ module.exports = {
     /**
      * Asserts that NPM did not run
      */
-    didNotRun () {
+    didNotRun() {
       let mocks = readMocks();
       expect(mocks).to.have.lengthOf(0, "NPM ran when it shouldn't have");
     },
@@ -47,20 +47,23 @@ module.exports = {
     /**
      * Asserts that all mocks ran the specified number of times
      */
-    ran (times) {
+    ran(times) {
       let mocks = readMocks();
 
       for (let [index, stub] of mocks.entries()) {
         if (!stub.ran) {
           throw new Error(
             `NPM call #${index + 1} did not run:\n` +
-            `EXPECTED: npm ${stub.args.join(" ")}\n` +
-            "ACTUAL:   <not called>\n"
+              `EXPECTED: npm ${stub.args.join(" ")}\n` +
+              "ACTUAL:   <not called>\n"
           );
         }
       }
 
-      expect(mocks).to.have.lengthOf(times, `Expected NPM to be run ${times} times`);
+      expect(mocks).to.have.lengthOf(
+        times,
+        `Expected NPM to be run ${times} times`
+      );
     },
   },
 };
@@ -70,12 +73,11 @@ module.exports = {
  *
  * @returns {object[]}
  */
-function readMocks () {
+function readMocks() {
   try {
     let json = fs.readFileSync(paths.mocks, "utf8");
     return JSON.parse(json);
-  }
-  catch (_) {
+  } catch (_) {
     return [];
   }
 }

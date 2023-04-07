@@ -8,12 +8,13 @@ const { expect } = require("chai");
 const { EOL } = require("os");
 
 describe("CLI - failure tests", () => {
-
   it("should fail if the package.json file does not exist", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).stderr.to.include("Unable to read package.json \nENOENT: no such file or directory");
+    expect(cli).stderr.to.include(
+      "Unable to read package.json \nENOENT: no such file or directory"
+    );
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -29,7 +30,9 @@ describe("CLI - failure tests", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).to.have.stderr("Unable to parse package.json \nUnexpected token h in JSON at position 0\n");
+    expect(cli).to.have.stderr(
+      "Unable to parse package.json \nUnexpected token h in JSON at position 0\n"
+    );
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -38,13 +41,15 @@ describe("CLI - failure tests", () => {
 
   it("should fail if the package name is invalid", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "\n  \t" }},
+      { path: "workspace/package.json", contents: { name: "\n  \t" } },
     ]);
 
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).to.have.stderr("Unable to parse package.json \nInvalid package name\n");
+    expect(cli).to.have.stderr(
+      "Unable to parse package.json \nInvalid package name\n"
+    );
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -53,13 +58,18 @@ describe("CLI - failure tests", () => {
 
   it("should fail if the package version is invalid", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "hello, world" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "hello, world" },
+      },
     ]);
 
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).to.have.stderr("Unable to parse package.json \nInvalid Version: hello, world\n");
+    expect(cli).to.have.stderr(
+      "Unable to parse package.json \nInvalid Version: hello, world\n"
+    );
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -68,7 +78,10 @@ describe("CLI - failure tests", () => {
 
   it('should fail if the "npm view" command errors', () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -87,8 +100,8 @@ describe("CLI - failure tests", () => {
     expect(cli).to.have.stdout("");
     expect(cli).to.have.stderr(
       "Unable to determine the current version of my-lib on NPM. \n" +
-      "npm view my-lib version exited with a status of 1.\n\n" +
-      "BOOM!\n"
+        "npm view my-lib version exited with a status of 1.\n\n" +
+        "BOOM!\n"
     );
     expect(cli).to.have.exitCode(1);
 
@@ -97,8 +110,14 @@ describe("CLI - failure tests", () => {
 
   it("should fail if the .npmrc file is invalid", () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
-      { path: "home/.npmrc/file.txt", contents: "~/.npmrc is a directory, not a file" },
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
+      {
+        path: "home/.npmrc/file.txt",
+        contents: "~/.npmrc is a directory, not a file",
+      },
     ]);
 
     npm.mock({
@@ -110,7 +129,9 @@ describe("CLI - failure tests", () => {
 
     expect(cli).to.have.stdout("");
     expect(cli).stderr.to.include("Unable to read the NPM config file: ");
-    expect(cli).stderr.to.include("EISDIR: illegal operation on a directory, read");
+    expect(cli).stderr.to.include(
+      "EISDIR: illegal operation on a directory, read"
+    );
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(1);
@@ -118,7 +139,10 @@ describe("CLI - failure tests", () => {
 
   it('should fail if the "npm config" command errors', () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -130,8 +154,12 @@ describe("CLI - failure tests", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).stderr.to.include("Unable to determine the NPM config file path.");
-    expect(cli).stderr.to.include("npm config get userconfig exited with a status of 1");
+    expect(cli).stderr.to.include(
+      "Unable to determine the NPM config file path."
+    );
+    expect(cli).stderr.to.include(
+      "npm config get userconfig exited with a status of 1"
+    );
     expect(cli).stderr.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
@@ -140,7 +168,10 @@ describe("CLI - failure tests", () => {
 
   it('should fail if the "npm publish" command errors', () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "2.0.0" }},
+      {
+        path: "workspace/package.json",
+        contents: { name: "my-lib", version: "2.0.0" },
+      },
     ]);
 
     npm.mock({
@@ -167,12 +198,13 @@ describe("CLI - failure tests", () => {
     let cli = exec.cli();
 
     expect(cli).to.have.stdout("");
-    expect(cli).stderr.to.include("Unable to publish my-lib v2.0.0 to https://registry.npmjs.org/.");
+    expect(cli).stderr.to.include(
+      "Unable to publish my-lib v2.0.0 to https://registry.npmjs.org/."
+    );
     expect(cli).stderr.to.include("npm publish exited with a status of 1");
     expect(cli).stderr.to.include("BOOM!");
     expect(cli).to.have.exitCode(1);
 
     npm.assert.ran(4);
   });
-
 });

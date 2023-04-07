@@ -9,6 +9,5 @@ spec:
   # Test specs
   - test/specs/**/*.spec.js
 
-bail: true
 recursive: true
 timeout: 30000 # Allow time for multiple process spawning

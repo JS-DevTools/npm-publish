@@ -3,7 +3,9 @@ import { NormalizedOptions } from "./normalize-options";
 /**
  * Returns the environment variables that should be passed to NPM, based on the given options.
  */
-export function getNpmEnvironment(options: NormalizedOptions): NodeJS.ProcessEnv {
+export function getNpmEnvironment(
+  options: NormalizedOptions
+): NodeJS.ProcessEnv {
   /* eslint-disable @typescript-eslint/naming-convention */
   let env: NodeJS.ProcessEnv = {
     // Copy all the host's environment variables
@@ -15,7 +17,9 @@ export function getNpmEnvironment(options: NormalizedOptions): NodeJS.ProcessEnv
   };
 
   // Determine if we need to set the NPM token
-  let needsToken = Boolean(options.token && process.env.INPUT_TOKEN !== options.token);
+  let needsToken = Boolean(
+    options.token && process.env.INPUT_TOKEN !== options.token
+  );
 
   if (needsToken) {
     env.INPUT_TOKEN = options.token;

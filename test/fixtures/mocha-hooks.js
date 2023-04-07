@@ -8,17 +8,13 @@ process.env.NODE_ENV = "test";
 /**
  * Re-create the .tmp directories before each test
  */
-beforeEach("clean the .tmp directory", async () => {
-  // Delete the .tmp directory, if it exists
-  try {
-    await fs.rm(paths.tmp, { recursive: true });
-  }
-  catch (err) {
-    if (err.code === "ENOENT") return;
-    throw err;
-  }
-
+beforeEach("create fixture directories", async () => {
   // Create the home and workspace directories
   await fs.mkdir(paths.home, { recursive: true });
   await fs.mkdir(paths.workspace, { recursive: true });
+});
+
+afterEach("clean the .tmp directory", async () => {
+  // Delete the .tmp directory, if it exists
+  await fs.rm(paths.tmp, { recursive: true, force: true });
 });

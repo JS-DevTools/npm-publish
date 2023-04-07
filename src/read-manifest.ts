@@ -19,14 +19,16 @@ export interface Manifest {
  *
  * @internal
  */
-export async function readManifest(path: string, debug?: Debug): Promise<Manifest> {
+export async function readManifest(
+  path: string,
+  debug?: Debug
+): Promise<Manifest> {
   debug && debug(`Reading package manifest from ${resolve(path)}`);
   let json: string;
 
   try {
     json = await fs.readFile(path, "utf-8");
-  }
-  catch (error) {
+  } catch (error) {
     throw ono(error, `Unable to read ${path}`);
   }
 
@@ -44,8 +46,7 @@ export async function readManifest(path: string, debug?: Debug): Promise<Manifes
 
     debug && debug("MANIFEST:", manifest);
     return manifest;
-  }
-  catch (error) {
+  } catch (error) {
     throw ono(error, `Unable to parse ${path}`);
   }
 }
