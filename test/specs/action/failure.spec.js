@@ -38,7 +38,7 @@ describe("GitHub Action - failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("::error::TypeError [ERR_INVALID_URL]: Invalid URL");
+    expect(cli).stdout.to.include("::error::TypeError: Invalid URL");
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
