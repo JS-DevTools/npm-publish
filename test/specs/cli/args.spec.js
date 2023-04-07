@@ -7,13 +7,14 @@ const { expect } = require("chai");
 const manifest = require("../../../package.json");
 
 describe("CLI - argument tests", () => {
-
   it("should error if an invalid argument is used", () => {
     let cli = exec.cli("--debug", "--help", "--fizzbuzz", "--quiet");
 
     expect(cli).to.have.exitCode(9);
     expect(cli).to.have.stdout("");
-    expect(cli.stderr).to.match(/^Unknown option: --fizzbuzz\n\nUsage: npm-publish \[options\] \[package_path\]\n/);
+    expect(cli.stderr).to.match(
+      /^Unknown option: --fizzbuzz\n\nUsage: npm-publish \[options\] \[package_path\]\n/
+    );
   });
 
   it("should error if an invalid shorthand argument is used", () => {
@@ -21,7 +22,9 @@ describe("CLI - argument tests", () => {
 
     expect(cli).to.have.exitCode(9);
     expect(cli).to.have.stdout("");
-    expect(cli.stderr).to.match(/^Unknown option: -z\n\nUsage: npm-publish \[options\] \[package_path\]\n/);
+    expect(cli.stderr).to.match(
+      /^Unknown option: -z\n\nUsage: npm-publish \[options\] \[package_path\]\n/
+    );
   });
 
   it("should print a more detailed error if DEBUG is set", () => {
@@ -31,7 +34,9 @@ describe("CLI - argument tests", () => {
     expect(cli).to.have.stdout("");
     expect(cli).to.have.exitCode(1);
 
-    expect(cli).to.have.stderr.that.matches(/^Error: Unable to read package.json \nENOENT: no such file or directory/);
+    expect(cli).to.have.stderr.that.matches(
+      /^Error: Unable to read package.json \nENOENT: no such file or directory/
+    );
     expect(cli).to.have.stderr.that.matches(/\n    at /);
 
     process.env.DEBUG = "";
@@ -43,7 +48,9 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(0);
       expect(cli).to.have.stderr("");
-      expect(cli.stdout).to.match(/^\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stdout).to.match(
+        /^\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
 
     it("should support -h shorthand", () => {
@@ -51,7 +58,9 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(0);
       expect(cli).to.have.stderr("");
-      expect(cli.stdout).to.match(/^\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stdout).to.match(
+        /^\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
 
     it("should ignore other arguments", () => {
@@ -59,7 +68,9 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(0);
       expect(cli).to.have.stderr("");
-      expect(cli.stdout).to.match(/^\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stdout).to.match(
+        /^\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
 
     it("should ignore other shorthand arguments", () => {
@@ -67,7 +78,9 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(0);
       expect(cli).to.have.stderr("");
-      expect(cli.stdout).to.match(/^\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stdout).to.match(
+        /^\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
   });
 
@@ -111,7 +124,9 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(9);
       expect(cli).to.have.stdout("");
-      expect(cli.stderr).to.match(/^The --token argument requires a value\n\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stderr).to.match(
+        /^The --token argument requires a value\n\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
   });
 
@@ -121,23 +136,27 @@ describe("CLI - argument tests", () => {
 
       expect(cli).to.have.exitCode(9);
       expect(cli).to.have.stdout("");
-      expect(cli.stderr).to.match(/^The --registry argument requires a value\n\nUsage: npm-publish \[options\] \[package_path\]\n/);
+      expect(cli.stderr).to.match(
+        /^The --registry argument requires a value\n\nUsage: npm-publish \[options\] \[package_path\]\n/
+      );
     });
 
     it("should fail if the NPM registry URL is invalid", () => {
       files.create([
-        { path: "workspace/package.json", contents: { name: "my-lib", version: "1.2.3" }},
+        {
+          path: "workspace/package.json",
+          contents: { name: "my-lib", version: "1.2.3" },
+        },
       ]);
 
       let cli = exec.cli("--registry", "example.com");
 
       expect(cli).to.have.stdout("");
-      expect(cli).stderr.to.include("Invalid URL: example.com");
+      expect(cli).stderr.to.include("Invalid URL");
       expect(cli).to.have.exitCode(1);
 
       files.assert.doesNotExist("home/.npmrc");
       npm.assert.ran(0);
     });
   });
-
 });

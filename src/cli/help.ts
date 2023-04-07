@@ -1,5 +1,6 @@
 /**
  * Text explaining how to use the CLI
+ *
  * @internal
  */
 export const usageText = `

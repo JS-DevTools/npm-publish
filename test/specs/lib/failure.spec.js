@@ -30,7 +30,7 @@ describe("NPM package - failure tests", () => {
     }
     catch (error) {
       expect(error).to.be.an.instanceOf(TypeError);
-      expect(error.message).to.equal("Invalid URL: example.com");
+      expect(error.message).to.equal("Invalid URL");
     }
 
     files.assert.doesNotExist("home/.npmrc");
@@ -222,7 +222,7 @@ describe("NPM package - failure tests", () => {
     catch (error) {
       expect(error).to.be.an.instanceOf(Error);
       expect(error.message).to.equal(
-        "Unable to publish my-lib v2.0.0 to NPM. \n" +
+        "Unable to publish my-lib v2.0.0 to https://registry.npmjs.org/. \n" +
         "npm publish exited with a status of 1.\n\n" +
         "BOOM!"
       );

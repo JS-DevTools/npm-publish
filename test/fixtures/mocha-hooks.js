@@ -6,11 +6,13 @@ const paths = require("../utils/paths");
 /**
  * Re-create the .tmp directories before each test
  */
-beforeEach("clean the .tmp directory", async () => {
-  // Delete the .tmp directory, if it exists
-  await fs.rmdir(paths.tmp, { recursive: true });
-
+beforeEach("create fixture directories", async () => {
   // Create the home and workspace directories
   await fs.mkdir(paths.home, { recursive: true });
   await fs.mkdir(paths.workspace, { recursive: true });
+});
+
+afterEach("clean the .tmp directory", async () => {
+  // Delete the .tmp directory, if it exists
+  await fs.rm(paths.tmp, { recursive: true, force: true });
 });

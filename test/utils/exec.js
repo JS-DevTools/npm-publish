@@ -10,7 +10,7 @@ module.exports = {
   /**
    * Executes the GitHub Action with the specified options
    */
-  action (options) {
+  action(options) {
     // Deep merge the options object, since Chai Exec only does a shallow merge
     options = {
       cwd: paths.workspace,
@@ -22,7 +22,7 @@ module.exports = {
         INPUT_PACKAGE: "package.json",
         "INPUT_CHECK-VERSION": "true",
         ...options.env,
-      }
+      },
     };
 
     return chaiExec("node", [paths.action], options);
@@ -31,7 +31,7 @@ module.exports = {
   /**
    * Executes the CLI with the specified arguments
    */
-  cli (...args) {
+  cli(...args) {
     return chaiExec("node", [paths.cli].concat(args), { cwd: paths.workspace });
   },
 };
