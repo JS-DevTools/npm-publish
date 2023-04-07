@@ -30,7 +30,8 @@
   ],
   "scripts": {
     "clean": "shx rm -rf .nyc_output coverage lib dist",
-    "lint": "eslint src test",
+    "lint": "npm run _eslint && npm run _prettier -- --check",
+    "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "npm run build:typescript && npm run build:ncc && npm run build:node_modules",
     "build:typescript": "tsc --declaration",
     "build:ncc": "ncc build src/action/index.ts --source-map --external semver",
@@ -39,10 +40,11 @@
     "test": "mocha && npm run lint",
     "coverage": "nyc -x test -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
-    "release": "npm run clean && npm run build && npm test && npm run bump"
+    "_eslint": "eslint \"**/*.@(js|ts)\"",
+    "_prettier": "prettier \"**/*.@(js|ts|json|md|yml)\""
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",
@@ -55,12 +57,14 @@
     "@types/node": "^14.14.19",
     "@types/semver": "^7.3.4",
     "@types/source-map-support": "^0.5.3",
-    "@vercel/ncc": "^0.36.0",
+    "@vercel/ncc": "^0.36.1",
     "chai": "^4.2.0",
     "eslint": "^7.17.0",
+    "eslint-config-prettier": "^8.8.0",
     "mocha": "^8.2.1",
     "npm-check": "^5.9.0",
     "nyc": "^15.1.0",
+    "prettier": "^2.8.7",
     "shx": "^0.3.3",
     "typescript": "^4.1.3"
   },

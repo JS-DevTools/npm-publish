@@ -12,11 +12,10 @@ fs.chmodSync(paths.npm, "0777");
 let otherPaths = getEnvPath();
 process.env.PATH = paths.bin + path.delimiter + otherPaths; // eslint-disable-line no-path-concat
 
-
 /**
  * Returns the PATH environment variable, case-insensitively
  */
-function getEnvPath () {
+function getEnvPath() {
   let keys = Object.keys(process.env);
 
   for (let key of keys) {

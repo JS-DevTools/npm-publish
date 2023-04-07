@@ -7,5 +7,5 @@
 export enum ExitCode {
   Success = 0,
   FatalError = 1,
-  InvalidArgument = 9
+  InvalidArgument = 9,
 }

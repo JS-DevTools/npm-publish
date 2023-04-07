@@ -14,7 +14,7 @@ module.exports = {
    *  - `path`: The relative path of the entry.
    *  - `contents`: The contents of the file, as a string or JSON object
    */
-  create (files = []) {
+  create(files = []) {
     for (let file of files) {
       file = typeof file === "string" ? { path: file } : file;
       file.path = path.join(paths.tmp, file.path);
@@ -32,7 +32,7 @@ module.exports = {
     /**
      * Asserts the the specified file has the specified contents
      */
-    contents (p, expected) {
+    contents(p, expected) {
       let actual = fs.readFileSync(path.join(paths.tmp, p), "utf8");
       expect(actual).to.equal(expected, `Incorrect file contents in ${p}`);
     },
@@ -40,7 +40,7 @@ module.exports = {
     /**
      * Asserts the the specified file does not exist
      */
-    doesNotExist (p) {
+    doesNotExist(p) {
       let exists = fs.existsSync(path.join(paths.tmp, p));
       expect(exists).to.equal(false, `File should not exist: ${p}`);
     },
