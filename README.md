@@ -52,7 +52,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 12
-      - run: npm install
+      - run: npm ci
       - run: npm test
       - uses: JS-DevTools/npm-publish@v1
         with:
