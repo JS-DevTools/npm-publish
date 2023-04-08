@@ -3,10 +3,12 @@
     "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
+    "esModuleInterop": true,
 
+    "rootDir": "src",
     "outDir": "lib",
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
 
     "newLine": "LF",
     "forceConsistentCasingInFileNames": true,
@@ -20,6 +22,5 @@
 
     "typeRoots": ["node_modules/@types"]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"]
 }
