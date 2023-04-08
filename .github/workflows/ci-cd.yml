@@ -26,8 +26,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          # TODO(mc, 2023-04-07): investigate and fix coverage-related failures on Windows
-          # - windows-latest
+          - windows-latest
         node:
           - 16
           - 18
@@ -54,9 +53,8 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@67662d24394fd74bffcf7b462d1b432814159afd
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
 
   coverage:
@@ -66,9 +64,8 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@67662d24394fd74bffcf7b462d1b432814159afd
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
 
   deploy:

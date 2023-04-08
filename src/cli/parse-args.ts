@@ -1,4 +1,4 @@
-import * as commandLineArgs from "command-line-args";
+import commandLineArgs from "command-line-args";
 import { Access, Options } from "../options";
 import { ExitCode } from "./exit-code";
 import { usageText } from "./help";
