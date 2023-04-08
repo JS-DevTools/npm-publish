@@ -40,8 +40,6 @@
     "test": "mocha && npm run lint",
     "coverage": "nyc -x test -x dist/sourcemap-register.js node_modules/mocha/bin/mocha",
     "upgrade": "npm-check -u && npm audit fix",
-    "bump": "bump --tag --push --all && git tag -afm v1 v1 && git push --tags --force",
-    "release": "npm run clean && npm run build && npm test && npm run bump",
     "_eslint": "eslint \"**/*.@(js|ts)\"",
     "_prettier": "prettier \"**/*.@(js|ts|json|md|yml)\""
   },
@@ -49,7 +47,7 @@
     "node": ">=16"
   },
   "devDependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.10.0",
     "@jsdevtools/chai-exec": "^2.1.1",
     "@jsdevtools/eslint-config": "^1.1.4",
     "@jsdevtools/version-bump-prompt": "^6.1.0",

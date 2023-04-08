@@ -9,6 +9,8 @@ const { EOL } = require("os");
 
 describe("GitHub Action - failure tests", () => {
   it("should fail if the NPM token isn't set", () => {
+    files.create([{ path: "workspace/not-package.json", contents: {} }]);
+
     let cli = exec.action({
       env: {
         INPUT_TOKEN: "",

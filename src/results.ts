@@ -18,6 +18,11 @@ export interface Results {
   package: string;
 
   /**
+   * The registry where the NPM package was published
+   */
+  registry: URL;
+
+  /**
    * The version that was published
    */
   version: string;

@@ -1,4 +1,9 @@
-import { debug, getInput, setFailed, setOutput } from "@actions/core";
+import {
+  debug,
+  getInput,
+  setFailed,
+  setOutput as setOutputActionsCore,
+} from "@actions/core";
 import { npmPublish } from "../npm-publish";
 import { Access, Options } from "../options";
 
@@ -60,6 +65,17 @@ async function main(): Promise<void> {
   } catch (error) {
     errorHandler(error as Error);
   }
+}
+
+/**
+ * Set output with logging to stdout for test support
+ */
+function setOutput(...args: Parameters<typeof setOutputActionsCore>) {
+  if (process.env.NODE_ENV === "test") {
+    console.log(`TEST::set-output name=${args[0]}::${args[1]}`);
+    return;
+  }
+  return setOutputActionsCore(...args);
 }
 
 /**

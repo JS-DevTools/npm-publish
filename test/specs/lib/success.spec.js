@@ -50,6 +50,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "2.0.0",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -97,6 +98,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.0",
       oldVersion: "0.0.0",
       tag: "latest",
@@ -142,6 +144,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.0",
       oldVersion: "0.0.0",
       tag: "my-tag",
@@ -177,6 +180,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "none",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.0",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -226,6 +230,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "prerelease",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.0-beta.1",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -272,6 +277,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "minor",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.1.0",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -334,6 +340,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "patch",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.1",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -390,6 +397,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "prerelease",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.0.0-beta",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -435,6 +443,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "@my-scope/my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "2.0.0",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -480,6 +489,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "2.0.0",
       oldVersion: "1.0.0",
       tag: "next",
@@ -525,6 +535,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "major",
       package: "@my-scope/my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "2.0.0",
       oldVersion: "1.0.0",
       tag: "latest",
@@ -574,6 +585,7 @@ describe("NPM package - success tests", () => {
     expect(results).to.deep.equal({
       type: "minor",
       package: "my-lib",
+      registry: new URL("https://registry.npmjs.org/"),
       version: "1.1.0",
       oldVersion: "1.0.0",
       tag: "latest",
