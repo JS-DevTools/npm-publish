@@ -70,7 +70,11 @@
     "nyc": "^15.1.0",
     "prettier": "^2.8.7",
     "shx": "^0.3.3",
-    "typescript": "^5.0.4"
+    "testdouble": "^3.17.2",
+    "testdouble-vitest": "^0.1.2",
+    "type-fest": "^3.8.0",
+    "typescript": "^5.0.4",
+    "vitest": "^0.30.0"
   },
   "dependencies": {
     "@jsdevtools/ez-spawn": "^3.0.4",
