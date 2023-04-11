@@ -1,4 +1,4 @@
-import { vi, describe, it, afterEach, expect } from "vitest";
+import { vi, describe, it, beforeEach, afterEach, expect } from "vitest";
 import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
@@ -13,15 +13,17 @@ describe("npm", () => {
   const authConfig = { registry: "https://example.com", token: "abc123" };
   const cliEnv = { foo: "bar" };
 
+  beforeEach(() => {
+    td.when(useNpmEnv(authConfig, td.matchers.isA(Function))).thenDo(
+      (_: unknown, task: NpmCliTask<unknown>) => task(cliEnv)
+    );
+  });
+
   afterEach(() => {
     reset();
   });
 
-  it("should configure auth to get existing versions", async () => {
-    td.when(useNpmEnv(authConfig, td.matchers.isA(Function))).thenDo(
-      (_: unknown, task: NpmCliTask<unknown>) => task(cliEnv)
-    );
-
+  it("should get existing versions", async () => {
     td.when(
       callNpmCli<subject.VersionsResult>(
         "view",
@@ -41,6 +43,20 @@ describe("npm", () => {
     expect(result).toEqual({
       "dist-tags": { latest: "1.2.3" },
       versions: ["1.2.3", "4.5.6"],
+    });
+  });
+
+  it("should publish a package", async () => {
+    td.when(
+      callNpmCli<subject.VersionsResult>(
+        "view",
+        ["@example/cool-package", "dist-tags", "versions"],
+        { env: cliEnv, ifError: { e404: { "dist-tags": {}, versions: [] } } }
+      )
+    ).thenResolve({
+      id: "@example/cool-package@1.2.3",
+      name: "@example/cool-package",
+      version: "1.2.3",
     });
   });
 });
