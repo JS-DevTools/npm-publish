@@ -1,42 +1,25 @@
-import { NpmPublishError } from "../error";
-import type { NpmClient, NpmClientOptions, GetVersionsResult } from "./client";
-import { configureNpmCli, removeNpmCliConfig } from "./configure-npm";
-import { callNpmCli, type NpmCliOptions } from "./call-npm-cli";
+import { useNpmEnv, type NpmAuthConfig } from "./use-npm-env";
+import { callNpmCli, type NpmCliEnv } from "./call-npm-cli";
 
-export * from "./client";
-
-export async function createNpmClient(
-  options: NpmClientOptions
-): Promise<NpmClient> {
-  const npmCliOptions = await configureNpmCli(options);
-
-  return {
-    getVersions: (packageName: string) =>
-      getVersions(packageName, npmCliOptions),
-    cleanup: () => removeNpmCliConfig(npmCliOptions),
-  };
+export interface VersionsResult {
+  "dist-tags": Record<string, string>;
+  versions: string[];
 }
 
-async function getVersions(
+export async function getVersions(
   packageName: string,
-  cliOptions: NpmCliOptions
-): Promise<GetVersionsResult> {
-  const result = await callNpmCli<GetVersionsResult>(
+  authConfig: NpmAuthConfig
+): Promise<VersionsResult> {
+  return useNpmEnv(authConfig, (env) => getVersionWithCliEnv(packageName, env));
+}
+
+async function getVersionWithCliEnv(
+  packageName: string,
+  env: NpmCliEnv
+): Promise<VersionsResult> {
+  return callNpmCli<VersionsResult>(
     "view",
     [packageName, "dist-tags", "versions"],
-    cliOptions
+    { env, ifError: { e404: { "dist-tags": {}, versions: [] } } }
   );
-
-  if ("error" in result) {
-    if (result.code !== "E404") {
-      throw new NpmPublishError(
-        `Unable to get published versions of ${packageName}`,
-        result.error
-      );
-    }
-
-    return { "dist-tags": {}, versions: [] };
-  }
-
-  return result;
 }

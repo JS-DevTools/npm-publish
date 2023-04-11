@@ -1,87 +1,46 @@
-import { vi, describe, it, beforeEach, afterEach, expect } from "vitest";
+import { vi, describe, it, afterEach, expect } from "vitest";
 import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
-import { createNpmClient, type NpmClient } from "..";
-import { configureNpmCli, removeNpmCliConfig } from "../configure-npm";
+import * as subject from "..";
+import { useNpmEnv, type NpmCliTask } from "../use-npm-env";
 import { callNpmCli } from "../call-npm-cli";
 
-vi.mock("../configure-npm", () => imitateEsm("../configure-npm"));
+vi.mock("../use-npm-env", () => imitateEsm("../use-npm-env"));
 vi.mock("../call-npm-cli", () => imitateEsm("../call-npm-cli"));
 
 describe("npm", () => {
-  const options = { registry: "https://example.com", token: "abc123" };
-  const cliOptions = { extraArgs: [], env: {} };
-  let subject: NpmClient;
-
-  beforeEach(async () => {
-    td.when(configureNpmCli(options), { times: 1 }).thenResolve(cliOptions);
-    subject = await createNpmClient(options);
-  });
+  const authConfig = { registry: "https://example.com", token: "abc123" };
+  const cliEnv = { foo: "bar" };
 
   afterEach(() => {
     reset();
   });
 
-  it("should clean up a client", async () => {
-    await subject.cleanup();
-    td.verify(removeNpmCliConfig(cliOptions), { times: 1 });
-  });
+  it("should configure auth to get existing versions", async () => {
+    td.when(useNpmEnv(authConfig, td.matchers.isA(Function))).thenDo(
+      (_: unknown, task: NpmCliTask<unknown>) => task(cliEnv)
+    );
 
-  it("should get existing versions", async () => {
     td.when(
-      callNpmCli(
+      callNpmCli<subject.VersionsResult>(
         "view",
         ["@example/cool-package", "dist-tags", "versions"],
-        cliOptions
+        { env: cliEnv, ifError: { e404: { "dist-tags": {}, versions: [] } } }
       )
     ).thenResolve({
       "dist-tags": { latest: "1.2.3" },
       versions: ["1.2.3", "4.5.6"],
     });
 
-    const result = await subject.getVersions("@example/cool-package");
+    const result = await subject.getVersions(
+      "@example/cool-package",
+      authConfig
+    );
 
     expect(result).toEqual({
       "dist-tags": { latest: "1.2.3" },
       versions: ["1.2.3", "4.5.6"],
     });
-  });
-
-  it("should get no versions if unpublished", async () => {
-    td.when(
-      callNpmCli(
-        "view",
-        ["@example/cool-package", "dist-tags", "versions"],
-        cliOptions
-      )
-    ).thenResolve({
-      code: "E404",
-      error: new Error("oh no"),
-    });
-
-    const result = await subject.getVersions("@example/cool-package");
-
-    expect(result).toEqual({
-      "dist-tags": {},
-      versions: [],
-    });
-  });
-
-  it("should raise if other error", async () => {
-    td.when(
-      callNpmCli(
-        "view",
-        ["@example/cool-package", "dist-tags", "versions"],
-        cliOptions
-      )
-    ).thenResolve({
-      code: "E999",
-      error: new Error("oh no"),
-    });
-
-    const result = subject.getVersions("@example/cool-package");
-
-    await expect(result).rejects.toThrow(/oh no/);
   });
 });
