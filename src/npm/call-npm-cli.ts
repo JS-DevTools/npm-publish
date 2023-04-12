@@ -49,7 +49,7 @@ export async function callNpmCli<TReturn = string>(
   options: NpmCliOptions<TReturn> = {}
 ): Promise<TReturn> {
   const { stdout, error } = await execProcess(
-    ["npm", command, "--json", ...args].join(" "),
+    ["npm", command, "--ignore-scripts", "--json", ...args].join(" "),
     options?.env
   );
 

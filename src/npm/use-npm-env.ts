@@ -2,12 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { type NpmCliEnv } from "./call-npm-cli";
-
-export interface NpmAuthConfig {
-  registry: string;
-  token: string;
-}
+import type { AuthConfig } from "../normalize-options";
+import { callNpmCli, type NpmCliEnv } from "./call-npm-cli";
 
 export type NpmCliTask<TReturn> = (env: NpmCliEnv) => Promise<TReturn>;
 
@@ -21,27 +17,35 @@ export type NpmCliTask<TReturn> = (env: NpmCliEnv) => Promise<TReturn>;
  * @returns The resolved value of `task`
  */
 export async function useNpmEnv<TReturn>(
-  auth: NpmAuthConfig,
+  auth: AuthConfig,
   task: NpmCliTask<TReturn>
 ): Promise<TReturn> {
-  const { registry, token } = auth;
+  const { registryUrl, token } = auth;
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "npm-publish-"));
   const tempConfigFile = path.join(tempDir, ".npmrc");
-  const registryUrl = new URL(registry);
+  const userConfigFile = await callNpmCli("config", ["get", "userconfig"]);
+
+  const userConfig = await fs
+    .readFile(userConfigFile, "utf8")
+    .catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return "";
+      throw error;
+    });
 
   const config = [
+    `; copied from ${userConfig}`,
+    userConfig,
     "; added by jsdevtools/npm-publish",
-    `registry=${registry}`,
-    `//${registryUrl.hostname}/:authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${registryUrl.value.href}`,
+    `//${registryUrl.value.hostname}/:authToken=\${NODE_AUTH_TOKEN}`,
     "",
   ].join(os.EOL);
 
-  const env = {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    NODE_AUTH_TOKEN: token,
-    npm_config_userconfig: tempConfigFile,
-    /* eslint-enable @typescript-eslint/naming-convention */
-  };
+  const env: NpmCliEnv = { npm_config_userconfig: tempConfigFile };
+
+  if (token.value) {
+    env.NODE_AUTH_TOKEN = token.value;
+  }
 
   await fs.writeFile(tempConfigFile, config, "utf8");
 

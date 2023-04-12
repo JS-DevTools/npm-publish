@@ -54,13 +54,11 @@ export function parseArgs(argv: string[]): ParsedArgs {
       version: args.version as boolean,
       options: {
         token: args.token as string,
-        registry: args.registry as string,
+        registryUrl: args.registry as string,
         package: args.package as string,
         tag: args.tag as string,
         access: args.access as Access,
         dryRun: args["dry-run"] as boolean,
-        debug: args.debug ? console.debug : undefined,
-        quiet: args.quiet as boolean,
       },
     };
 

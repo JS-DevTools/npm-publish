@@ -12,7 +12,7 @@ describe("callNpmCli", () => {
   it("should call the NPM CLI in JSON mode", async () => {
     const result = await subject.callNpmCli("config", ["list"]);
 
-    expect(result).toMatchObject({ json: true });
+    expect(result).toMatchObject({ json: true, "ignore-scripts": true });
   });
 
   it("should raise if error", async () => {

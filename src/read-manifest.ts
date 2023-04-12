@@ -1,8 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { SemVer } from "semver";
 import { ono } from "@jsdevtools/ono";
-import { Debug } from "./options";
 
 /**
  * A package manifest (package.json)
@@ -11,43 +9,46 @@ import { Debug } from "./options";
  */
 export interface Manifest {
   name: string;
-  version: SemVer;
+  version: string;
+  scope?: string;
 }
 
 /**
- * Reads the package manifest (package.json) and returns its parsed contents
+ * Reads the package manifest (package.json) and returns its parsed contents.
  *
- * @internal
+ * @param packagePath The path to the package being published.
+ * @returns The parsed package metadata.
  */
-export async function readManifest(
-  packageSpec?: string,
-  debug?: Debug
-): Promise<Manifest> {
-  const packageManifest = path.join(packageSpec ?? ".", "package.json");
-  debug && debug(`Reading manifest from ${path.resolve(packageManifest)}`);
+export async function readManifest(packagePath?: string): Promise<Manifest> {
+  let manifestPath = packagePath;
+
+  if (!manifestPath) {
+    manifestPath = "package.json";
+  } else if (path.extname(manifestPath) === "") {
+    manifestPath = path.join(manifestPath, "package.json");
+  }
+
   let json: string;
 
   try {
-    json = await fs.readFile(packageManifest, "utf8");
+    json = await fs.readFile(manifestPath, "utf8");
   } catch (error) {
-    throw ono(error, `Unable to read ${packageManifest}`);
+    throw ono(error, `Unable to read ${manifestPath}`);
   }
 
   try {
-    let { name, version } = JSON.parse(json) as Record<string, unknown>;
+    const { name, version } = JSON.parse(json) as Record<string, unknown>;
 
     if (typeof name !== "string" || name.trim().length === 0) {
       throw new TypeError("Invalid package name");
     }
 
-    let manifest: Manifest = {
-      name,
-      version: new SemVer(version as string),
-    };
+    if (typeof version !== "string" || version.trim().length === 0) {
+      throw new TypeError("Invalid package version");
+    }
 
-    debug && debug("MANIFEST:", manifest);
-    return manifest;
+    return { name: name.trim(), version: version.trim() };
   } catch (error) {
-    throw ono(error, `Unable to parse ${packageManifest}`);
+    throw ono(error, `Unable to parse ${manifestPath}`);
   }
 }

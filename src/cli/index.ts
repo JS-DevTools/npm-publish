@@ -31,21 +31,21 @@ export async function main(args: string[]): Promise<void> {
     } else {
       let results = await npmPublish(options);
 
-      if (!options.quiet) {
-        if (results.type === "none") {
-          console.log(
-            `\n📦 ${results.package} v${results.version} is already published to ${options.registry}`
-          );
-        } else if (results.dryRun) {
-          console.log(
-            `\n📦 ${results.package} v${results.version} was NOT actually published to ${options.registry} (dry run)`
-          );
-        } else {
-          console.log(
-            `\n📦 Successfully published ${results.package} v${results.version} to ${options.registry}`
-          );
-        }
+      // if (!options.quiet) {
+      if (!results.releaseType) {
+        console.log(
+          `\n📦 ${results.name} v${results.version} is already published to ${results.registryUrl}`
+        );
+      } else if (results.dryRun) {
+        console.log(
+          `\n📦 ${results.name} v${results.version} was NOT actually published to ${results.registryUrl} (dry run)`
+        );
+      } else {
+        console.log(
+          `\n📦 Successfully published ${results.name} v${results.version} to ${results.registryUrl}`
+        );
       }
+      // }
     }
   } catch (error) {
     errorHandler(error as Error);

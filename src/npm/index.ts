@@ -1,4 +1,5 @@
-import { useNpmEnv, type NpmAuthConfig } from "./use-npm-env";
+import type { AuthConfig, PublishConfig } from "../normalize-options";
+import { useNpmEnv } from "./use-npm-env";
 import { callNpmCli } from "./call-npm-cli";
 import { getPublishArgs } from "./get-publish-args";
 
@@ -7,17 +8,8 @@ export interface VersionsResult {
   versions: string[];
 }
 
-export interface PublishConfig {
-  packageSpec?: string;
-  tag?: string;
-  access?: string;
-  dryRun?: boolean;
-}
-
 export interface PublishResult {
   id: string;
-  name: string;
-  version: string;
 }
 
 /**
@@ -29,7 +21,7 @@ export interface PublishResult {
  */
 export async function getVersions(
   packageName: string,
-  authConfig: NpmAuthConfig
+  authConfig: AuthConfig
 ): Promise<VersionsResult> {
   return useNpmEnv(authConfig, (env) => {
     return callNpmCli<VersionsResult>(
@@ -48,7 +40,7 @@ export async function getVersions(
  */
 export async function publish(
   publishConfig: PublishConfig,
-  authConfig: NpmAuthConfig
+  authConfig: AuthConfig
 ): Promise<PublishResult> {
   const publishArgs = getPublishArgs(publishConfig);
 

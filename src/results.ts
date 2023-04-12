@@ -1,26 +1,20 @@
-import { ReleaseType } from "semver";
-import { Access } from "./options";
-
-export { ReleaseType };
+import type { Access } from "./options";
+import type { ReleaseType } from "./compare-versions";
 
 /**
  * Results of the publish
  */
 export interface Results {
   /**
-   * The type of version change that occurred
+   * The identifier of the published package, if published.
+   * Format is `${packageName}@${version}`
    */
-  type: ReleaseType | "lower" | "none";
+  id: string | undefined;
 
   /**
    * The name of the NPM package that was published
    */
-  package: string;
-
-  /**
-   * The registry where the NPM package was published
-   */
-  registry: string;
+  name: string;
 
   /**
    * The version that was published
@@ -28,9 +22,14 @@ export interface Results {
   version: string;
 
   /**
+   * The type of version change that occurred, if any.
+   */
+  releaseType: ReleaseType | undefined;
+
+  /**
    * The version number that was previously published to NPM
    */
-  oldVersion: string;
+  previousVersion: string;
 
   /**
    * The tag that the package was published to.
@@ -42,6 +41,11 @@ export interface Results {
    * or restricted to members of your NPM organization.
    */
   access: Access;
+
+  /**
+   * The registry where the NPM package was published
+   */
+  registryUrl: URL;
 
   /**
    * Whether this was a dry run (not published to NPM)
