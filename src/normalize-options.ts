@@ -1,4 +1,4 @@
-import { URL } from "url";
+import path from "node:path";
 import { Access, Debug, Options } from "./options";
 
 /**
@@ -8,15 +8,14 @@ import { Access, Debug, Options } from "./options";
  */
 export interface NormalizedOptions {
   token: string;
-  registry: URL;
-  package: string;
+  registry: string;
+  package?: string;
   tag: string;
   access?: Access;
-  dryRun: boolean;
-  checkVersion: boolean;
-  greaterVersionOnly: boolean;
-  quiet: boolean;
-  debug: Debug;
+  dryRun?: boolean;
+  greaterVersionOnly?: boolean;
+  quiet?: boolean;
+  debug?: Debug;
 }
 
 /**
@@ -25,25 +24,13 @@ export interface NormalizedOptions {
  * @internal
  */
 export function normalizeOptions(options: Options): NormalizedOptions {
-  let registryURL =
-    typeof options.registry === "string"
-      ? new URL(options.registry)
-      : options.registry;
-
   return {
-    token: options.token || "",
-    registry: registryURL || new URL("https://registry.npmjs.org/"),
-    package: options.package || "package.json",
-    tag: options.tag || "latest",
-    access: options.access,
-    dryRun: options.dryRun || false,
-    checkVersion:
-      options.checkVersion === undefined ? true : Boolean(options.checkVersion),
-    greaterVersionOnly:
-      options.greaterVersionOnly === undefined
-        ? false
-        : Boolean(options.greaterVersionOnly),
-    quiet: options.quiet || false,
-    debug: options.debug || (() => undefined),
+    ...options,
+    token: options.token ?? "",
+    registry: options.registry ?? "https://registry.npmjs.org/",
+    tag: options.tag ?? "latest",
+    package: options.package?.endsWith("package.json")
+      ? path.dirname(options.package)
+      : options.package,
   };
 }

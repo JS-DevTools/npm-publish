@@ -1,5 +1,3 @@
-import { URL } from "url";
-
 /**
  * Options that determine how/whether the package is published.
  */
@@ -14,7 +12,7 @@ export interface Options {
    *
    * Defaults to "https://registry.npmjs.org/"
    */
-  registry?: string | URL;
+  registry?: string;
 
   /**
    * The absolute or relative path of your package.json file.

@@ -20,7 +20,7 @@ export interface Results {
   /**
    * The registry where the NPM package was published
    */
-  registry: URL;
+  registry: string;
 
   /**
    * The version that was published

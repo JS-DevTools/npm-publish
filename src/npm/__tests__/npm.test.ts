@@ -5,9 +5,11 @@ import * as td from "testdouble";
 import * as subject from "..";
 import { useNpmEnv, type NpmCliTask } from "../use-npm-env";
 import { callNpmCli } from "../call-npm-cli";
+import { getPublishArgs } from "../get-publish-args";
 
 vi.mock("../use-npm-env", () => imitateEsm("../use-npm-env"));
 vi.mock("../call-npm-cli", () => imitateEsm("../call-npm-cli"));
+vi.mock("../get-publish-args", () => imitateEsm("../get-publish-args"));
 
 describe("npm", () => {
   const authConfig = { registry: "https://example.com", token: "abc123" };
@@ -47,13 +49,27 @@ describe("npm", () => {
   });
 
   it("should publish a package", async () => {
+    const publishConfig = { packageSpec: "./cool-package" };
+
+    td.when(getPublishArgs(publishConfig)).thenReturn([
+      "--registry",
+      "cool-registry",
+    ]);
     td.when(
-      callNpmCli<subject.VersionsResult>(
-        "view",
-        ["@example/cool-package", "dist-tags", "versions"],
-        { env: cliEnv, ifError: { e404: { "dist-tags": {}, versions: [] } } }
+      callNpmCli<subject.PublishResult>(
+        "publish",
+        ["--registry", "cool-registry"],
+        { env: cliEnv }
       )
     ).thenResolve({
+      id: "@example/cool-package@1.2.3",
+      name: "@example/cool-package",
+      version: "1.2.3",
+    });
+
+    const result = await subject.publish(publishConfig, authConfig);
+
+    expect(result).toEqual({
       id: "@example/cool-package@1.2.3",
       name: "@example/cool-package",
       version: "1.2.3",

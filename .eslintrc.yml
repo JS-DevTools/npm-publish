@@ -33,14 +33,14 @@ overrides:
       "@typescript-eslint/no-var-requires": "off"
       "unicorn/prefer-module": "off"
 
-  - files: ["test/**/*"]
+  - files: ["test/**/*", "**/__tests__/**/*"]
     env:
       mocha: true
     rules:
       sonarjs/no-duplicate-string: "off"
 
 rules:
-  n/no-unpublished-import: ["error", { "allowModules": ["@actions/core"] }]
+  n/no-unpublished-import: "off"
 
   # temporary rule overrides
   # TODO(mc, 2023-04-12): fix problems, remove overrides, and remove  --quiet

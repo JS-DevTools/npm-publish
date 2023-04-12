@@ -99,11 +99,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os = __importStar(require("os"));
+    var os2 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os.EOL);
+      process.stdout.write(cmd.toString() + os2.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -520,7 +520,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs3 = __importStar(require("fs"));
-    var os = __importStar(require("os"));
+    var os2 = __importStar(require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -531,7 +531,7 @@ var require_file_command = __commonJS({
       if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os2.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -545,7 +545,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os2.EOL}${convertedValue}${os2.EOL}${delimiter}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -647,44 +647,44 @@ var require_tunnel = __commonJS({
       return agent;
     }
     function TunnelingAgent(options) {
-      var self2 = this;
-      self2.options = options || {};
-      self2.proxyOptions = self2.options.proxy || {};
-      self2.maxSockets = self2.options.maxSockets || http.Agent.defaultMaxSockets;
-      self2.requests = [];
-      self2.sockets = [];
-      self2.on("free", function onFree(socket, host, port, localAddress) {
+      var self = this;
+      self.options = options || {};
+      self.proxyOptions = self.options.proxy || {};
+      self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
+      self.requests = [];
+      self.sockets = [];
+      self.on("free", function onFree(socket, host, port, localAddress) {
         var options2 = toOptions(host, port, localAddress);
-        for (var i = 0, len = self2.requests.length; i < len; ++i) {
-          var pending = self2.requests[i];
+        for (var i = 0, len = self.requests.length; i < len; ++i) {
+          var pending = self.requests[i];
           if (pending.host === options2.host && pending.port === options2.port) {
-            self2.requests.splice(i, 1);
+            self.requests.splice(i, 1);
             pending.request.onSocket(socket);
             return;
           }
         }
         socket.destroy();
-        self2.removeSocket(socket);
+        self.removeSocket(socket);
       });
     }
     util.inherits(TunnelingAgent, events.EventEmitter);
     TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
-      var self2 = this;
-      var options = mergeOptions({ request: req }, self2.options, toOptions(host, port, localAddress));
-      if (self2.sockets.length >= this.maxSockets) {
-        self2.requests.push(options);
+      var self = this;
+      var options = mergeOptions({ request: req }, self.options, toOptions(host, port, localAddress));
+      if (self.sockets.length >= this.maxSockets) {
+        self.requests.push(options);
         return;
       }
-      self2.createSocket(options, function(socket) {
+      self.createSocket(options, function(socket) {
         socket.on("free", onFree);
         socket.on("close", onCloseOrRemove);
         socket.on("agentRemove", onCloseOrRemove);
         req.onSocket(socket);
         function onFree() {
-          self2.emit("free", socket, options);
+          self.emit("free", socket, options);
         }
         function onCloseOrRemove(err) {
-          self2.removeSocket(socket);
+          self.removeSocket(socket);
           socket.removeListener("free", onFree);
           socket.removeListener("close", onCloseOrRemove);
           socket.removeListener("agentRemove", onCloseOrRemove);
@@ -692,10 +692,10 @@ var require_tunnel = __commonJS({
       });
     };
     TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
-      var self2 = this;
+      var self = this;
       var placeholder = {};
-      self2.sockets.push(placeholder);
-      var connectOptions = mergeOptions({}, self2.proxyOptions, {
+      self.sockets.push(placeholder);
+      var connectOptions = mergeOptions({}, self.proxyOptions, {
         method: "CONNECT",
         path: options.host + ":" + options.port,
         agent: false,
@@ -711,7 +711,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
       debug2("making CONNECT request");
-      var connectReq = self2.request(connectOptions);
+      var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
       connectReq.once("upgrade", onUpgrade);
@@ -738,7 +738,7 @@ var require_tunnel = __commonJS({
           var error = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
           error.code = "ECONNRESET";
           options.request.emit("error", error);
-          self2.removeSocket(placeholder);
+          self.removeSocket(placeholder);
           return;
         }
         if (head.length > 0) {
@@ -747,11 +747,11 @@ var require_tunnel = __commonJS({
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
           options.request.emit("error", error);
-          self2.removeSocket(placeholder);
+          self.removeSocket(placeholder);
           return;
         }
         debug2("tunneling connection has established");
-        self2.sockets[self2.sockets.indexOf(placeholder)] = socket;
+        self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
@@ -764,7 +764,7 @@ var require_tunnel = __commonJS({
         var error = new Error("tunneling socket could not be established, cause=" + cause.message);
         error.code = "ECONNRESET";
         options.request.emit("error", error);
-        self2.removeSocket(placeholder);
+        self.removeSocket(placeholder);
       }
     };
     TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
@@ -781,15 +781,15 @@ var require_tunnel = __commonJS({
       }
     };
     function createSecureSocket(options, cb) {
-      var self2 = this;
-      TunnelingAgent.prototype.createSocket.call(self2, options, function(socket) {
+      var self = this;
+      TunnelingAgent.prototype.createSocket.call(self, options, function(socket) {
         var hostHeader = options.request.getHeader("host");
-        var tlsOptions = mergeOptions({}, self2.options, {
+        var tlsOptions = mergeOptions({}, self.options, {
           socket,
           servername: hostHeader ? hostHeader.replace(/:.*$/, "") : options.host
         });
         var secureSocket = tls.connect(0, tlsOptions);
-        self2.sockets[self2.sockets.indexOf(socket)] = secureSocket;
+        self.sockets[self.sockets.indexOf(socket)] = secureSocket;
         cb(secureSocket);
       });
     }
@@ -878,11 +878,11 @@ var require_lib = __commonJS({
     };
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve3) {
-          resolve3(value);
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
         });
       }
-      return new (P || (P = Promise))(function(resolve3, reject) {
+      return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -898,7 +898,7 @@ var require_lib = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve3(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -983,13 +983,13 @@ var require_lib = __commonJS({
       }
       readBody() {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve3) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
             });
             this.message.on("end", () => {
-              resolve3(output.toString());
+              resolve(output.toString());
             });
           }));
         });
@@ -1198,14 +1198,14 @@ var require_lib = __commonJS({
        */
       requestRaw(info, data) {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve3, reject) => {
+          return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
               if (err) {
                 reject(err);
               } else if (!res) {
                 reject(new Error("Unknown error"));
               } else {
-                resolve3(res);
+                resolve(res);
               }
             }
             this.requestRawWithCallback(info, data, callbackForResult);
@@ -1361,12 +1361,12 @@ var require_lib = __commonJS({
         return __awaiter(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-          return new Promise((resolve3) => setTimeout(() => resolve3(), ms));
+          return new Promise((resolve) => setTimeout(() => resolve(), ms));
         });
       }
       _processResponse(res, options) {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve3, reject) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -1374,7 +1374,7 @@ var require_lib = __commonJS({
               headers: {}
             };
             if (statusCode === HttpCodes.NotFound) {
-              resolve3(response);
+              resolve(response);
             }
             function dateTimeDeserializer(key, value) {
               if (typeof value === "string") {
@@ -1413,7 +1413,7 @@ var require_lib = __commonJS({
               err.result = response.result;
               reject(err);
             } else {
-              resolve3(response);
+              resolve(response);
             }
           }));
         });
@@ -1430,11 +1430,11 @@ var require_auth = __commonJS({
     "use strict";
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve3) {
-          resolve3(value);
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
         });
       }
-      return new (P || (P = Promise))(function(resolve3, reject) {
+      return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -1450,7 +1450,7 @@ var require_auth = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve3(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -1534,11 +1534,11 @@ var require_oidc_utils = __commonJS({
     "use strict";
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve3) {
-          resolve3(value);
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
         });
       }
-      return new (P || (P = Promise))(function(resolve3, reject) {
+      return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -1554,7 +1554,7 @@ var require_oidc_utils = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve3(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -1632,11 +1632,11 @@ var require_summary = __commonJS({
     "use strict";
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve3) {
-          resolve3(value);
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
         });
       }
-      return new (P || (P = Promise))(function(resolve3, reject) {
+      return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -1652,7 +1652,7 @@ var require_summary = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve3(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -1954,7 +1954,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
-    var path = __importStar(require("path"));
+    var path4 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -1964,7 +1964,7 @@ var require_path_utils = __commonJS({
     }
     exports.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path.sep);
+      return pth.replace(/[/\\]/g, path4.sep);
     }
     exports.toPlatformPath = toPlatformPath;
   }
@@ -2004,11 +2004,11 @@ var require_core = __commonJS({
     };
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve3) {
-          resolve3(value);
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
         });
       }
-      return new (P || (P = Promise))(function(resolve3, reject) {
+      return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -2024,7 +2024,7 @@ var require_core = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve3(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -2034,8 +2034,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os = __importStar(require("os"));
-    var path = __importStar(require("path"));
+    var os2 = __importStar(require("os"));
+    var path4 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -2063,7 +2063,7 @@ var require_core = __commonJS({
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path4.delimiter}${process.env["PATH"]}`;
     }
     exports.addPath = addPath;
     function getInput2(name, options) {
@@ -2102,7 +2102,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os.EOL);
+      process.stdout.write(os2.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput2;
@@ -2136,7 +2136,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice;
     function info(message) {
-      process.stdout.write(message + os.EOL);
+      process.stdout.write(message + os2.EOL);
     }
     exports.info = info;
     function startGroup(name) {
@@ -2347,10 +2347,10 @@ var require_semver = __commonJS({
     var { re, t } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
-    var SemVer3 = class {
+    var SemVer2 = class {
       constructor(version2, options) {
         options = parseOptions(options);
-        if (version2 instanceof SemVer3) {
+        if (version2 instanceof SemVer2) {
           if (version2.loose === !!options.loose && version2.includePrerelease === !!options.includePrerelease) {
             return version2;
           } else {
@@ -2413,11 +2413,11 @@ var require_semver = __commonJS({
       }
       compare(other) {
         debug2("SemVer.compare", this.version, this.options, other);
-        if (!(other instanceof SemVer3)) {
+        if (!(other instanceof SemVer2)) {
           if (typeof other === "string" && other === this.version) {
             return 0;
           }
-          other = new SemVer3(other, this.options);
+          other = new SemVer2(other, this.options);
         }
         if (other.version === this.version) {
           return 0;
@@ -2425,14 +2425,14 @@ var require_semver = __commonJS({
         return this.compareMain(other) || this.comparePre(other);
       }
       compareMain(other) {
-        if (!(other instanceof SemVer3)) {
-          other = new SemVer3(other, this.options);
+        if (!(other instanceof SemVer2)) {
+          other = new SemVer2(other, this.options);
         }
         return compareIdentifiers(this.major, other.major) || compareIdentifiers(this.minor, other.minor) || compareIdentifiers(this.patch, other.patch);
       }
       comparePre(other) {
-        if (!(other instanceof SemVer3)) {
-          other = new SemVer3(other, this.options);
+        if (!(other instanceof SemVer2)) {
+          other = new SemVer2(other, this.options);
         }
         if (this.prerelease.length && !other.prerelease.length) {
           return -1;
@@ -2460,8 +2460,8 @@ var require_semver = __commonJS({
         } while (++i);
       }
       compareBuild(other) {
-        if (!(other instanceof SemVer3)) {
-          other = new SemVer3(other, this.options);
+        if (!(other instanceof SemVer2)) {
+          other = new SemVer2(other, this.options);
         }
         let i = 0;
         do {
@@ -2564,7 +2564,7 @@ var require_semver = __commonJS({
         return this;
       }
     };
-    module2.exports = SemVer3;
+    module2.exports = SemVer2;
   }
 });
 
@@ -2572,9 +2572,9 @@ var require_semver = __commonJS({
 var require_parse = __commonJS({
   "node_modules/semver/functions/parse.js"(exports, module2) {
     var { MAX_LENGTH } = require_constants();
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var parse2 = (version2, options) => {
-      if (version2 instanceof SemVer3) {
+      if (version2 instanceof SemVer2) {
         return version2;
       }
       if (typeof version2 !== "string") {
@@ -2584,7 +2584,7 @@ var require_parse = __commonJS({
         return null;
       }
       try {
-        return new SemVer3(version2, options);
+        return new SemVer2(version2, options);
       } catch (er) {
         return null;
       }
@@ -2620,7 +2620,7 @@ var require_clean = __commonJS({
 // node_modules/semver/functions/inc.js
 var require_inc = __commonJS({
   "node_modules/semver/functions/inc.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var inc = (version2, release, options, identifier, identifierBase) => {
       if (typeof options === "string") {
         identifierBase = identifier;
@@ -2628,8 +2628,8 @@ var require_inc = __commonJS({
         options = void 0;
       }
       try {
-        return new SemVer3(
-          version2 instanceof SemVer3 ? version2.version : version2,
+        return new SemVer2(
+          version2 instanceof SemVer2 ? version2.version : version2,
           options
         ).inc(release, identifier, identifierBase).version;
       } catch (er) {
@@ -2643,8 +2643,8 @@ var require_inc = __commonJS({
 // node_modules/semver/functions/compare.js
 var require_compare = __commonJS({
   "node_modules/semver/functions/compare.js"(exports, module2) {
-    var SemVer3 = require_semver();
-    var compare2 = (a, b, loose) => new SemVer3(a, loose).compare(new SemVer3(b, loose));
+    var SemVer2 = require_semver();
+    var compare2 = (a, b, loose) => new SemVer2(a, loose).compare(new SemVer2(b, loose));
     module2.exports = compare2;
   }
 });
@@ -2702,8 +2702,8 @@ var require_diff = __commonJS({
 // node_modules/semver/functions/major.js
 var require_major = __commonJS({
   "node_modules/semver/functions/major.js"(exports, module2) {
-    var SemVer3 = require_semver();
-    var major = (a, loose) => new SemVer3(a, loose).major;
+    var SemVer2 = require_semver();
+    var major = (a, loose) => new SemVer2(a, loose).major;
     module2.exports = major;
   }
 });
@@ -2711,8 +2711,8 @@ var require_major = __commonJS({
 // node_modules/semver/functions/minor.js
 var require_minor = __commonJS({
   "node_modules/semver/functions/minor.js"(exports, module2) {
-    var SemVer3 = require_semver();
-    var minor = (a, loose) => new SemVer3(a, loose).minor;
+    var SemVer2 = require_semver();
+    var minor = (a, loose) => new SemVer2(a, loose).minor;
     module2.exports = minor;
   }
 });
@@ -2720,8 +2720,8 @@ var require_minor = __commonJS({
 // node_modules/semver/functions/patch.js
 var require_patch = __commonJS({
   "node_modules/semver/functions/patch.js"(exports, module2) {
-    var SemVer3 = require_semver();
-    var patch = (a, loose) => new SemVer3(a, loose).patch;
+    var SemVer2 = require_semver();
+    var patch = (a, loose) => new SemVer2(a, loose).patch;
     module2.exports = patch;
   }
 });
@@ -2759,10 +2759,10 @@ var require_compare_loose = __commonJS({
 // node_modules/semver/functions/compare-build.js
 var require_compare_build = __commonJS({
   "node_modules/semver/functions/compare-build.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var compareBuild = (a, b, loose) => {
-      const versionA = new SemVer3(a, loose);
-      const versionB = new SemVer3(b, loose);
+      const versionA = new SemVer2(a, loose);
+      const versionB = new SemVer2(b, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     };
     module2.exports = compareBuild;
@@ -2884,11 +2884,11 @@ var require_cmp = __commonJS({
 // node_modules/semver/functions/coerce.js
 var require_coerce = __commonJS({
   "node_modules/semver/functions/coerce.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var parse2 = require_parse();
     var { re, t } = require_re();
     var coerce = (version2, options) => {
-      if (version2 instanceof SemVer3) {
+      if (version2 instanceof SemVer2) {
         return version2;
       }
       if (typeof version2 === "number") {
@@ -2942,23 +2942,23 @@ var require_yallist = __commonJS({
     Yallist.Node = Node;
     Yallist.create = Yallist;
     function Yallist(list) {
-      var self2 = this;
-      if (!(self2 instanceof Yallist)) {
-        self2 = new Yallist();
+      var self = this;
+      if (!(self instanceof Yallist)) {
+        self = new Yallist();
       }
-      self2.tail = null;
-      self2.head = null;
-      self2.length = 0;
+      self.tail = null;
+      self.head = null;
+      self.length = 0;
       if (list && typeof list.forEach === "function") {
         list.forEach(function(item) {
-          self2.push(item);
+          self.push(item);
         });
       } else if (arguments.length > 0) {
         for (var i = 0, l = arguments.length; i < l; i++) {
-          self2.push(arguments[i]);
+          self.push(arguments[i]);
         }
       }
-      return self2;
+      return self;
     }
     Yallist.prototype.removeNode = function(node) {
       if (node.list !== this) {
@@ -3252,30 +3252,30 @@ var require_yallist = __commonJS({
       this.tail = head;
       return this;
     };
-    function insert(self2, node, value) {
-      var inserted = node === self2.head ? new Node(value, null, node, self2) : new Node(value, node, node.next, self2);
+    function insert(self, node, value) {
+      var inserted = node === self.head ? new Node(value, null, node, self) : new Node(value, node, node.next, self);
       if (inserted.next === null) {
-        self2.tail = inserted;
+        self.tail = inserted;
       }
       if (inserted.prev === null) {
-        self2.head = inserted;
+        self.head = inserted;
       }
-      self2.length++;
+      self.length++;
       return inserted;
     }
-    function push(self2, item) {
-      self2.tail = new Node(item, self2.tail, null, self2);
-      if (!self2.head) {
-        self2.head = self2.tail;
+    function push(self, item) {
+      self.tail = new Node(item, self.tail, null, self);
+      if (!self.head) {
+        self.head = self.tail;
       }
-      self2.length++;
+      self.length++;
     }
-    function unshift(self2, item) {
-      self2.head = new Node(item, null, self2.head, self2);
-      if (!self2.tail) {
-        self2.tail = self2.head;
+    function unshift(self, item) {
+      self.head = new Node(item, null, self.head, self);
+      if (!self.tail) {
+        self.tail = self.head;
       }
-      self2.length++;
+      self.length++;
     }
     function Node(value, prev, next, list) {
       if (!(this instanceof Node)) {
@@ -3507,47 +3507,47 @@ var require_lru_cache = __commonJS({
         this[CACHE].forEach((value, key) => get(this, key, false));
       }
     };
-    var get = (self2, key, doUse) => {
-      const node = self2[CACHE].get(key);
+    var get = (self, key, doUse) => {
+      const node = self[CACHE].get(key);
       if (node) {
         const hit = node.value;
-        if (isStale(self2, hit)) {
-          del(self2, node);
-          if (!self2[ALLOW_STALE])
+        if (isStale(self, hit)) {
+          del(self, node);
+          if (!self[ALLOW_STALE])
             return void 0;
         } else {
           if (doUse) {
-            if (self2[UPDATE_AGE_ON_GET])
+            if (self[UPDATE_AGE_ON_GET])
               node.value.now = Date.now();
-            self2[LRU_LIST].unshiftNode(node);
+            self[LRU_LIST].unshiftNode(node);
           }
         }
         return hit.value;
       }
     };
-    var isStale = (self2, hit) => {
-      if (!hit || !hit.maxAge && !self2[MAX_AGE])
+    var isStale = (self, hit) => {
+      if (!hit || !hit.maxAge && !self[MAX_AGE])
         return false;
       const diff2 = Date.now() - hit.now;
-      return hit.maxAge ? diff2 > hit.maxAge : self2[MAX_AGE] && diff2 > self2[MAX_AGE];
+      return hit.maxAge ? diff2 > hit.maxAge : self[MAX_AGE] && diff2 > self[MAX_AGE];
     };
-    var trim = (self2) => {
-      if (self2[LENGTH] > self2[MAX]) {
-        for (let walker = self2[LRU_LIST].tail; self2[LENGTH] > self2[MAX] && walker !== null; ) {
+    var trim = (self) => {
+      if (self[LENGTH] > self[MAX]) {
+        for (let walker = self[LRU_LIST].tail; self[LENGTH] > self[MAX] && walker !== null; ) {
           const prev = walker.prev;
-          del(self2, walker);
+          del(self, walker);
           walker = prev;
         }
       }
     };
-    var del = (self2, node) => {
+    var del = (self, node) => {
       if (node) {
         const hit = node.value;
-        if (self2[DISPOSE])
-          self2[DISPOSE](hit.key, hit.value);
-        self2[LENGTH] -= hit.length;
-        self2[CACHE].delete(hit.key);
-        self2[LRU_LIST].removeNode(node);
+        if (self[DISPOSE])
+          self[DISPOSE](hit.key, hit.value);
+        self[LENGTH] -= hit.length;
+        self[CACHE].delete(hit.key);
+        self[LRU_LIST].removeNode(node);
       }
     };
     var Entry = class {
@@ -3559,15 +3559,15 @@ var require_lru_cache = __commonJS({
         this.maxAge = maxAge || 0;
       }
     };
-    var forEachStep = (self2, fn, node, thisp) => {
+    var forEachStep = (self, fn, node, thisp) => {
       let hit = node.value;
-      if (isStale(self2, hit)) {
-        del(self2, node);
-        if (!self2[ALLOW_STALE])
+      if (isStale(self, hit)) {
+        del(self, node);
+        if (!self[ALLOW_STALE])
           hit = void 0;
       }
       if (hit)
-        fn.call(thisp, hit.value, hit.key, self2);
+        fn.call(thisp, hit.value, hit.key, self);
     };
     module2.exports = LRUCache;
   }
@@ -3686,7 +3686,7 @@ var require_range = __commonJS({
         }
         if (typeof version2 === "string") {
           try {
-            version2 = new SemVer3(version2, this.options);
+            version2 = new SemVer2(version2, this.options);
           } catch (er) {
             return false;
           }
@@ -3705,7 +3705,7 @@ var require_range = __commonJS({
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
     var debug2 = require_debug();
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var {
       re,
       t,
@@ -3975,7 +3975,7 @@ var require_comparator = __commonJS({
         if (!m[2]) {
           this.semver = ANY;
         } else {
-          this.semver = new SemVer3(m[2], this.options.loose);
+          this.semver = new SemVer2(m[2], this.options.loose);
         }
       }
       toString() {
@@ -3988,7 +3988,7 @@ var require_comparator = __commonJS({
         }
         if (typeof version2 === "string") {
           try {
-            version2 = new SemVer3(version2, this.options);
+            version2 = new SemVer2(version2, this.options);
           } catch (er) {
             return false;
           }
@@ -4040,7 +4040,7 @@ var require_comparator = __commonJS({
     var { re, t } = require_re();
     var cmp = require_cmp();
     var debug2 = require_debug();
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var Range = require_range();
   }
 });
@@ -4073,7 +4073,7 @@ var require_to_comparators = __commonJS({
 // node_modules/semver/ranges/max-satisfying.js
 var require_max_satisfying = __commonJS({
   "node_modules/semver/ranges/max-satisfying.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var Range = require_range();
     var maxSatisfying = (versions, range, options) => {
       let max = null;
@@ -4088,7 +4088,7 @@ var require_max_satisfying = __commonJS({
         if (rangeObj.test(v)) {
           if (!max || maxSV.compare(v) === -1) {
             max = v;
-            maxSV = new SemVer3(max, options);
+            maxSV = new SemVer2(max, options);
           }
         }
       });
@@ -4101,7 +4101,7 @@ var require_max_satisfying = __commonJS({
 // node_modules/semver/ranges/min-satisfying.js
 var require_min_satisfying = __commonJS({
   "node_modules/semver/ranges/min-satisfying.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var Range = require_range();
     var minSatisfying = (versions, range, options) => {
       let min = null;
@@ -4116,7 +4116,7 @@ var require_min_satisfying = __commonJS({
         if (rangeObj.test(v)) {
           if (!min || minSV.compare(v) === 1) {
             min = v;
-            minSV = new SemVer3(min, options);
+            minSV = new SemVer2(min, options);
           }
         }
       });
@@ -4129,16 +4129,16 @@ var require_min_satisfying = __commonJS({
 // node_modules/semver/ranges/min-version.js
 var require_min_version = __commonJS({
   "node_modules/semver/ranges/min-version.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var Range = require_range();
     var gt = require_gt();
     var minVersion = (range, loose) => {
       range = new Range(range, loose);
-      let minver = new SemVer3("0.0.0");
+      let minver = new SemVer2("0.0.0");
       if (range.test(minver)) {
         return minver;
       }
-      minver = new SemVer3("0.0.0-0");
+      minver = new SemVer2("0.0.0-0");
       if (range.test(minver)) {
         return minver;
       }
@@ -4147,7 +4147,7 @@ var require_min_version = __commonJS({
         const comparators = range.set[i];
         let setMin = null;
         comparators.forEach((comparator) => {
-          const compver = new SemVer3(comparator.semver.version);
+          const compver = new SemVer2(comparator.semver.version);
           switch (comparator.operator) {
             case ">":
               if (compver.prerelease.length === 0) {
@@ -4200,7 +4200,7 @@ var require_valid2 = __commonJS({
 // node_modules/semver/ranges/outside.js
 var require_outside = __commonJS({
   "node_modules/semver/ranges/outside.js"(exports, module2) {
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var Comparator = require_comparator();
     var { ANY } = Comparator;
     var Range = require_range();
@@ -4210,7 +4210,7 @@ var require_outside = __commonJS({
     var lte = require_lte();
     var gte = require_gte();
     var outside = (version2, range, hilo, options) => {
-      version2 = new SemVer3(version2, options);
+      version2 = new SemVer2(version2, options);
       range = new Range(range, options);
       let gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
@@ -4512,7 +4512,7 @@ var require_semver2 = __commonJS({
   "node_modules/semver/index.js"(exports, module2) {
     var internalRe = require_re();
     var constants = require_constants();
-    var SemVer3 = require_semver();
+    var SemVer2 = require_semver();
     var identifiers = require_identifiers();
     var parse2 = require_parse();
     var valid = require_valid();
@@ -4589,7 +4589,7 @@ var require_semver2 = __commonJS({
       intersects,
       simplifyRange,
       subset,
-      SemVer: SemVer3,
+      SemVer: SemVer2,
       re: internalRe.re,
       src: internalRe.src,
       tokens: internalRe.t,
@@ -4598,981 +4598,6 @@ var require_semver2 = __commonJS({
       compareIdentifiers: identifiers.compareIdentifiers,
       rcompareIdentifiers: identifiers.rcompareIdentifiers
     };
-  }
-});
-
-// node_modules/string-argv/index.js
-var require_string_argv = __commonJS({
-  "node_modules/string-argv/index.js"(exports) {
-    "use strict";
-    exports.__esModule = true;
-    function parseArgsStringToArgv(value, env, file) {
-      var myRegexp = /([^\s'"]([^\s'"]*(['"])([^\3]*?)\3)+[^\s'"]*)|[^\s'"]+|(['"])([^\5]*?)\5/gi;
-      var myString = value;
-      var myArray = [];
-      if (env) {
-        myArray.push(env);
-      }
-      if (file) {
-        myArray.push(file);
-      }
-      var match;
-      do {
-        match = myRegexp.exec(myString);
-        if (match !== null) {
-          myArray.push(firstString(match[1], match[6], match[0]));
-        }
-      } while (match !== null);
-      return myArray;
-    }
-    exports["default"] = parseArgsStringToArgv;
-    exports.parseArgsStringToArgv = parseArgsStringToArgv;
-    function firstString() {
-      var args = [];
-      for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
-      }
-      for (var i = 0; i < args.length; i++) {
-        var arg = args[i];
-        if (typeof arg === "string") {
-          return arg;
-        }
-      }
-    }
-  }
-});
-
-// node_modules/type-detect/type-detect.js
-var require_type_detect = __commonJS({
-  "node_modules/type-detect/type-detect.js"(exports, module2) {
-    (function(global2, factory) {
-      typeof exports === "object" && typeof module2 !== "undefined" ? module2.exports = factory() : typeof define === "function" && define.amd ? define(factory) : global2.typeDetect = factory();
-    })(exports, function() {
-      "use strict";
-      var promiseExists = typeof Promise === "function";
-      var globalObject = typeof self === "object" ? self : global;
-      var symbolExists = typeof Symbol !== "undefined";
-      var mapExists = typeof Map !== "undefined";
-      var setExists = typeof Set !== "undefined";
-      var weakMapExists = typeof WeakMap !== "undefined";
-      var weakSetExists = typeof WeakSet !== "undefined";
-      var dataViewExists = typeof DataView !== "undefined";
-      var symbolIteratorExists = symbolExists && typeof Symbol.iterator !== "undefined";
-      var symbolToStringTagExists = symbolExists && typeof Symbol.toStringTag !== "undefined";
-      var setEntriesExists = setExists && typeof Set.prototype.entries === "function";
-      var mapEntriesExists = mapExists && typeof Map.prototype.entries === "function";
-      var setIteratorPrototype = setEntriesExists && Object.getPrototypeOf((/* @__PURE__ */ new Set()).entries());
-      var mapIteratorPrototype = mapEntriesExists && Object.getPrototypeOf((/* @__PURE__ */ new Map()).entries());
-      var arrayIteratorExists = symbolIteratorExists && typeof Array.prototype[Symbol.iterator] === "function";
-      var arrayIteratorPrototype = arrayIteratorExists && Object.getPrototypeOf([][Symbol.iterator]());
-      var stringIteratorExists = symbolIteratorExists && typeof String.prototype[Symbol.iterator] === "function";
-      var stringIteratorPrototype = stringIteratorExists && Object.getPrototypeOf(""[Symbol.iterator]());
-      var toStringLeftSliceLength = 8;
-      var toStringRightSliceLength = -1;
-      function typeDetect(obj) {
-        var typeofObj = typeof obj;
-        if (typeofObj !== "object") {
-          return typeofObj;
-        }
-        if (obj === null) {
-          return "null";
-        }
-        if (obj === globalObject) {
-          return "global";
-        }
-        if (Array.isArray(obj) && (symbolToStringTagExists === false || !(Symbol.toStringTag in obj))) {
-          return "Array";
-        }
-        if (typeof window === "object" && window !== null) {
-          if (typeof window.location === "object" && obj === window.location) {
-            return "Location";
-          }
-          if (typeof window.document === "object" && obj === window.document) {
-            return "Document";
-          }
-          if (typeof window.navigator === "object") {
-            if (typeof window.navigator.mimeTypes === "object" && obj === window.navigator.mimeTypes) {
-              return "MimeTypeArray";
-            }
-            if (typeof window.navigator.plugins === "object" && obj === window.navigator.plugins) {
-              return "PluginArray";
-            }
-          }
-          if ((typeof window.HTMLElement === "function" || typeof window.HTMLElement === "object") && obj instanceof window.HTMLElement) {
-            if (obj.tagName === "BLOCKQUOTE") {
-              return "HTMLQuoteElement";
-            }
-            if (obj.tagName === "TD") {
-              return "HTMLTableDataCellElement";
-            }
-            if (obj.tagName === "TH") {
-              return "HTMLTableHeaderCellElement";
-            }
-          }
-        }
-        var stringTag = symbolToStringTagExists && obj[Symbol.toStringTag];
-        if (typeof stringTag === "string") {
-          return stringTag;
-        }
-        var objPrototype = Object.getPrototypeOf(obj);
-        if (objPrototype === RegExp.prototype) {
-          return "RegExp";
-        }
-        if (objPrototype === Date.prototype) {
-          return "Date";
-        }
-        if (promiseExists && objPrototype === Promise.prototype) {
-          return "Promise";
-        }
-        if (setExists && objPrototype === Set.prototype) {
-          return "Set";
-        }
-        if (mapExists && objPrototype === Map.prototype) {
-          return "Map";
-        }
-        if (weakSetExists && objPrototype === WeakSet.prototype) {
-          return "WeakSet";
-        }
-        if (weakMapExists && objPrototype === WeakMap.prototype) {
-          return "WeakMap";
-        }
-        if (dataViewExists && objPrototype === DataView.prototype) {
-          return "DataView";
-        }
-        if (mapExists && objPrototype === mapIteratorPrototype) {
-          return "Map Iterator";
-        }
-        if (setExists && objPrototype === setIteratorPrototype) {
-          return "Set Iterator";
-        }
-        if (arrayIteratorExists && objPrototype === arrayIteratorPrototype) {
-          return "Array Iterator";
-        }
-        if (stringIteratorExists && objPrototype === stringIteratorPrototype) {
-          return "String Iterator";
-        }
-        if (objPrototype === null) {
-          return "Object";
-        }
-        return Object.prototype.toString.call(obj).slice(toStringLeftSliceLength, toStringRightSliceLength);
-      }
-      return typeDetect;
-    });
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/normalize-args.js
-var require_normalize_args = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/normalize-args.js"(exports, module2) {
-    "use strict";
-    var { parseArgsStringToArgv } = require_string_argv();
-    var detectType = require_type_detect();
-    module2.exports = normalizeArgs;
-    function normalizeArgs(params) {
-      let command, args, options, callback, error;
-      try {
-        ({ command, args, options, callback } = shiftArgs(params));
-        let commandArgs = [];
-        if (typeof command === "string" && args === void 0) {
-          command = splitArgString(command);
-        }
-        if (Array.isArray(command)) {
-          commandArgs = command.slice(1);
-          command = command[0];
-        }
-        if (typeof args === "string") {
-          args = splitArgString(args);
-        }
-        if (Array.isArray(args)) {
-          args = commandArgs.concat(args);
-        }
-        if (args === void 0 || args === null) {
-          args = commandArgs;
-        }
-        if (options === void 0 || options === null) {
-          options = {};
-        }
-        options.encoding = options.encoding || "utf8";
-        validateArgs(command, args, options, callback);
-      } catch (err) {
-        error = err;
-        command = String(command || "");
-        args = (Array.isArray(args) ? args : []).map((arg) => String(arg || ""));
-      }
-      return { command, args, options, callback, error };
-    }
-    function shiftArgs(params) {
-      params = Array.prototype.slice.call(params);
-      let command, args, options, callback;
-      let lastParam = params[params.length - 1];
-      if (typeof lastParam === "function") {
-        callback = lastParam;
-        params.pop();
-      }
-      lastParam = params[params.length - 1];
-      if (lastParam === null || lastParam === void 0 || typeof lastParam === "object" && !Array.isArray(lastParam)) {
-        options = lastParam;
-        params.pop();
-      }
-      command = params.shift();
-      if (params.length === 0) {
-        args = void 0;
-      } else if (params.length === 1 && Array.isArray(params[0])) {
-        args = params[0];
-      } else if (params.length === 1 && params[0] === "") {
-        args = [];
-      } else {
-        args = params;
-      }
-      return { command, args, options, callback };
-    }
-    function validateArgs(command, args, options, callback) {
-      if (command === void 0 || command === null) {
-        throw new Error("The command to execute is missing.");
-      }
-      if (typeof command !== "string") {
-        throw new Error("The command to execute should be a string, not " + friendlyType(command));
-      }
-      if (!Array.isArray(args)) {
-        throw new Error(
-          "The command arguments should be a string or an array, not " + friendlyType(args)
-        );
-      }
-      for (let i = 0; i < args.length; i++) {
-        let arg = args[i];
-        if (typeof arg !== "string") {
-          throw new Error(
-            `The command arguments should be strings, but argument #${i + 1} is ` + friendlyType(arg)
-          );
-        }
-      }
-      if (typeof options !== "object") {
-        throw new Error(
-          "The options should be an object, not " + friendlyType(options)
-        );
-      }
-      if (callback !== void 0 && callback !== null) {
-        if (typeof callback !== "function") {
-          throw new Error("The callback should be a function, not " + friendlyType(callback));
-        }
-      }
-    }
-    function splitArgString(argString) {
-      try {
-        return parseArgsStringToArgv(argString);
-      } catch (error) {
-        throw new Error(`Could not parse the string: ${argString}
-${error.message}`);
-      }
-    }
-    function friendlyType(val) {
-      let type = detectType(val);
-      let firstChar = String(type)[0].toLowerCase();
-      if (["a", "e", "i", "o", "u"].indexOf(firstChar) === -1) {
-        return `a ${type}.`;
-      } else {
-        return `an ${type}.`;
-      }
-    }
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/process.js
-var require_process = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/process.js"(exports, module2) {
-    "use strict";
-    module2.exports = class Process {
-      /**
-       * @param {object} props - Initial property values
-       */
-      constructor({ command, args, pid, stdout, stderr, output, status, signal, options }) {
-        options = options || {};
-        stdout = stdout || (options.encoding === "buffer" ? Buffer.from([]) : "");
-        stderr = stderr || (options.encoding === "buffer" ? Buffer.from([]) : "");
-        output = output || [options.input || null, stdout, stderr];
-        this.command = command || "";
-        this.args = args || [];
-        this.pid = pid || 0;
-        this.stdout = output[1];
-        this.stderr = output[2];
-        this.output = output;
-        this.status = status;
-        this.signal = signal || null;
-      }
-      /**
-       * Returns the full command and arguments used to spawn the process
-       *
-       * @type {string}
-       */
-      toString() {
-        let string = this.command;
-        for (let arg of this.args) {
-          arg = arg.replace(/"/g, '\\"');
-          if (arg.indexOf(" ") >= 0) {
-            string += ` "${arg}"`;
-          } else {
-            string += ` ${arg}`;
-          }
-        }
-        return string;
-      }
-    };
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/process-error.js
-var require_process_error = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/process-error.js"(exports, module2) {
-    "use strict";
-    module2.exports = class ProcessError extends Error {
-      constructor(process2) {
-        let message = `${process2.toString()} exited with a status of ${process2.status}.`;
-        if (process2.stderr.length > 0) {
-          message += "\n\n" + process2.stderr.toString().trim();
-        }
-        super(message);
-        Object.assign(this, process2);
-        this.name = ProcessError.name;
-      }
-    };
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/normalize-result.js
-var require_normalize_result = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/normalize-result.js"(exports, module2) {
-    "use strict";
-    var Process = require_process();
-    var ProcessError = require_process_error();
-    module2.exports = normalizeResult;
-    function normalizeResult({ command, args, pid, stdout, stderr, output, status, signal, options, error }) {
-      let process2 = new Process({ command, args, pid, stdout, stderr, output, status, signal, options });
-      if (error) {
-        if (process2.status === void 0) {
-          process2.status = null;
-        }
-        throw Object.assign(error, process2);
-      } else if (process2.status) {
-        throw new ProcessError(process2);
-      } else {
-        return process2;
-      }
-    }
-  }
-});
-
-// node_modules/isexe/windows.js
-var require_windows = __commonJS({
-  "node_modules/isexe/windows.js"(exports, module2) {
-    module2.exports = isexe;
-    isexe.sync = sync;
-    var fs3 = require("fs");
-    function checkPathExt(path, options) {
-      var pathext = options.pathExt !== void 0 ? options.pathExt : process.env.PATHEXT;
-      if (!pathext) {
-        return true;
-      }
-      pathext = pathext.split(";");
-      if (pathext.indexOf("") !== -1) {
-        return true;
-      }
-      for (var i = 0; i < pathext.length; i++) {
-        var p = pathext[i].toLowerCase();
-        if (p && path.substr(-p.length).toLowerCase() === p) {
-          return true;
-        }
-      }
-      return false;
-    }
-    function checkStat(stat, path, options) {
-      if (!stat.isSymbolicLink() && !stat.isFile()) {
-        return false;
-      }
-      return checkPathExt(path, options);
-    }
-    function isexe(path, options, cb) {
-      fs3.stat(path, function(er, stat) {
-        cb(er, er ? false : checkStat(stat, path, options));
-      });
-    }
-    function sync(path, options) {
-      return checkStat(fs3.statSync(path), path, options);
-    }
-  }
-});
-
-// node_modules/isexe/mode.js
-var require_mode = __commonJS({
-  "node_modules/isexe/mode.js"(exports, module2) {
-    module2.exports = isexe;
-    isexe.sync = sync;
-    var fs3 = require("fs");
-    function isexe(path, options, cb) {
-      fs3.stat(path, function(er, stat) {
-        cb(er, er ? false : checkStat(stat, options));
-      });
-    }
-    function sync(path, options) {
-      return checkStat(fs3.statSync(path), options);
-    }
-    function checkStat(stat, options) {
-      return stat.isFile() && checkMode(stat, options);
-    }
-    function checkMode(stat, options) {
-      var mod = stat.mode;
-      var uid = stat.uid;
-      var gid = stat.gid;
-      var myUid = options.uid !== void 0 ? options.uid : process.getuid && process.getuid();
-      var myGid = options.gid !== void 0 ? options.gid : process.getgid && process.getgid();
-      var u = parseInt("100", 8);
-      var g = parseInt("010", 8);
-      var o = parseInt("001", 8);
-      var ug = u | g;
-      var ret = mod & o || mod & g && gid === myGid || mod & u && uid === myUid || mod & ug && myUid === 0;
-      return ret;
-    }
-  }
-});
-
-// node_modules/isexe/index.js
-var require_isexe = __commonJS({
-  "node_modules/isexe/index.js"(exports, module2) {
-    var fs3 = require("fs");
-    var core;
-    if (process.platform === "win32" || global.TESTING_WINDOWS) {
-      core = require_windows();
-    } else {
-      core = require_mode();
-    }
-    module2.exports = isexe;
-    isexe.sync = sync;
-    function isexe(path, options, cb) {
-      if (typeof options === "function") {
-        cb = options;
-        options = {};
-      }
-      if (!cb) {
-        if (typeof Promise !== "function") {
-          throw new TypeError("callback not provided");
-        }
-        return new Promise(function(resolve3, reject) {
-          isexe(path, options || {}, function(er, is) {
-            if (er) {
-              reject(er);
-            } else {
-              resolve3(is);
-            }
-          });
-        });
-      }
-      core(path, options || {}, function(er, is) {
-        if (er) {
-          if (er.code === "EACCES" || options && options.ignoreErrors) {
-            er = null;
-            is = false;
-          }
-        }
-        cb(er, is);
-      });
-    }
-    function sync(path, options) {
-      try {
-        return core.sync(path, options || {});
-      } catch (er) {
-        if (options && options.ignoreErrors || er.code === "EACCES") {
-          return false;
-        } else {
-          throw er;
-        }
-      }
-    }
-  }
-});
-
-// node_modules/which/which.js
-var require_which = __commonJS({
-  "node_modules/which/which.js"(exports, module2) {
-    var isWindows = process.platform === "win32" || process.env.OSTYPE === "cygwin" || process.env.OSTYPE === "msys";
-    var path = require("path");
-    var COLON = isWindows ? ";" : ":";
-    var isexe = require_isexe();
-    var getNotFoundError = (cmd) => Object.assign(new Error(`not found: ${cmd}`), { code: "ENOENT" });
-    var getPathInfo = (cmd, opt) => {
-      const colon = opt.colon || COLON;
-      const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? [""] : [
-        // windows always checks the cwd first
-        ...isWindows ? [process.cwd()] : [],
-        ...(opt.path || process.env.PATH || /* istanbul ignore next: very unusual */
-        "").split(colon)
-      ];
-      const pathExtExe = isWindows ? opt.pathExt || process.env.PATHEXT || ".EXE;.CMD;.BAT;.COM" : "";
-      const pathExt = isWindows ? pathExtExe.split(colon) : [""];
-      if (isWindows) {
-        if (cmd.indexOf(".") !== -1 && pathExt[0] !== "")
-          pathExt.unshift("");
-      }
-      return {
-        pathEnv,
-        pathExt,
-        pathExtExe
-      };
-    };
-    var which = (cmd, opt, cb) => {
-      if (typeof opt === "function") {
-        cb = opt;
-        opt = {};
-      }
-      if (!opt)
-        opt = {};
-      const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt);
-      const found = [];
-      const step = (i) => new Promise((resolve3, reject) => {
-        if (i === pathEnv.length)
-          return opt.all && found.length ? resolve3(found) : reject(getNotFoundError(cmd));
-        const ppRaw = pathEnv[i];
-        const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path.join(pathPart, cmd);
-        const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
-        resolve3(subStep(p, i, 0));
-      });
-      const subStep = (p, i, ii) => new Promise((resolve3, reject) => {
-        if (ii === pathExt.length)
-          return resolve3(step(i + 1));
-        const ext = pathExt[ii];
-        isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
-          if (!er && is) {
-            if (opt.all)
-              found.push(p + ext);
-            else
-              return resolve3(p + ext);
-          }
-          return resolve3(subStep(p, i, ii + 1));
-        });
-      });
-      return cb ? step(0).then((res) => cb(null, res), cb) : step(0);
-    };
-    var whichSync = (cmd, opt) => {
-      opt = opt || {};
-      const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt);
-      const found = [];
-      for (let i = 0; i < pathEnv.length; i++) {
-        const ppRaw = pathEnv[i];
-        const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path.join(pathPart, cmd);
-        const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
-        for (let j = 0; j < pathExt.length; j++) {
-          const cur = p + pathExt[j];
-          try {
-            const is = isexe.sync(cur, { pathExt: pathExtExe });
-            if (is) {
-              if (opt.all)
-                found.push(cur);
-              else
-                return cur;
-            }
-          } catch (ex) {
-          }
-        }
-      }
-      if (opt.all && found.length)
-        return found;
-      if (opt.nothrow)
-        return null;
-      throw getNotFoundError(cmd);
-    };
-    module2.exports = which;
-    which.sync = whichSync;
-  }
-});
-
-// node_modules/path-key/index.js
-var require_path_key = __commonJS({
-  "node_modules/path-key/index.js"(exports, module2) {
-    "use strict";
-    var pathKey = (options = {}) => {
-      const environment = options.env || process.env;
-      const platform = options.platform || process.platform;
-      if (platform !== "win32") {
-        return "PATH";
-      }
-      return Object.keys(environment).reverse().find((key) => key.toUpperCase() === "PATH") || "Path";
-    };
-    module2.exports = pathKey;
-    module2.exports.default = pathKey;
-  }
-});
-
-// node_modules/cross-spawn/lib/util/resolveCommand.js
-var require_resolveCommand = __commonJS({
-  "node_modules/cross-spawn/lib/util/resolveCommand.js"(exports, module2) {
-    "use strict";
-    var path = require("path");
-    var which = require_which();
-    var getPathKey = require_path_key();
-    function resolveCommandAttempt(parsed, withoutPathExt) {
-      const env = parsed.options.env || process.env;
-      const cwd = process.cwd();
-      const hasCustomCwd = parsed.options.cwd != null;
-      const shouldSwitchCwd = hasCustomCwd && process.chdir !== void 0 && !process.chdir.disabled;
-      if (shouldSwitchCwd) {
-        try {
-          process.chdir(parsed.options.cwd);
-        } catch (err) {
-        }
-      }
-      let resolved;
-      try {
-        resolved = which.sync(parsed.command, {
-          path: env[getPathKey({ env })],
-          pathExt: withoutPathExt ? path.delimiter : void 0
-        });
-      } catch (e) {
-      } finally {
-        if (shouldSwitchCwd) {
-          process.chdir(cwd);
-        }
-      }
-      if (resolved) {
-        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : "", resolved);
-      }
-      return resolved;
-    }
-    function resolveCommand(parsed) {
-      return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
-    }
-    module2.exports = resolveCommand;
-  }
-});
-
-// node_modules/cross-spawn/lib/util/escape.js
-var require_escape = __commonJS({
-  "node_modules/cross-spawn/lib/util/escape.js"(exports, module2) {
-    "use strict";
-    var metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
-    function escapeCommand(arg) {
-      arg = arg.replace(metaCharsRegExp, "^$1");
-      return arg;
-    }
-    function escapeArgument(arg, doubleEscapeMetaChars) {
-      arg = `${arg}`;
-      arg = arg.replace(/(\\*)"/g, '$1$1\\"');
-      arg = arg.replace(/(\\*)$/, "$1$1");
-      arg = `"${arg}"`;
-      arg = arg.replace(metaCharsRegExp, "^$1");
-      if (doubleEscapeMetaChars) {
-        arg = arg.replace(metaCharsRegExp, "^$1");
-      }
-      return arg;
-    }
-    module2.exports.command = escapeCommand;
-    module2.exports.argument = escapeArgument;
-  }
-});
-
-// node_modules/shebang-regex/index.js
-var require_shebang_regex = __commonJS({
-  "node_modules/shebang-regex/index.js"(exports, module2) {
-    "use strict";
-    module2.exports = /^#!(.*)/;
-  }
-});
-
-// node_modules/shebang-command/index.js
-var require_shebang_command = __commonJS({
-  "node_modules/shebang-command/index.js"(exports, module2) {
-    "use strict";
-    var shebangRegex = require_shebang_regex();
-    module2.exports = (string = "") => {
-      const match = string.match(shebangRegex);
-      if (!match) {
-        return null;
-      }
-      const [path, argument] = match[0].replace(/#! ?/, "").split(" ");
-      const binary = path.split("/").pop();
-      if (binary === "env") {
-        return argument;
-      }
-      return argument ? `${binary} ${argument}` : binary;
-    };
-  }
-});
-
-// node_modules/cross-spawn/lib/util/readShebang.js
-var require_readShebang = __commonJS({
-  "node_modules/cross-spawn/lib/util/readShebang.js"(exports, module2) {
-    "use strict";
-    var fs3 = require("fs");
-    var shebangCommand = require_shebang_command();
-    function readShebang(command) {
-      const size = 150;
-      const buffer = Buffer.alloc(size);
-      let fd;
-      try {
-        fd = fs3.openSync(command, "r");
-        fs3.readSync(fd, buffer, 0, size, 0);
-        fs3.closeSync(fd);
-      } catch (e) {
-      }
-      return shebangCommand(buffer.toString());
-    }
-    module2.exports = readShebang;
-  }
-});
-
-// node_modules/cross-spawn/lib/parse.js
-var require_parse2 = __commonJS({
-  "node_modules/cross-spawn/lib/parse.js"(exports, module2) {
-    "use strict";
-    var path = require("path");
-    var resolveCommand = require_resolveCommand();
-    var escape = require_escape();
-    var readShebang = require_readShebang();
-    var isWin = process.platform === "win32";
-    var isExecutableRegExp = /\.(?:com|exe)$/i;
-    var isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
-    function detectShebang(parsed) {
-      parsed.file = resolveCommand(parsed);
-      const shebang = parsed.file && readShebang(parsed.file);
-      if (shebang) {
-        parsed.args.unshift(parsed.file);
-        parsed.command = shebang;
-        return resolveCommand(parsed);
-      }
-      return parsed.file;
-    }
-    function parseNonShell(parsed) {
-      if (!isWin) {
-        return parsed;
-      }
-      const commandFile = detectShebang(parsed);
-      const needsShell = !isExecutableRegExp.test(commandFile);
-      if (parsed.options.forceShell || needsShell) {
-        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
-        parsed.command = path.normalize(parsed.command);
-        parsed.command = escape.command(parsed.command);
-        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
-        const shellCommand = [parsed.command].concat(parsed.args).join(" ");
-        parsed.args = ["/d", "/s", "/c", `"${shellCommand}"`];
-        parsed.command = process.env.comspec || "cmd.exe";
-        parsed.options.windowsVerbatimArguments = true;
-      }
-      return parsed;
-    }
-    function parse2(command, args, options) {
-      if (args && !Array.isArray(args)) {
-        options = args;
-        args = null;
-      }
-      args = args ? args.slice(0) : [];
-      options = Object.assign({}, options);
-      const parsed = {
-        command,
-        args,
-        options,
-        file: void 0,
-        original: {
-          command,
-          args
-        }
-      };
-      return options.shell ? parsed : parseNonShell(parsed);
-    }
-    module2.exports = parse2;
-  }
-});
-
-// node_modules/cross-spawn/lib/enoent.js
-var require_enoent = __commonJS({
-  "node_modules/cross-spawn/lib/enoent.js"(exports, module2) {
-    "use strict";
-    var isWin = process.platform === "win32";
-    function notFoundError(original, syscall) {
-      return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
-        code: "ENOENT",
-        errno: "ENOENT",
-        syscall: `${syscall} ${original.command}`,
-        path: original.command,
-        spawnargs: original.args
-      });
-    }
-    function hookChildProcess(cp, parsed) {
-      if (!isWin) {
-        return;
-      }
-      const originalEmit = cp.emit;
-      cp.emit = function(name, arg1) {
-        if (name === "exit") {
-          const err = verifyENOENT(arg1, parsed, "spawn");
-          if (err) {
-            return originalEmit.call(cp, "error", err);
-          }
-        }
-        return originalEmit.apply(cp, arguments);
-      };
-    }
-    function verifyENOENT(status, parsed) {
-      if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, "spawn");
-      }
-      return null;
-    }
-    function verifyENOENTSync(status, parsed) {
-      if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, "spawnSync");
-      }
-      return null;
-    }
-    module2.exports = {
-      hookChildProcess,
-      verifyENOENT,
-      verifyENOENTSync,
-      notFoundError
-    };
-  }
-});
-
-// node_modules/cross-spawn/index.js
-var require_cross_spawn = __commonJS({
-  "node_modules/cross-spawn/index.js"(exports, module2) {
-    "use strict";
-    var cp = require("child_process");
-    var parse2 = require_parse2();
-    var enoent = require_enoent();
-    function spawn(command, args, options) {
-      const parsed = parse2(command, args, options);
-      const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
-      enoent.hookChildProcess(spawned, parsed);
-      return spawned;
-    }
-    function spawnSync(command, args, options) {
-      const parsed = parse2(command, args, options);
-      const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
-      result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
-      return result;
-    }
-    module2.exports = spawn;
-    module2.exports.spawn = spawn;
-    module2.exports.sync = spawnSync;
-    module2.exports._parse = parse2;
-    module2.exports._enoent = enoent;
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/sync.js
-var require_sync = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/sync.js"(exports, module2) {
-    "use strict";
-    var normalizeArgs = require_normalize_args();
-    var normalizeResult = require_normalize_result();
-    var spawnSync = require_cross_spawn().sync;
-    module2.exports = sync;
-    function sync() {
-      let { command, args, options, error } = normalizeArgs(arguments);
-      if (error) {
-        normalizeResult({ command, args, options, error });
-      } else {
-        let result;
-        try {
-          result = spawnSync(command, args, options);
-        } catch (error2) {
-          normalizeResult({ error: error2, command, args, options });
-        }
-        return normalizeResult(Object.assign({}, result, { command, args, options }));
-      }
-    }
-  }
-});
-
-// node_modules/call-me-maybe/index.js
-var require_call_me_maybe = __commonJS({
-  "node_modules/call-me-maybe/index.js"(exports, module2) {
-    "use strict";
-    var next = global.process && process.nextTick || global.setImmediate || function(f) {
-      setTimeout(f, 0);
-    };
-    module2.exports = function maybe(cb, promise) {
-      if (cb) {
-        promise.then(function(result) {
-          next(function() {
-            cb(null, result);
-          });
-        }, function(err) {
-          next(function() {
-            cb(err);
-          });
-        });
-        return void 0;
-      } else {
-        return promise;
-      }
-    };
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/async.js
-var require_async = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/async.js"(exports, module2) {
-    "use strict";
-    var normalizeArgs = require_normalize_args();
-    var normalizeResult = require_normalize_result();
-    var maybe = require_call_me_maybe();
-    var spawn = require_cross_spawn();
-    module2.exports = async3;
-    function async3() {
-      let { command, args, options, callback, error } = normalizeArgs(arguments);
-      return maybe(callback, new Promise((resolve3, reject) => {
-        if (error) {
-          normalizeResult({ command, args, options, error });
-        } else {
-          let spawnedProcess;
-          try {
-            spawnedProcess = spawn(command, args, options);
-          } catch (error2) {
-            normalizeResult({ error: error2, command, args, options });
-          }
-          let pid = spawnedProcess.pid;
-          let stdout = options.encoding === "buffer" ? Buffer.from([]) : "";
-          let stderr = options.encoding === "buffer" ? Buffer.from([]) : "";
-          spawnedProcess.stdout && spawnedProcess.stdout.on("data", (data) => {
-            if (typeof stdout === "string") {
-              stdout += data.toString();
-            } else {
-              stdout = Buffer.concat([stdout, data]);
-            }
-          });
-          spawnedProcess.stderr && spawnedProcess.stderr.on("data", (data) => {
-            if (typeof stderr === "string") {
-              stderr += data.toString();
-            } else {
-              stderr = Buffer.concat([stderr, data]);
-            }
-          });
-          spawnedProcess.on("error", (error2) => {
-            try {
-              normalizeResult({ error: error2, command, args, options, pid, stdout, stderr });
-            } catch (error3) {
-              reject(error3);
-            }
-          });
-          spawnedProcess.on("exit", (status, signal) => {
-            try {
-              resolve3(normalizeResult({ command, args, options, pid, stdout, stderr, status, signal }));
-            } catch (error2) {
-              reject(error2);
-            }
-          });
-        }
-      }));
-    }
-  }
-});
-
-// node_modules/@jsdevtools/ez-spawn/lib/index.js
-var require_lib2 = __commonJS({
-  "node_modules/@jsdevtools/ez-spawn/lib/index.js"(exports, module2) {
-    "use strict";
-    module2.exports.sync = require_sync();
-    module2.exports.async = require_async();
   }
 });
 
@@ -5831,13 +4856,13 @@ var require_constructor = __commonJS({
     exports.Ono = constructor;
     function Ono(ErrorConstructor, options) {
       options = normalize_1.normalizeOptions(options);
-      function ono4(...args) {
+      function ono2(...args) {
         let { originalError, props, message } = normalize_1.normalizeArgs(args, options);
         let newError = new ErrorConstructor(message);
         return extend_error_1.extendError(newError, originalError, props);
       }
-      ono4[Symbol.species] = ErrorConstructor;
-      return ono4;
+      ono2[Symbol.species] = ErrorConstructor;
+      return ono2;
     }
     Ono.toJSON = function toJSON(error) {
       return to_json_1.toJSON.call(error);
@@ -5861,17 +4886,17 @@ var require_singleton = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ono = void 0;
     var constructor_1 = require_constructor();
-    var singleton = ono4;
+    var singleton = ono2;
     exports.ono = singleton;
-    ono4.error = new constructor_1.Ono(Error);
-    ono4.eval = new constructor_1.Ono(EvalError);
-    ono4.range = new constructor_1.Ono(RangeError);
-    ono4.reference = new constructor_1.Ono(ReferenceError);
-    ono4.syntax = new constructor_1.Ono(SyntaxError);
-    ono4.type = new constructor_1.Ono(TypeError);
-    ono4.uri = new constructor_1.Ono(URIError);
-    var onoMap = ono4;
-    function ono4(...args) {
+    ono2.error = new constructor_1.Ono(Error);
+    ono2.eval = new constructor_1.Ono(EvalError);
+    ono2.range = new constructor_1.Ono(RangeError);
+    ono2.reference = new constructor_1.Ono(ReferenceError);
+    ono2.syntax = new constructor_1.Ono(SyntaxError);
+    ono2.type = new constructor_1.Ono(TypeError);
+    ono2.uri = new constructor_1.Ono(URIError);
+    var onoMap = ono2;
+    function ono2(...args) {
       let originalError = args[0];
       if (typeof originalError === "object" && typeof originalError.name === "string") {
         for (let typedOno of Object.values(onoMap)) {
@@ -5883,7 +4908,7 @@ var require_singleton = __commonJS({
           }
         }
       }
-      return ono4.error.apply(void 0, args);
+      return ono2.error.apply(void 0, args);
     }
   }
 });
@@ -5942,205 +4967,136 @@ var import_core = __toESM(require_core());
 var semver = __toESM(require_semver2());
 
 // src/normalize-options.ts
-var import_url = require("url");
+var import_node_path = __toESM(require("node:path"));
 function normalizeOptions(options) {
-  let registryURL = typeof options.registry === "string" ? new import_url.URL(options.registry) : options.registry;
+  var _a;
   return {
-    token: options.token || "",
-    registry: registryURL || new import_url.URL("https://registry.npmjs.org/"),
-    package: options.package || "package.json",
-    tag: options.tag || "latest",
-    access: options.access,
-    dryRun: options.dryRun || false,
-    checkVersion: options.checkVersion === void 0 ? true : Boolean(options.checkVersion),
-    greaterVersionOnly: options.greaterVersionOnly === void 0 ? false : Boolean(options.greaterVersionOnly),
-    quiet: options.quiet || false,
-    debug: options.debug || (() => void 0)
+    ...options,
+    token: options.token ?? "",
+    registry: options.registry ?? "https://registry.npmjs.org/",
+    tag: options.tag ?? "latest",
+    package: ((_a = options.package) == null ? void 0 : _a.endsWith("package.json")) ? import_node_path.default.dirname(options.package) : options.package
   };
 }
 
-// src/npm.ts
-var ezSpawn2 = __toESM(require_lib2());
-var import_ono2 = __toESM(require_cjs());
-var import_path2 = require("path");
-var import_semver = __toESM(require_semver2());
-
-// src/npm-config.ts
-var ezSpawn = __toESM(require_lib2());
-var import_ono = __toESM(require_cjs());
-var import_fs = require("fs");
-var import_os = require("os");
-var import_path = require("path");
-
-// src/npm-env.ts
-function getNpmEnvironment(options) {
-  let env = {
-    // Copy all the host's environment variables
-    ...process.env,
-    // Don't pass Node.js runtime variables to NPM
-    NODE_ENV: "",
-    NODE_OPTIONS: ""
+// src/npm/use-npm-env.ts
+var import_promises = __toESM(require("node:fs/promises"));
+var import_node_os = __toESM(require("node:os"));
+var import_node_path2 = __toESM(require("node:path"));
+async function useNpmEnv(auth, task) {
+  const { registry, token } = auth;
+  const tempDir = await import_promises.default.mkdtemp(import_node_path2.default.join(import_node_os.default.tmpdir(), "npm-publish-"));
+  const tempConfigFile = import_node_path2.default.join(tempDir, ".npmrc");
+  const registryUrl = new URL(registry);
+  const config = [
+    "; added by jsdevtools/npm-publish",
+    `registry=${registry}`,
+    `//${registryUrl.hostname}/:authToken=\${NODE_AUTH_TOKEN}`,
+    ""
+  ].join(import_node_os.default.EOL);
+  const env = {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    NODE_AUTH_TOKEN: token,
+    npm_config_userconfig: tempConfigFile
+    /* eslint-enable @typescript-eslint/naming-convention */
   };
-  let needsToken = Boolean(
-    options.token && process.env.INPUT_TOKEN !== options.token
-  );
-  if (needsToken) {
-    env.INPUT_TOKEN = options.token;
-  }
-  return env;
-}
-
-// src/npm-config.ts
-async function setNpmConfig(options) {
-  let configPath = await getNpmConfigPath(options);
-  let config = await readNpmConfig(configPath, options);
-  config = updateConfig(config, options);
-  await writeNpmConfig(configPath, config, options);
-}
-function updateConfig(config, { registry, debug: debug2 }) {
-  let authDomain = registry.origin.slice(registry.protocol.length);
-  let lines = config.split(/\r?\n/);
-  lines = lines.filter(
-    (line) => !(line.startsWith("registry=") || line.includes("_authToken="))
-  );
-  lines.push(`${authDomain}/:_authToken=\${INPUT_TOKEN}`);
-  lines.push(`registry=${registry.href}`);
-  config = lines.join(import_os.EOL).trim() + import_os.EOL;
-  debug2(`NEW NPM CONFIG: 
-${config}`);
-  return config;
-}
-async function getNpmConfigPath(options) {
+  await import_promises.default.writeFile(tempConfigFile, config, "utf8");
   try {
-    let env = getNpmEnvironment(options);
-    options.debug("Running command: npm config get userconfig");
-    let process2 = await ezSpawn.async("npm", "config", "get", "userconfig", {
-      env
-    });
-    return process2.stdout.trim();
-  } catch (error) {
-    throw (0, import_ono.ono)(error, "Unable to determine the NPM config file path.");
-  }
-}
-async function readNpmConfig(configPath, { debug: debug2 }) {
-  try {
-    debug2(`Reading NPM config from ${configPath}`);
-    let config = await import_fs.promises.readFile(configPath, "utf-8");
-    debug2(`OLD NPM CONFIG: 
-${config}`);
-    return config;
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      debug2("OLD NPM CONFIG: <none>");
-      return "";
-    }
-    throw (0, import_ono.ono)(error, `Unable to read the NPM config file: ${configPath}`);
-  }
-}
-async function writeNpmConfig(configPath, config, { debug: debug2 }) {
-  try {
-    debug2(`Writing new NPM config to ${configPath}`);
-    await import_fs.promises.mkdir((0, import_path.dirname)(configPath), { recursive: true });
-    await import_fs.promises.writeFile(configPath, config);
-  } catch (error) {
-    throw (0, import_ono.ono)(error, `Unable to update the NPM config file: ${configPath}`);
+    return await task(env);
+  } finally {
+    await import_promises.default.rm(tempDir, { force: true, recursive: true });
   }
 }
 
-// src/npm.ts
-var npm = {
-  /**
-   * Gets the latest published version of the specified package.
-   */
-  async getLatestVersion(name, options) {
-    await setNpmConfig(options);
-    try {
-      let command = ["npm", "view"];
-      if (options.tag === "latest") {
-        command.push(name);
-      } else {
-        command.push(`${name}@${options.tag}`);
-      }
-      command.push("version");
-      let env = getNpmEnvironment(options);
-      options.debug(`Running command: npm view ${name} version`, {
-        command,
-        env
-      });
-      let result;
-      try {
-        result = await ezSpawn2.async(command, { env });
-      } catch (err) {
-        result = err;
-      }
-      let version2 = result.stdout.trim();
-      let error = result.stderr.trim();
-      let status = result.status || 0;
-      if (status === 0 && !version2 || error.includes("E404")) {
-        options.debug(
-          `The latest version of ${name} is at v0.0.0, as it was never published.`
-        );
-        return new import_semver.SemVer("0.0.0");
-      } else if (result instanceof Error) {
-        throw result;
-      }
-      let semver2 = new import_semver.SemVer(version2);
-      options.debug(`The latest version of ${name} is at v${semver2}`);
-      return semver2;
-    } catch (error) {
-      throw (0, import_ono2.ono)(
-        error,
-        `Unable to determine the current version of ${name} on NPM.`
-      );
-    }
-  },
-  /**
-   * Publishes the specified package to NPM
-   */
-  async publish({ name, version: version2 }, options) {
-    await setNpmConfig(options);
-    try {
-      let command = ["npm", "publish"];
-      if (options.tag !== "latest") {
-        command.push("--tag", options.tag);
-      }
-      if (options.access) {
-        command.push("--access", options.access);
-      }
-      if (options.dryRun) {
-        command.push("--dry-run");
-      }
-      let cwd = (0, import_path2.resolve)((0, import_path2.dirname)(options.package));
-      let stdio = options.quiet ? "pipe" : "inherit";
-      let env = getNpmEnvironment(options);
-      options.debug("Running command: npm publish", {
-        command,
-        stdio,
-        cwd,
-        env
-      });
-      await ezSpawn2.async(command, { cwd, stdio, env });
-    } catch (error) {
-      throw (0, import_ono2.ono)(
-        error,
-        `Unable to publish ${name} v${version2} to ${options.registry}.`
-      );
-    }
+// src/npm/call-npm-cli.ts
+var import_node_child_process = __toESM(require("node:child_process"));
+var execProcess = (command, env = {}) => {
+  const {
+    NODE_ENV: _NODE_ENV,
+    NODE_OPTIONS: _NODE_OPTIONS,
+    ...processEnv
+  } = process.env;
+  return new Promise((resolve) => {
+    import_node_child_process.default.exec(
+      command,
+      { env: { ...processEnv, ...env } },
+      (error, stdout) => resolve({ stdout: stdout.trim(), error })
+    );
+  });
+};
+var parseJson = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return void 0;
   }
 };
+async function callNpmCli(command, args, options = {}) {
+  var _a, _b;
+  const { stdout, error } = await execProcess(
+    ["npm", command, "--json", ...args].join(" "),
+    options == null ? void 0 : options.env
+  );
+  if (error) {
+    const errorPayload = parseJson(stdout);
+    const errorCode = (_b = (_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) == null ? void 0 : _b.toLowerCase();
+    if (typeof errorCode === "string" && options.ifError && errorCode in options.ifError) {
+      return options.ifError[errorCode];
+    }
+    throw error;
+  }
+  return parseJson(stdout) ?? stdout;
+}
+
+// src/npm/get-publish-args.ts
+function getPublishArgs(config) {
+  const { packageSpec, tag, access, dryRun } = config;
+  const args = [];
+  if (packageSpec !== void 0) {
+    args.push(packageSpec);
+  }
+  if (tag !== void 0) {
+    args.push("--tag", tag);
+  }
+  if (access !== void 0) {
+    args.push("--access", access);
+  }
+  if (dryRun !== void 0) {
+    args.push("--dry-run", JSON.stringify(dryRun));
+  }
+  return args;
+}
+
+// src/npm/index.ts
+async function getVersions(packageName, authConfig) {
+  return useNpmEnv(authConfig, (env) => {
+    return callNpmCli(
+      "view",
+      [packageName, "dist-tags", "versions"],
+      { env, ifError: { e404: { "dist-tags": {}, versions: [] } } }
+    );
+  });
+}
+async function publish(publishConfig, authConfig) {
+  const publishArgs = getPublishArgs(publishConfig);
+  return useNpmEnv(authConfig, (env) => {
+    return callNpmCli("publish", publishArgs, { env });
+  });
+}
 
 // src/read-manifest.ts
-var import_ono3 = __toESM(require_cjs());
-var import_fs2 = require("fs");
-var import_path3 = require("path");
-var import_semver2 = __toESM(require_semver2());
-async function readManifest(path, debug2) {
-  debug2 && debug2(`Reading package manifest from ${(0, import_path3.resolve)(path)}`);
+var import_promises2 = __toESM(require("node:fs/promises"));
+var import_node_path3 = __toESM(require("node:path"));
+var import_semver = __toESM(require_semver2());
+var import_ono = __toESM(require_cjs());
+async function readManifest(packageSpec, debug2) {
+  const packageManifest = import_node_path3.default.join(packageSpec ?? ".", "package.json");
+  debug2 && debug2(`Reading manifest from ${import_node_path3.default.resolve(packageManifest)}`);
   let json;
   try {
-    json = await import_fs2.promises.readFile(path, "utf-8");
+    json = await import_promises2.default.readFile(packageManifest, "utf8");
   } catch (error) {
-    throw (0, import_ono3.ono)(error, `Unable to read ${path}`);
+    throw (0, import_ono.ono)(error, `Unable to read ${packageManifest}`);
   }
   try {
     let { name, version: version2 } = JSON.parse(json);
@@ -6149,40 +5105,45 @@ async function readManifest(path, debug2) {
     }
     let manifest = {
       name,
-      version: new import_semver2.SemVer(version2)
+      version: new import_semver.SemVer(version2)
     };
     debug2 && debug2("MANIFEST:", manifest);
     return manifest;
   } catch (error) {
-    throw (0, import_ono3.ono)(error, `Unable to parse ${path}`);
+    throw (0, import_ono.ono)(error, `Unable to parse ${packageManifest}`);
   }
 }
 
 // src/npm-publish.ts
 async function npmPublish(opts = {}) {
-  let options = normalizeOptions(opts);
-  let manifest = await readManifest(options.package, options.debug);
-  let publishedVersion = await npm.getLatestVersion(manifest.name, options);
+  var _a;
+  const { registry, token, ...options } = normalizeOptions(opts);
+  const authOptions = { registry, token };
+  const manifest = await readManifest(options.package, options.debug);
+  const versions = await getVersions(manifest.name, authOptions);
+  const publishedVersion = versions["dist-tags"][options.tag] ?? "0.0.0";
   let diff2 = semver.diff(manifest.version, publishedVersion);
   let cmp = semver.compare(manifest.version, publishedVersion);
-  let shouldPublish = !options.checkVersion || // compare returns 1 if manifest is higher than published
-  options.greaterVersionOnly && cmp === 1 || // compare returns 0 if the manifest is the same as published
-  cmp !== 0;
+  let shouldPublish = (
+    // compare returns 1 if manifest is higher than published
+    options.greaterVersionOnly && cmp === 1 || // compare returns 0 if the manifest is the same as published
+    cmp !== 0
+  );
   if (shouldPublish) {
-    await npm.publish(manifest, options);
+    await publish(options, authOptions);
   }
   let results = {
     package: manifest.name,
-    registry: options.registry,
+    registry: authOptions.registry,
     // The version should be marked as lower if we disallow decrementing the version
     type: options.greaterVersionOnly && cmp === -1 && "lower" || diff2 || "none",
     version: manifest.version.raw,
-    oldVersion: publishedVersion.raw,
+    oldVersion: publishedVersion,
     tag: options.tag,
     access: options.access || (manifest.name.startsWith("@") ? "restricted" : "public"),
-    dryRun: options.dryRun
+    dryRun: options.dryRun ?? false
   };
-  options.debug("OUTPUT:", results);
+  (_a = options.debug) == null ? void 0 : _a.call(options, "OUTPUT:", results);
   return results;
 }
 

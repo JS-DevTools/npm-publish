@@ -62,11 +62,11 @@ export async function callNpmCli<TReturn = string>(
       options.ifError &&
       errorCode in options.ifError
     ) {
-      return options.ifError[errorCode];
+      return options.ifError[errorCode] as TReturn;
     }
 
     throw error;
   }
 
-  return parseJson(stdout) ?? (stdout as TReturn);
+  return parseJson(stdout) ?? (stdout as unknown as TReturn);
 }

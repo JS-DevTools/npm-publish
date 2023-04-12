@@ -1,7 +1,7 @@
-import { ono } from "@jsdevtools/ono";
-import { promises as fs } from "fs";
-import { resolve } from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { SemVer } from "semver";
+import { ono } from "@jsdevtools/ono";
 import { Debug } from "./options";
 
 /**
@@ -20,16 +20,17 @@ export interface Manifest {
  * @internal
  */
 export async function readManifest(
-  path: string,
+  packageSpec?: string,
   debug?: Debug
 ): Promise<Manifest> {
-  debug && debug(`Reading package manifest from ${resolve(path)}`);
+  const packageManifest = path.join(packageSpec ?? ".", "package.json");
+  debug && debug(`Reading manifest from ${path.resolve(packageManifest)}`);
   let json: string;
 
   try {
-    json = await fs.readFile(path, "utf-8");
+    json = await fs.readFile(packageManifest, "utf8");
   } catch (error) {
-    throw ono(error, `Unable to read ${path}`);
+    throw ono(error, `Unable to read ${packageManifest}`);
   }
 
   try {
@@ -47,6 +48,6 @@ export async function readManifest(
     debug && debug("MANIFEST:", manifest);
     return manifest;
   } catch (error) {
-    throw ono(error, `Unable to parse ${path}`);
+    throw ono(error, `Unable to parse ${packageManifest}`);
   }
 }
