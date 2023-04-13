@@ -487,7 +487,7 @@ describe("GitHub Action - success tests", () => {
     files.create([
       {
         path: "workspace/subdir/my-lib/package.json",
-        contents: { name: "my-lib", version: "1.0.0-beta" },
+        contents: { name: "my-lib", version: "1.0.1-beta" },
       },
     ]);
 
@@ -510,7 +510,7 @@ describe("GitHub Action - success tests", () => {
       args: ["publish"],
       cwd: join(paths.workspace, "subdir/my-lib"),
       env: { INPUT_TOKEN: "my-secret-token" },
-      stdout: `my-lib 1.0.0-beta${EOL}`,
+      stdout: `my-lib 1.0.1-beta${EOL}`,
     });
 
     let cli = exec.action({
@@ -521,12 +521,12 @@ describe("GitHub Action - success tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("my-lib 1.0.0-beta");
+    expect(cli).stdout.to.include("my-lib 1.0.1-beta");
     expect(cli).stdout.to.include(
-      "📦 Successfully published my-lib v1.0.0-beta to https://registry.npmjs.org/"
+      "📦 Successfully published my-lib v1.0.1-beta to https://registry.npmjs.org/"
     );
-    expect(cli).stdout.to.include("TEST::set-output name=type::prerelease");
-    expect(cli).stdout.to.include("TEST::set-output name=version::1.0.0-beta");
+    expect(cli).stdout.to.include("TEST::set-output name=type::prepatch");
+    expect(cli).stdout.to.include("TEST::set-output name=version::1.0.1-beta");
     expect(cli).stdout.to.include("TEST::set-output name=old-version::1.0.0");
     expect(cli).stdout.to.include("TEST::set-output name=tag::latest");
     expect(cli).stdout.to.include("TEST::set-output name=access::public");
