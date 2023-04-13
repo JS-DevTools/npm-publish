@@ -1,12 +1,75 @@
-# ESLint config
-# http://eslint.org/docs/user-guide/configuring
-# https://jstools.dev/eslint-config/
-
 root: true
 
 extends:
-  - "@jsdevtools"
+  - "eslint:recommended"
+  - "plugin:@typescript-eslint/recommended"
+  - "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  - "plugin:@typescript-eslint/strict"
+  - "plugin:import/recommended"
+  - "plugin:import/typescript"
+  - "plugin:jsdoc/recommended-typescript"
+  - "plugin:n/recommended"
+  - "plugin:promise/recommended"
+  - "plugin:sonarjs/recommended"
+  - "plugin:unicorn/recommended"
   - "prettier"
 
+parserOptions:
+  project:
+    - "tsconfig.eslint.json"
+
+settings:
+  import/resolver:
+    typescript: true
+    node: true
+
 env:
+  es2021: true
   node: true
+
+overrides:
+  - files: ["**/*.js"]
+    rules:
+      "@typescript-eslint/no-var-requires": "off"
+      "unicorn/prefer-module": "off"
+
+  - files: ["test/**/*"]
+    env:
+      mocha: true
+    rules:
+      sonarjs/no-duplicate-string: "off"
+
+rules:
+  n/no-unpublished-import: ["error", { "allowModules": ["@actions/core"] }]
+
+  # temporary rule overrides
+  # TODO(mc, 2023-04-12): fix problems, remove overrides, and remove  --quiet
+  prefer-const: "warn"
+  no-regex-spaces: "warn"
+  "@typescript-eslint/no-floating-promises": "warn"
+  "@typescript-eslint/no-unsafe-argument": "warn"
+  "@typescript-eslint/no-unsafe-assignment": "warn"
+  "@typescript-eslint/no-unsafe-call": "warn"
+  "@typescript-eslint/no-unsafe-member-access": "warn"
+  "@typescript-eslint/no-unsafe-return": "warn"
+  "@typescript-eslint/require-await": "warn"
+  "@typescript-eslint/restrict-plus-operands": "warn"
+  "@typescript-eslint/restrict-template-expressions": "warn"
+  "@typescript-eslint/unbound-method": "warn"
+  n/no-missing-import: "warn"
+  n/no-missing-require: "warn"
+  n/no-process-exit: "warn"
+  unicorn/better-regex: "warn"
+  unicorn/catch-error-name: "warn"
+  unicorn/import-style: "warn"
+  unicorn/no-array-push-push: "warn"
+  unicorn/no-process-exit: "warn"
+  unicorn/no-useless-undefined: "warn"
+  unicorn/prefer-export-from: "warn"
+  unicorn/prefer-module: "warn"
+  unicorn/prefer-node-protocol: "warn"
+  unicorn/prefer-optional-catch-binding: "warn"
+  unicorn/prefer-spread: "warn"
+  unicorn/prefer-top-level-await: "warn"
+  unicorn/prevent-abbreviations: "warn"
+  unicorn/text-encoding-identifier-case: "warn"
