@@ -11,7 +11,7 @@ package_manifest=${PACKAGE_SPEC}/package.json
 
 mkdir -p ${PACKAGE_SPEC}
 
-echo "{"                                     > ${package_manifest}
+echo "{"                                      > ${package_manifest}
 echo "  \"name\": \"@jsdevtools/fixture\","  >> ${package_manifest}
 echo "  \"version\": \"${PACKAGE_VERSION}\"" >> ${package_manifest}
 echo "}"                                     >> ${package_manifest}

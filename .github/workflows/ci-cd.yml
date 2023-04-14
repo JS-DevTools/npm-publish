@@ -90,7 +90,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: "Upload publish artifact"
+      - name: Upload publish artifact
         uses: actions/upload-artifact@v3
         with:
           name: publish-artifact
@@ -152,7 +152,7 @@ jobs:
           token: ${{ steps.setup.outputs.token }}
 
       - name: Check action output
-        if: steps.action-no-publish.outputs.type != 'none'
+        if: ${{ steps.action-no-publish.outputs.type != 'none' }}
         run: |
           echo "::error::Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
           exit 1
@@ -170,13 +170,13 @@ jobs:
           token: ${{ steps.setup.outputs.token }}
 
       - name: Check release output
-        if: steps.action-publish.outputs.type != 'patch'
+        if: ${{ steps.action-publish.outputs.type != 'patch' }}
         run: |
           echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
           exit 1
 
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.ref == 'refs/heads/master' }}
     name: Publish to NPM
     runs-on: ubuntu-latest
     timeout-minutes: 10
