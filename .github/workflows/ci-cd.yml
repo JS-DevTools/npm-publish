@@ -166,7 +166,6 @@ jobs:
 
       - name: Create new version for Action end-to-end test
         shell: bash
-        env:
         run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.token }} 0.0.3
 
       - name: Publish with action
