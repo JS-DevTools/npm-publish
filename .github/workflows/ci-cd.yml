@@ -1,8 +1,3 @@
-# GitHub Actions workflow
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions
-
 name: CI-CD
 
 on:
@@ -12,12 +7,28 @@ on:
     tags-ignore:
       - "*"
 
+  # run CI every Monday at 12:25 UTC
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: "25 12 * * 1"
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install Node.js and dependencies
+        uses: ./.github/actions/setup
+
+      - name: Run linters
+        run: npm run lint
+
   test:
-    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    name: Run tests using Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -36,16 +47,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node ${{ matrix.node }}
-        uses: actions/setup-node@v3
+      - name: Install Node.js ${{ matrix.node }} and dependencies
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run linters
-        run: npm run lint
 
       - name: Build the code
         run: npm run build
@@ -54,7 +59,7 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
@@ -66,30 +71,131 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
 
-  deploy:
-    name: Publish to NPM
-    if: github.ref == 'refs/heads/master'
+  build:
+    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: test
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v3
+      - name: Install Node.js and dependencies
+        uses: ./.github/actions/setup
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build the code
+      - name: Build
         run: npm run build
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish-artifact
+          path: lib
+
+  e2e:
+    name: Run end-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+
+    services:
+      verdaccio:
+        image: verdaccio/verdaccio:5
+        ports:
+          - 4873:4873
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install Node.js and dependencies
+        uses: ./.github/actions/setup
+        with:
+          install-command: npm install --production
+
+      - name: Download publish artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: publish-artifact
+          path: lib
+
+      - id: setup
+        name: Login to local registry and set up fixture package
+        shell: bash
+        run: |
+          echo "token=$(./e2e/00-login.sh)" >> "$GITHUB_OUTPUT"
+          echo "package=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)" >> "$GITHUB_OUTPUT"
+
+      - name: Run CLI end-to-end test
+        shell: bash
+        env:
+          TOKEN: ${{ steps.setup.outputs.token }}
+          PACKAGE: ${{ steps.setup.outputs.package }}
+        run: |
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/01-setup-package.sh ${PACKAGE} 0.0.2
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
+
+      - id: action-no-publish
+        name: Publish with already published version
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+
+      - name: Check action output
+        if: ${{ steps.action-no-publish.outputs.type != 'none' }}
+        run: |
+          echo "::error::Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
+          exit 1
+
+      - name: Create new version for Action end-to-end test
+        shell: bash
+        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.package }} 0.0.3
+
+      - id: action-publish
+        name: Publish a new version
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+
+      - name: Check release output
+        if: ${{ steps.action-publish.outputs.type != 'patch' }}
+        run: |
+          echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
+          exit 1
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - lint
+      - test
+      - build
+      - e2e
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Download publish artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: publish-artifact
+          path: lib
 
       - name: Publish to NPM
         uses: ./
