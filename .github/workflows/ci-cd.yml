@@ -135,7 +135,7 @@ jobs:
         with:
           node-version: "18"
 
-      - name: "Download publish artifact"
+      - name: Download publish artifact
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
@@ -151,7 +151,7 @@ jobs:
           echo "token=$(./e2e/00-login.sh)" >> "$GITHUB_OUTPUT"
           echo "package=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)" >> "$GITHUB_OUTPUT"
 
-      - name: Run CLI end-to-end tests
+      - name: Run CLI end-to-end test
         shell: bash
         env:
           TOKEN: ${{ steps.setup.outputs.token }}
@@ -164,6 +164,18 @@ jobs:
           ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
           ./e2e/03-verify.sh ${PACKAGE}
 
+      - name: Create new version for Action end-to-end test
+        shell: bash
+        env:
+        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.token }} 0.0.3
+
+      - name: Publish with action
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+
   deploy:
     if: github.ref == 'refs/heads/master'
     name: Publish to NPM
@@ -175,7 +187,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: "Download publish artifact"
+      - name: Download publish artifact
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
