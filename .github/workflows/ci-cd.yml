@@ -139,6 +139,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
+          path: lib
 
       - id: setup
         name: Login to local registry and set up fixture package
@@ -175,6 +176,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
+          path: lib
 
       - name: Publish to NPM
         uses: ./
