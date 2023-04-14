@@ -198,7 +198,7 @@ describe("NPM package - success tests", () => {
 
   it("should use the specified NPM token to publish the package", async () => {
     files.create([
-      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.0-beta.1" }},
+      { path: "workspace/package.json", contents: { name: "my-lib", version: "1.0.1-beta.1" }},
     ]);
 
     npm.mock({
@@ -219,7 +219,7 @@ describe("NPM package - success tests", () => {
     npm.mock({
       args: ["publish"],
       env: { INPUT_TOKEN: "my-secret-token" },
-      stdout: `my-lib 1.0.0-beta.1${EOL}`,
+      stdout: `my-lib 1.0.1-beta.1${EOL}`,
     });
 
     let results = await npmPublish({
@@ -228,10 +228,10 @@ describe("NPM package - success tests", () => {
     });
 
     expect(results).to.deep.equal({
-      type: "prerelease",
+      type: "prepatch",
       package: "my-lib",
       registry: new URL("https://registry.npmjs.org/"),
-      version: "1.0.0-beta.1",
+      version: "1.0.1-beta.1",
       oldVersion: "1.0.0",
       tag: "latest",
       access: "public",
@@ -365,7 +365,7 @@ describe("NPM package - success tests", () => {
 
   it("should publish a package that's not in the root of the workspace directory", async () => {
     files.create([
-      { path: "workspace/subdir/my-lib/package.json", contents: { name: "my-lib", version: "1.0.0-beta" }},
+      { path: "workspace/subdir/my-lib/package.json", contents: { name: "my-lib", version: "1.0.1-beta" }},
     ]);
 
     npm.mock({
@@ -386,7 +386,7 @@ describe("NPM package - success tests", () => {
     npm.mock({
       args: ["publish"],
       cwd: join(paths.workspace, "subdir/my-lib"),
-      stdout: `my-lib 1.0.0-beta${EOL}`,
+      stdout: `my-lib 1.0.1-beta${EOL}`,
     });
 
     let results = await npmPublish({
@@ -395,10 +395,10 @@ describe("NPM package - success tests", () => {
     });
 
     expect(results).to.deep.equal({
-      type: "prerelease",
+      type: "prepatch",
       package: "my-lib",
       registry: new URL("https://registry.npmjs.org/"),
-      version: "1.0.0-beta",
+      version: "1.0.1-beta",
       oldVersion: "1.0.0",
       tag: "latest",
       access: "public",

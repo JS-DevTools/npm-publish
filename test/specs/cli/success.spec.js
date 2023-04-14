@@ -356,7 +356,7 @@ describe("CLI - success tests", () => {
     files.create([
       {
         path: "workspace/subdir/my-lib/package.json",
-        contents: { name: "my-lib", version: "1.0.0-beta" },
+        contents: { name: "my-lib", version: "1.0.1-beta" },
       },
     ]);
 
@@ -378,15 +378,15 @@ describe("CLI - success tests", () => {
     npm.mock({
       args: ["publish"],
       cwd: join(paths.workspace, "subdir/my-lib"),
-      stdout: `my-lib 1.0.0-beta${EOL}`,
+      stdout: `my-lib 1.0.1-beta${EOL}`,
     });
 
     let cli = exec.cli("subdir/my-lib/package.json");
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("my-lib 1.0.0-beta");
+    expect(cli).stdout.to.include("my-lib 1.0.1-beta");
     expect(cli).stdout.to.include(
-      "📦 Successfully published my-lib v1.0.0-beta to https://registry.npmjs.org/"
+      "📦 Successfully published my-lib v1.0.1-beta to https://registry.npmjs.org/"
     );
     expect(cli).to.have.exitCode(0);
 
