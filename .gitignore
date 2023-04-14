@@ -44,4 +44,4 @@ pids
 # Test output
 /.nyc_output
 /coverage
-/e2e/dummy
+/e2e/fixture

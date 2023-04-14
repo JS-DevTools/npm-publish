@@ -135,21 +135,21 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install production dependencies
-        run: npm ci --omit dev
-
       - name: "Download publish artifact"
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
           path: lib
 
+      - name: Install production dependencies
+        run: npm install . --production
+
       - id: setup
         name: Login to local registry and set up fixture package
         shell: bash
         run: |
           echo "token=$(./e2e/00-login.sh)" >> "$GITHUB_OUTPUT"
-          echo "package=$(./e2e/01-setup-package.sh ./e2e/dummy "@jsdevtools/dummy" "0.0.1")" >> "$GITHUB_OUTPUT"
+          echo "package=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)" >> "$GITHUB_OUTPUT"
 
       - name: Run CLI end-to-end tests
         shell: bash
@@ -160,7 +160,7 @@ jobs:
           ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
           ./e2e/03-verify.sh ${PACKAGE}
           ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
-          ./e2e/01-setup-package.sh ${PACKAGE} "@jsdevtools/dummy" "0.0.2"
+          ./e2e/01-setup-package.sh ${PACKAGE} 0.0.2
           ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
           ./e2e/03-verify.sh ${PACKAGE}
 

@@ -22,7 +22,7 @@ Login to the local registry and create a fixture package.
 
 ```shell
 export TOKEN=$(./e2e/00-login.sh)
-export PACKAGE=$(./e2e/01-setup-package.sh ./e2e/dummy "@jsdevtools/dummy" "0.0.1")
+export PACKAGE=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)
 ```
 
 ### Test the CLI
@@ -38,7 +38,7 @@ export PACKAGE=$(./e2e/01-setup-package.sh ./e2e/dummy "@jsdevtools/dummy" "0.0.
 ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
 ./e2e/03-verify.sh ${PACKAGE}
 ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
-./e2e/01-setup-package.sh ${PACKAGE} "@jsdevtools/dummy" "0.0.2"
+./e2e/01-setup-package.sh ${PACKAGE} 0.0.2
 ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
 ./e2e/03-verify.sh ${PACKAGE}
 ```

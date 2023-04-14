@@ -29,7 +29,7 @@
     "lib"
   ],
   "scripts": {
-    "clean": "shx rm -rf .nyc_output coverage lib dist",
+    "clean": "shx rm -rf .nyc_output coverage lib dist e2e/fixture",
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "npm run build:typescript && npm run build:ncc && npm run build:node_modules",
