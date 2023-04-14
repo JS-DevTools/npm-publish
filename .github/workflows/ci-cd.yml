@@ -135,6 +135,9 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Install production dependencies
+        run: npm ci --omit dev
+
       - name: "Download publish artifact"
         uses: actions/download-artifact@v3
         with:
