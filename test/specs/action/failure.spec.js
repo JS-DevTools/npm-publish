@@ -44,7 +44,9 @@ describe("GitHub Action - failure tests", () => {
     });
 
     expect(cli).to.have.stderr("");
-    expect(cli).stdout.to.include("::error::TypeError: Invalid URL");
+    expect(cli).stdout.to.include(
+      "::error::TypeError [ERR_INVALID_URL]: Invalid URL"
+    );
     expect(cli).to.have.exitCode(1);
 
     files.assert.doesNotExist("home/.npmrc");
@@ -82,7 +84,7 @@ describe("GitHub Action - failure tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include(
-      "::error::SyntaxError: Unable to parse package.json"
+      "::error::Error: Unable to parse package.json"
     );
     expect(cli).stdout.to.include("Unexpected token h in JSON at position 0");
     expect(cli).to.have.exitCode(1);
@@ -104,7 +106,7 @@ describe("GitHub Action - failure tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include(
-      "::error::TypeError: Unable to parse package.json"
+      "::error::Error: Unable to parse package.json"
     );
     expect(cli).stdout.to.include("Invalid package name");
     expect(cli).to.have.exitCode(1);
@@ -129,7 +131,7 @@ describe("GitHub Action - failure tests", () => {
 
     expect(cli).to.have.stderr("");
     expect(cli).stdout.to.include(
-      "::error::TypeError: Unable to parse package.json"
+      "::error::Error: Unable to parse package.json"
     );
     expect(cli).stdout.to.include("Invalid Version: hello, world");
     expect(cli).to.have.exitCode(1);

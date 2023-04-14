@@ -5,6 +5,9 @@ extension:
   - .js
   - .ts
 
+exclude:
+  - test
+
 reporter:
   - text
   - lcov
