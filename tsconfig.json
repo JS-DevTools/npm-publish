@@ -1,26 +1,42 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    // target Node v16 / ES2021
+    "target": "es2021",
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+
+    // Interoperability with CommonJS modules
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
 
+    // Do not error out for errors in third-party modules
+    "skipLibCheck": true,
+
+    // Type-checking options
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    // "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    // "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // inputs and outputs
+    "declaration": true,
+    "sourceMap": true,
     "rootDir": "src",
     "outDir": "lib",
-    "sourceMap": true,
-    "declaration": true,
 
-    "newLine": "LF",
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictBindCallApply": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "stripInternal": true,
-
-    "typeRoots": ["node_modules/@types"]
+    // temporary overrides
+    // TODO(mc, 2023-04-12): fix errors and remove overrides
+    "useUnknownInCatchVariables": false,
+    "exactOptionalPropertyTypes": false,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src/**/*.ts"]
 }
