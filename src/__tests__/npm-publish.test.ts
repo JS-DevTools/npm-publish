@@ -29,7 +29,7 @@ describe("npmPublish", () => {
   });
 
   it("should read the manifest, get publish config, compare, and publish", async () => {
-    const options: Options = { token: "abc123" };
+    const options: Options = { package: "./cool-package", token: "abc123" };
     const manifest: Manifest = { name: "cool-package", version: "1.2.3" };
     const authConfig = {
       registryUrl: { value: new URL("http://example.com") },
@@ -46,7 +46,7 @@ describe("npmPublish", () => {
     };
     const publishResult: PublishResult = { id: "cool-package@1.2.3" };
 
-    td.when(readManifest("./package.json")).thenResolve(manifest);
+    td.when(readManifest("./cool-package")).thenResolve(manifest);
     td.when(normalizeOptions(options, manifest)).thenReturn({
       authConfig,
       publishConfig,
@@ -71,7 +71,7 @@ describe("npmPublish", () => {
   });
 
   it("should skip publish if not needed", async () => {
-    const options: Options = { token: "abc123" };
+    const options: Options = { package: "./cool-package", token: "abc123" };
     const manifest: Manifest = { name: "cool-package", version: "1.2.3" };
     const authConfig = {
       registryUrl: { value: new URL("http://example.com") },
@@ -87,7 +87,7 @@ describe("npmPublish", () => {
       previousVersion: "0.1.2",
     };
 
-    td.when(readManifest("./package.json")).thenResolve(manifest);
+    td.when(readManifest("./cool-package")).thenResolve(manifest);
     td.when(normalizeOptions(options, manifest)).thenReturn({
       authConfig,
       publishConfig,
