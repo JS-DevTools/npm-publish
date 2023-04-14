@@ -7,8 +7,9 @@ on:
     tags-ignore:
       - "*"
 
+  # run CI every Monday at 12:25 UTC
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: "25 12 * * 1"
 
 jobs:
   lint:
