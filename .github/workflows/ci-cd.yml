@@ -48,6 +48,7 @@ jobs:
 
       - name: Install Node.js ${{ matrix.node }} and dependencies
         uses: ./actions/setup
+        with:
           node-version: ${{ matrix.node }}
 
       - name: Build the code
