@@ -1,8 +1,3 @@
-# GitHub Actions workflow
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions
-
 name: CI-CD
 
 on:
@@ -25,13 +20,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Node.js and dependencies
+        uses: ./actions/setup
 
       - name: Run linters
         run: npm run lint
@@ -56,13 +46,9 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node ${{ matrix.node }}
-        uses: actions/setup-node@v3
-        with:
+      - name: Install Node.js ${{ matrix.node }} and dependencies
+        uses: ./actions/setup
           node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Build the code
         run: npm run build
@@ -97,13 +83,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Node.js and dependencies
+        uses: ./actions/setup
 
       - name: Build
         run: npm run build
@@ -118,7 +99,7 @@ jobs:
     name: Run end-to-end tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: ["build"]
+    needs: build
 
     services:
       verdaccio:
@@ -130,19 +111,16 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Install Node.js and dependencies
+        uses: ./actions/setup
         with:
-          node-version: "18"
+          install-command: npm install --production
 
       - name: Download publish artifact
         uses: actions/download-artifact@v3
         with:
           name: publish-artifact
           path: lib
-
-      - name: Install production dependencies
-        run: npm install . --production
 
       - id: setup
         name: Login to local registry and set up fixture package
@@ -164,23 +142,48 @@ jobs:
           ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
           ./e2e/03-verify.sh ${PACKAGE}
 
-      - name: Create new version for Action end-to-end test
-        shell: bash
-        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.token }} 0.0.3
-
-      - name: Publish with action
+      - id: action-no-publish
+        name: Publish with already published version
         uses: ./
         with:
           registry: http://localhost:4873
           package: ${{ steps.setup.outputs.package }}/package.json
           token: ${{ steps.setup.outputs.token }}
 
+      - name: Check action output
+        if: steps.action-no-publish.outputs.type != 'none'
+        run: |
+          echo "::error Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
+          exit 1
+
+      - name: Create new version for Action end-to-end test
+        shell: bash
+        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.package }} 0.0.3
+
+      - id: action-publish
+        name: Publish a new version
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+
+      - name: Check release output
+        if: steps.action-publish.outputs.type != 'patch'
+        run: |
+          echo "::error Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
+          exit 1
+
   deploy:
     if: github.ref == 'refs/heads/master'
     name: Publish to NPM
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: ["lint", "test", "build", "e2e"]
+    needs:
+      - lint
+      - test
+      - build
+      - e2e
 
     steps:
       - name: Checkout source
