@@ -154,7 +154,7 @@ jobs:
       - name: Check action output
         if: steps.action-no-publish.outputs.type != 'nne'
         run: |
-          echo "::error Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
+          echo "::error::Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
           exit 1
 
       - name: Create new version for Action end-to-end test
@@ -172,7 +172,7 @@ jobs:
       - name: Check release output
         if: steps.action-publish.outputs.type != 'patch'
         run: |
-          echo "::error Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
+          echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
           exit 1
 
   deploy:
