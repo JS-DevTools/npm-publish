@@ -1,11 +1,12 @@
 name: CI-CD
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - "*"
-    tags-ignore:
-      - "*"
+      - main
 
   # run CI every Monday at 12:25 UTC
   schedule:
@@ -177,7 +178,7 @@ jobs:
           exit 1
 
   deploy:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: Publish to NPM
     runs-on: ubuntu-latest
     timeout-minutes: 10

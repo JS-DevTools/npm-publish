@@ -3,7 +3,7 @@
 [![Cross-Platform Compatibility](https://jstools.dev/img/badges/os-badges.svg)](https://github.com/JS-DevTools/npm-publish/actions)
 [![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI-CD/badge.svg)](https://github.com/JS-DevTools/npm-publish/actions)
 
-[![Coverage Status](https://coveralls.io/repos/github/JS-DevTools/npm-publish/badge.svg?branch=master)](https://coveralls.io/github/JS-DevTools/npm-publish)
+[![Coverage Status](https://coveralls.io/repos/github/JS-DevTools/npm-publish/badge.svg?branch=main)](https://coveralls.io/github/JS-DevTools/npm-publish)
 
 [![npm](https://img.shields.io/npm/v/@jsdevtools/npm-publish.svg)](https://www.npmjs.com/package/@jsdevtools/npm-publish)
 [![License](https://img.shields.io/npm/l/@jsdevtools/npm-publish.svg)](LICENSE)
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 18
       - run: npm ci
       - run: npm test
       - uses: JS-DevTools/npm-publish@v1
