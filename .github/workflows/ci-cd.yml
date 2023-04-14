@@ -58,7 +58,7 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
@@ -70,7 +70,7 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
