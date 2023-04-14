@@ -16,8 +16,28 @@ on:
     - cron: "0 0 1 * *"
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linters
+        run: npm run lint
+
   test:
-    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    name: Run tests using Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -44,9 +64,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linters
-        run: npm run lint
-
       - name: Build the code
         run: npm run build
 
@@ -71,12 +88,52 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
 
-  deploy:
-    name: Publish to NPM
-    if: github.ref == 'refs/heads/master'
+  e2e:
+    name: Run end-to-end tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: test
+
+    services:
+      verdaccio:
+        image: verdaccio/verdaccio:5
+        ports:
+          - 4873:4873
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - id: setup
+        name: Login to local registry and set up fixture package
+        shell: bash
+        run: |
+          echo "token=$(./e2e/00-login.sh)" >> "$GITHUB_OUTPUT"
+          echo "package=$(./e2e/01-setup-package.sh ./e2e/dummy "@jsdevtools/dummy" "0.0.1")" >> "$GITHUB_OUTPUT"
+
+      - name: Run CLI end-to-end tests
+        shell: bash
+        env:
+          TOKEN: ${{ steps.setup.outputs.token }}
+          PACKAGE: ${{ steps.setup.outputs.package }}
+        run: |
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/01-setup-package.sh ${PACKAGE} "@jsdevtools/dummy" "0.0.2"
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: ["lint", "test", "e2e"]
 
     steps:
       - name: Checkout source
