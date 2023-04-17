@@ -25,7 +25,10 @@ jobs:
       - name: Install Node.js and dependencies
         uses: ./.github/actions/setup
 
-      - name: Run linters
+      - name: Build types
+        run: npm run build:lib
+
+      - name: Run lints
         run: npm run lint
 
   test:

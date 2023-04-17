@@ -10,4 +10,4 @@ PACKAGE_SPEC=$1
 package_name=$(cd $1 && npm pkg get name | sed 's/"//g')
 package_version=$(cd $1 && npm pkg get version | sed 's/"//g')
 
-npm view $package_name@$package_version
+npm view --registry ${REGISTRY_URL} $package_name@$package_version
