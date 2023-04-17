@@ -87,7 +87,7 @@ jobs:
 
   e2e:
     name: Run E2E tests with Node.js ${{ matrix.node-version }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
 

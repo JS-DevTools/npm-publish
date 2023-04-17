@@ -187,36 +187,41 @@ For security and safety, the `npm-publish` CLI uses a different, isolated config
 Run `npm-publish --help` to see the full list of options available.
 
 ```
-> npm-publish --help
+Usage:
 
-Usage: npm-publish [options] [package_path]
+  npm-publish <options> [package]
 
-options:
-  --token <token>     The NPM access token to use when publishing
+Arguments:
 
-  --registry <url>    The NPM registry URL to use
+  package                 The path to the package to publish.
+                          May be a directory or package.json file.
+                          Defaults to the package in the current directory.
 
-  --tag <tag>         The tag to publish to. Allows the package to be installed
-                      using "npm install <package-name>@<tag>"
+Options:
 
-  --access <access>   "public" = The package will be publicly visible.
-                      "restricted" = The package will only be visible to members
-                      of your NPM organization.
+  --token <token>         (Required) npm authentication token.
 
-  --dry-run           Don't actually publish to NPM, but report what would have
-                      been published
+  --registry <url>        Registry to read from and write to.
+                          Defaults to "https://registry.npmjs.org/".
 
-  --debug, -d         Enable debug mode, with increased logging
+  --tag <tag>             The distribution tag to check against and publish to.
+                          Defaults to "latest".
 
-  --quiet, -q         Suppress unnecessary output
+  --access <access>       Package access, may be "public" or "restricted".
+                          See documentation for details.
 
-  --version, -v       Print the version number
+  --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
+                          Defaults to "all", see documentation for details.
 
-  --help, -h          Show help
+  --dry-run               Do not actually publish anything.
+  --quiet                 Only print errors.
+  --debug                 Print debug logs.
+  -v, --version           Print the version number.
+  -h --help               Show usage text.
 
-package_path          The absolute or relative path of the NPM package to publish.
-                      Can be a directory path, or the path of a package.json file.
-                      Defaults to the current directory.
+Examples:
+
+  $ npm-publish --token abc123 ./my-package
 ```
 
 ## License
