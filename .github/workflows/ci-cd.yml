@@ -161,9 +161,9 @@ jobs:
           token: ${{ steps.setup.outputs.token }}
 
       - name: Check action output
-        if: ${{ steps.action-no-publish.outputs.type != 'none' }}
+        if: ${{ steps.action-no-publish.outputs.type != '' }}
         run: |
-          echo "::error::Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
+          echo "::error::Expected release type to be '', got '${{ steps.action-no-publish.outputs.type }}'"
           exit 1
 
       - name: Create new version for Action end-to-end test

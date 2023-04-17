@@ -4821,7 +4821,7 @@ async function useNpmEnvironment(auth, task) {
   const npmrc = import_node_path2.default.join(npmrcDirectory, ".npmrc");
   const config = [
     "; created by jsdevtools/npm-publish",
-    `//${registry.value.hostname}/:authToken=\${NODE_AUTH_TOKEN}`,
+    `//${registry.value.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
     `registry=${registry.value.href}`,
     ""
   ].join(import_node_os2.default.EOL);

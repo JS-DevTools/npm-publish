@@ -9,7 +9,7 @@ REGISTRY_HOSTNAME="localhost:4873"
 registry_url=http://${REGISTRY_HOSTNAME}
 token_matcher='^\/\/'${REGISTRY_HOSTNAME}'\/:_authToken="(.+)"$'
 temporary_dir=${RUNNER_TEMP:-${TMPDIR}}
-npmrc=${temporary_dir}.npmrc-e2e
+npmrc=${temporary_dir}/.npmrc-e2e
 
 {
 echo -e "test"
