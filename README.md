@@ -131,15 +131,17 @@ As shown in the example above, you should pass an options object to the `npmPubl
 import type { Options } from "@jsdevtools/npm-publish";
 ```
 
-| Name       | Type                   | Default                        | Description                                                                   |
-| ---------- | ---------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
-| `token`    | string                 | **required**                   | The authentication token to use with npm.                                     |
-| `registry` | string, `URL`          | `https://registry.npmjs.org/`  | The registry URL to read and write to.                                        |
-| `package`  | string                 | Current working directory      | The path to the package or its package.json file.                             |
-| `tag`      | string                 | `latest`                       | The [distribution tag][npm-tag] to publish to.                                |
-| `access`   | `public`, `restricted` | [Use npm defaults][npm-access] | Whether the package should be publicly visible or restricted.                 |
-| `strategy` | `all`, `upgrade`       | `all`                          | Use `all` to publish all unique versions, `upgrade` for only semver upgrades. |
-| `dryRun`   | boolean                | `false`                        | Run `npm publish` with the `--dry-run` flag to prevent publication.           |
+| Name                 | Type                   | Default                        | Description                                                                   |
+| -------------------- | ---------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `token`              | string                 | **required**                   | The authentication token to use with npm.                                     |
+| `registry`           | string, `URL`          | `https://registry.npmjs.org/`  | The registry URL to read and write to.                                        |
+| `package`            | string                 | Current working directory      | The path to the package or its package.json file.                             |
+| `tag`                | string                 | `latest`                       | The [distribution tag][npm-tag] to publish to.                                |
+| `access`             | `public`, `restricted` | [Use npm defaults][npm-access] | Whether the package should be publicly visible or restricted.                 |
+| `strategy`           | `all`, `upgrade`       | `all`                          | Use `all` to publish all unique versions, `upgrade` for only semver upgrades. |
+| `dryRun`             | boolean                | `false`                        | Run `npm publish` with the `--dry-run` flag to prevent publication.           |
+| `logger`             | object                 | `undefined`                    | A logging interface with `debug`, `info`, and `error` log methods.            |
+| `temporaryDirectory` | string                 | `os.tmpdir()`                  | A temporary directory to hold a generated `.npmrc` file                       |
 
 ### Output
 

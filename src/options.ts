@@ -96,4 +96,11 @@ export interface Options {
    * Optional logger.
    */
   logger?: Logger | undefined;
+
+  /**
+   * Temporary directory.
+   *
+   * Defaults to os.tmpdir()
+   */
+  temporaryDirectory?: string | undefined;
 }

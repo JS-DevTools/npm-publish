@@ -2507,11 +2507,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os4 = __importStar(require("os"));
+    var os5 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os4.EOL);
+      process.stdout.write(cmd.toString() + os5.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -2928,7 +2928,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs3 = __importStar(require("fs"));
-    var os4 = __importStar(require("os"));
+    var os5 = __importStar(require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -2939,7 +2939,7 @@ var require_file_command = __commonJS({
       if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os5.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -2953,7 +2953,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os4.EOL}${convertedValue}${os4.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os5.EOL}${convertedValue}${os5.EOL}${delimiter}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -4442,7 +4442,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os4 = __importStar(require("os"));
+    var os5 = __importStar(require("os"));
     var path3 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -4510,7 +4510,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os4.EOL);
+      process.stdout.write(os5.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput2;
@@ -4544,7 +4544,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice;
     function info(message) {
-      process.stdout.write(message + os4.EOL);
+      process.stdout.write(message + os5.EOL);
     }
     exports.info = info;
     function startGroup(name) {
@@ -4759,6 +4759,7 @@ async function readManifest(packagePath) {
 }
 
 // src/normalize-options.ts
+var import_node_os2 = __toESM(require("node:os"));
 var DEFAULT_REGISTRY = "https://registry.npmjs.org/";
 var DEFAULT_TAG = "latest";
 function normalizeOptions(options, manifest) {
@@ -4767,16 +4768,14 @@ function normalizeOptions(options, manifest) {
   const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? DEFAULT_REGISTRY;
   const defaultAccess = ((_c = manifest.publishConfig) == null ? void 0 : _c.access) ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
   return {
-    authConfig: {
-      token: setValue(options.token, "", validateToken),
-      registry: setValue(options.registry, defaultRegistry, validateRegistry)
-    },
-    publishConfig: {
-      tag: setValue(options.tag, defaultTag, validateTag),
-      access: setValue(options.access, defaultAccess, validateAccess),
-      dryRun: setValue(options.dryRun, false, validateDryRun),
-      strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy)
-    }
+    token: validateToken(options.token),
+    registry: validateRegistry(options.registry ?? defaultRegistry),
+    tag: setValue(options.tag, defaultTag, validateTag),
+    access: setValue(options.access, defaultAccess, validateAccess),
+    dryRun: setValue(options.dryRun, false, validateDryRun),
+    strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
+    logger: options.logger,
+    temporaryDirectory: options.temporaryDirectory ?? import_node_os2.default.tmpdir()
   };
 }
 var setValue = (value, defaultValue, validate2 = (_) => _) => ({
@@ -4817,24 +4816,26 @@ var validateStrategy = (value) => {
 
 // src/npm/use-npm-environment.ts
 var import_promises2 = __toESM(require("node:fs/promises"));
-var import_node_os2 = __toESM(require("node:os"));
+var import_node_os3 = __toESM(require("node:os"));
 var import_node_path2 = __toESM(require("node:path"));
-async function useNpmEnvironment(auth, task) {
-  const { registry, token } = auth;
+async function useNpmEnvironment(options, task) {
+  const { registry, token, logger: logger2, temporaryDirectory } = options;
   const npmrcDirectory = await import_promises2.default.mkdtemp(
-    import_node_path2.default.join(import_node_os2.default.tmpdir(), "npm-publish-")
+    import_node_path2.default.join(temporaryDirectory, "npm-publish-")
   );
   const npmrc = import_node_path2.default.join(npmrcDirectory, ".npmrc");
   const config = [
     "; created by jsdevtools/npm-publish",
-    `//${registry.value.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
-    `registry=${registry.value.href}`,
+    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${registry.href}`,
     ""
-  ].join(import_node_os2.default.EOL);
+  ].join(import_node_os3.default.EOL);
   await import_promises2.default.writeFile(npmrc, config, "utf8");
+  logger2 == null ? void 0 : logger2.debug(`Temporary .npmrc created at ${npmrc}
+${config}`);
   try {
     return await task({
-      NODE_AUTH_TOKEN: token.value,
+      NODE_AUTH_TOKEN: token,
       npm_config_userconfig: npmrc
     });
   } finally {
@@ -4896,8 +4897,8 @@ async function callNpmCli(command, cliArguments, options = {}) {
 }
 
 // src/npm/get-publish-arguments.ts
-function getPublishArguments(packageSpec, config) {
-  const { tag, access, dryRun } = config;
+function getPublishArguments(packageSpec, options) {
+  const { tag, access, dryRun } = options;
   const publishArguments = [];
   if (packageSpec.length > 0) {
     publishArguments.push(packageSpec);
@@ -4915,24 +4916,24 @@ function getPublishArguments(packageSpec, config) {
 }
 
 // src/npm/index.ts
-async function getVersions(packageName, authConfig, logger2) {
-  return useNpmEnvironment(authConfig, (environment) => {
+async function getVersions(packageName, options) {
+  return useNpmEnvironment(options, (environment) => {
     return callNpmCli(
       "view",
       [packageName, "dist-tags", "versions"],
       {
-        logger: logger2,
+        logger: options.logger,
         environment,
         ifError: { e404: { "dist-tags": {}, versions: [] } }
       }
     );
   });
 }
-async function publish(packageSpec, publishConfig, authConfig, logger2) {
-  const publishArguments = getPublishArguments(packageSpec, publishConfig);
-  return useNpmEnvironment(authConfig, (environment) => {
+async function publish(packageSpec, options) {
+  const publishArguments = getPublishArguments(packageSpec, options);
+  return useNpmEnvironment(options, (environment) => {
     return callNpmCli("publish", publishArguments, {
-      logger: logger2,
+      logger: options.logger,
       environment
     });
   });
@@ -4942,9 +4943,9 @@ async function publish(packageSpec, publishConfig, authConfig, logger2) {
 var import_semver2 = __toESM(require_semver2());
 var INITIAL = "initial";
 var DIFFERENT = "different";
-function compareVersions(version2, publishedVersions, publishConfig) {
+function compareVersions(version2, publishedVersions, options) {
   const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
-  const { strategy, tag: publishTag } = publishConfig;
+  const { strategy, tag: publishTag } = options;
   const oldVersion = (0, import_semver2.valid)(tags[publishTag.value]) ?? void 0;
   const isUnique = !existingVersions.includes(version2);
   let type;
@@ -4961,16 +4962,16 @@ function compareVersions(version2, publishedVersions, publishConfig) {
 }
 
 // src/format-publish-result.ts
-var import_node_os3 = __toESM(require("node:os"));
-function formatPublishResult(manifest, publishConfig, results) {
+var import_node_os4 = __toESM(require("node:os"));
+function formatPublishResult(manifest, options, results) {
   if (results === void 0) {
     return `\u{1F645}\u200D\u2640\uFE0F ${manifest.name}@${manifest.version} publish skipped.`;
   }
   return [
-    `\u{1F4E6} ${results.id}${publishConfig.dryRun.value ? " (DRY RUN)" : ""}`,
+    `\u{1F4E6} ${results.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
     "=== Contents ===",
     ...results.files.map(({ path: path3, size }) => `${formatSize(size)}	${path3}`)
-  ].join(import_node_os3.default.EOL);
+  ].join(import_node_os4.default.EOL);
 }
 var formatSize = (size) => {
   if (size < 1e3) {
@@ -4986,19 +4987,19 @@ var formatSize = (size) => {
 async function npmPublish(options) {
   var _a;
   const { packageSpec, manifest } = await readManifest(options.package);
-  const { authConfig, publishConfig } = normalizeOptions(options, manifest);
-  const publishedVersions = await getVersions(manifest.name, authConfig);
+  const normalizedOptions = normalizeOptions(options, manifest);
+  const publishedVersions = await getVersions(manifest.name, normalizedOptions);
   const versionComparison = compareVersions(
     manifest.version,
     publishedVersions,
-    publishConfig
+    normalizedOptions
   );
   let publishResult;
   if (versionComparison.type !== void 0) {
-    publishResult = await publish(packageSpec, publishConfig, authConfig);
+    publishResult = await publish(packageSpec, normalizedOptions);
   }
-  (_a = options.logger) == null ? void 0 : _a.info(
-    formatPublishResult(manifest, publishConfig, publishResult)
+  (_a = normalizedOptions.logger) == null ? void 0 : _a.info(
+    formatPublishResult(manifest, normalizedOptions, publishResult)
   );
   return {
     id: publishResult == null ? void 0 : publishResult.id,
@@ -5006,11 +5007,11 @@ async function npmPublish(options) {
     version: manifest.version,
     type: versionComparison.type,
     oldVersion: versionComparison.oldVersion,
-    registry: authConfig.registry.value,
-    tag: publishConfig.tag.value,
-    access: publishConfig.access.value,
-    strategy: publishConfig.strategy.value,
-    dryRun: publishConfig.dryRun.value
+    registry: normalizedOptions.registry,
+    tag: normalizedOptions.tag.value,
+    access: normalizedOptions.access.value,
+    strategy: normalizedOptions.strategy.value,
+    dryRun: normalizedOptions.dryRun.value
   };
 }
 
@@ -5048,7 +5049,8 @@ async function run() {
     access: getInput("access"),
     strategy: getInput("strategy"),
     dryRun: getBooleanInput("dry-run"),
-    logger
+    logger,
+    temporaryDirectory: process.env["RUNNER_TEMP"]
   };
   const results = await npmPublish(options);
   setOutput("id", results.id, "");

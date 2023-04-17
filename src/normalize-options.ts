@@ -1,3 +1,5 @@
+import os from "node:os";
+
 import * as errors from "./errors.js";
 import type { PackageManifest } from "./read-manifest.js";
 import {
@@ -8,35 +10,24 @@ import {
   type Access,
   type Strategy,
   type Options,
+  type Logger,
 } from "./options.js";
 
 const DEFAULT_REGISTRY = "https://registry.npmjs.org/";
 const DEFAULT_TAG = "latest";
 
 /**
- * Normalized and sanitized auth and publish configurations.
+ * Normalized and sanitized auth, publish, and runtime configurations.
  */
 export interface NormalizedOptions {
-  authConfig: AuthConfig;
-  publishConfig: PublishConfig;
-}
-
-/**
- * Normalized and sanitized auth configuration.
- */
-export interface AuthConfig {
-  registry: ConfigValue<URL>;
-  token: ConfigValue<string>;
-}
-
-/**
- * Normalized and sanitized publish configuration.
- */
-export interface PublishConfig {
+  registry: URL;
+  token: string;
   tag: ConfigValue<string>;
   access: ConfigValue<Access | undefined>;
   dryRun: ConfigValue<boolean>;
   strategy: ConfigValue<Strategy>;
+  logger: Logger | undefined;
+  temporaryDirectory: string;
 }
 
 /**
@@ -67,16 +58,14 @@ export function normalizeOptions(
     (manifest.scope === undefined ? ACCESS_PUBLIC : undefined);
 
   return {
-    authConfig: {
-      token: setValue(options.token, "", validateToken),
-      registry: setValue(options.registry, defaultRegistry, validateRegistry),
-    },
-    publishConfig: {
-      tag: setValue(options.tag, defaultTag, validateTag),
-      access: setValue(options.access, defaultAccess, validateAccess),
-      dryRun: setValue(options.dryRun, false, validateDryRun),
-      strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
-    },
+    token: validateToken(options.token),
+    registry: validateRegistry(options.registry ?? defaultRegistry),
+    tag: setValue(options.tag, defaultTag, validateTag),
+    access: setValue(options.access, defaultAccess, validateAccess),
+    dryRun: setValue(options.dryRun, false, validateDryRun),
+    strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
+    logger: options.logger,
+    temporaryDirectory: options.temporaryDirectory ?? os.tmpdir(),
   };
 }
 

@@ -1,17 +1,17 @@
-import type { PublishConfig } from "../normalize-options.js";
+import type { NormalizedOptions } from "../normalize-options.js";
 
 /**
  * Given a publish configuration, get the NPM CLI publish arguments.
  *
- * @param packageSpec Package specification path
- * @param config Publish configuration
- * @returns Arguments to pass to the NPM CLI
+ * @param packageSpec Package specification path.
+ * @param options Publish configuration.
+ * @returns Arguments to pass to the NPM CLI.
  */
 export function getPublishArguments(
   packageSpec: string,
-  config: PublishConfig
+  options: NormalizedOptions
 ): string[] {
-  const { tag, access, dryRun } = config;
+  const { tag, access, dryRun } = options;
   const publishArguments = [];
 
   if (packageSpec.length > 0) {

@@ -2,19 +2,19 @@ import os from "node:os";
 
 import type { PublishResult } from "./npm/index.js";
 import type { PackageManifest } from "./read-manifest.js";
-import type { PublishConfig } from "./normalize-options.js";
+import type { NormalizedOptions } from "./normalize-options.js";
 
 /**
  * Format publish results into a string.
  *
  * @param manifest Package manifest
- * @param publishConfig Publish configuration.
+ * @param options Configuration options.
  * @param results Results from running npm publish.
  * @returns Formatted string.
  */
 export function formatPublishResult(
   manifest: PackageManifest,
-  publishConfig: PublishConfig,
+  options: NormalizedOptions,
   results?: PublishResult
 ): string {
   if (results === undefined) {
@@ -22,7 +22,7 @@ export function formatPublishResult(
   }
 
   return [
-    `📦 ${results.id}${publishConfig.dryRun.value ? " (DRY RUN)" : ""}`,
+    `📦 ${results.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
     "=== Contents ===",
     ...results.files.map(({ path, size }) => `${formatSize(size)}\t${path}`),
   ].join(os.EOL);

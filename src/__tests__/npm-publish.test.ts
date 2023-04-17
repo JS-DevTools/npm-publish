@@ -6,8 +6,7 @@ import * as subject from "../npm-publish.js";
 import { readManifest, type PackageManifest } from "../read-manifest.js";
 import {
   normalizeOptions,
-  type AuthConfig,
-  type PublishConfig,
+  type NormalizedOptions,
 } from "../normalize-options.js";
 import {
   getVersions,
@@ -38,15 +37,13 @@ describe("npmPublish", () => {
       name: "cool-package",
       version: "1.2.3",
     } as PackageManifest;
-    const authConfig = {
-      registry: { value: new URL("http://example.com") },
-    } as AuthConfig;
-    const publishConfig = {
+    const normalizedOptions = {
+      registry: new URL("http://example.com"),
       tag: { value: "latest" },
       access: { value: "public" },
       dryRun: { value: false },
       strategy: { value: "upgrade" },
-    } as PublishConfig;
+    } as NormalizedOptions;
     const versions: PublishedVersions = { "dist-tags": {}, versions: [] };
     const comparison: VersionComparison = {
       type: "major",
@@ -61,17 +58,14 @@ describe("npmPublish", () => {
       packageSpec,
       manifest,
     });
-    td.when(normalizeOptions(options, manifest)).thenReturn({
-      authConfig,
-      publishConfig,
-    });
-    td.when(getVersions("cool-package", authConfig)).thenResolve(versions);
-    td.when(compareVersions("1.2.3", versions, publishConfig)).thenReturn(
+    td.when(normalizeOptions(options, manifest)).thenReturn(normalizedOptions);
+    td.when(getVersions("cool-package", normalizedOptions)).thenResolve(
+      versions
+    );
+    td.when(compareVersions("1.2.3", versions, normalizedOptions)).thenReturn(
       comparison
     );
-    td.when(publish(packageSpec, publishConfig, authConfig)).thenResolve(
-      publishResult
-    );
+    td.when(publish(packageSpec, normalizedOptions)).thenResolve(publishResult);
 
     const result = await subject.npmPublish(options);
 
@@ -96,15 +90,13 @@ describe("npmPublish", () => {
       name: "cool-package",
       version: "1.2.3",
     } as PackageManifest;
-    const authConfig = {
-      registry: { value: new URL("http://example.com") },
-    } as AuthConfig;
-    const publishConfig = {
+    const normalizedOptions = {
+      registry: new URL("http://example.com"),
       tag: { value: "latest" },
       access: { value: "public" },
       dryRun: { value: false },
       strategy: { value: "upgrade" },
-    } as PublishConfig;
+    } as NormalizedOptions;
     const versions: PublishedVersions = { "dist-tags": {}, versions: [] };
     const comparison: VersionComparison = {
       type: undefined,
@@ -115,18 +107,19 @@ describe("npmPublish", () => {
       packageSpec,
       manifest,
     });
-    td.when(normalizeOptions(options, manifest)).thenReturn({
-      authConfig,
-      publishConfig,
-    });
-    td.when(getVersions("cool-package", authConfig)).thenResolve(versions);
-    td.when(compareVersions("1.2.3", versions, publishConfig)).thenReturn(
+    td.when(normalizeOptions(options, manifest)).thenReturn(normalizedOptions);
+    td.when(getVersions("cool-package", normalizedOptions)).thenResolve(
+      versions
+    );
+    td.when(compareVersions("1.2.3", versions, normalizedOptions)).thenReturn(
       comparison
     );
 
     const result = await subject.npmPublish(options);
 
-    td.verify(publish(packageSpec, publishConfig, authConfig), { times: 0 });
+    td.verify(publish(packageSpec, normalizedOptions), {
+      times: 0,
+    });
 
     expect(result).toEqual({
       id: undefined,

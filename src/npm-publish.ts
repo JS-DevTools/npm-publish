@@ -14,22 +14,22 @@ import type { Results } from "./results.js";
  */
 export async function npmPublish(options: Options): Promise<Results> {
   const { packageSpec, manifest } = await readManifest(options.package);
-  const { authConfig, publishConfig } = normalizeOptions(options, manifest);
-  const publishedVersions = await getVersions(manifest.name, authConfig);
+  const normalizedOptions = normalizeOptions(options, manifest);
+  const publishedVersions = await getVersions(manifest.name, normalizedOptions);
   const versionComparison = compareVersions(
     manifest.version,
     publishedVersions,
-    publishConfig
+    normalizedOptions
   );
 
   let publishResult;
 
   if (versionComparison.type !== undefined) {
-    publishResult = await publish(packageSpec, publishConfig, authConfig);
+    publishResult = await publish(packageSpec, normalizedOptions);
   }
 
-  options.logger?.info(
-    formatPublishResult(manifest, publishConfig, publishResult)
+  normalizedOptions.logger?.info(
+    formatPublishResult(manifest, normalizedOptions, publishResult)
   );
 
   return {
@@ -38,10 +38,10 @@ export async function npmPublish(options: Options): Promise<Results> {
     version: manifest.version,
     type: versionComparison.type,
     oldVersion: versionComparison.oldVersion,
-    registry: authConfig.registry.value,
-    tag: publishConfig.tag.value,
-    access: publishConfig.access.value,
-    strategy: publishConfig.strategy.value,
-    dryRun: publishConfig.dryRun.value,
+    registry: normalizedOptions.registry,
+    tag: normalizedOptions.tag.value,
+    access: normalizedOptions.access.value,
+    strategy: normalizedOptions.strategy.value,
+    dryRun: normalizedOptions.dryRun.value,
   };
 }

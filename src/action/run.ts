@@ -19,6 +19,7 @@ export async function run(): Promise<void> {
     strategy: core.getInput<Strategy>("strategy"),
     dryRun: core.getBooleanInput("dry-run"),
     logger: core.logger,
+    temporaryDirectory: process.env["RUNNER_TEMP"],
   };
 
   const results = await npmPublish(options);

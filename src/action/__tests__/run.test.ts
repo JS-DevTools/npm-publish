@@ -1,4 +1,4 @@
-import { vi, describe, it, afterEach } from "vitest";
+import { vi, describe, it, beforeEach, afterEach } from "vitest";
 import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
@@ -10,6 +10,10 @@ vi.mock("../../index", () => imitateEsm("../../index"));
 vi.mock("../core", () => imitateEsm("../core"));
 
 describe("run", () => {
+  beforeEach(() => {
+    vi.stubEnv("RUNNER_TEMP", "/path/to/temp");
+  });
+
   afterEach(() => {
     reset();
   });
@@ -33,6 +37,7 @@ describe("run", () => {
         strategy: "all",
         dryRun: true,
         logger: core.logger,
+        temporaryDirectory: "/path/to/temp",
       })
     ).thenResolve({
       id: "cool-package@1.2.3",

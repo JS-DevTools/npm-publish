@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import type { AuthConfig } from "../normalize-options.js";
+import type { NormalizedOptions } from "../normalize-options.js";
 
 export type NpmCliEnvironment = Record<string, string>;
 
@@ -14,33 +14,35 @@ export type NpmCliTask<TReturn> = (
  * Create a temporary .npmrc file with the given auth token,
  * and call a task with env vars set to use that .npmrc.
  *
- * @param auth Registry and token.
+ * @param options Configuration options.
  * @param task A function called with the configured environment.
  * After the function resolves, the temporary .npmrc file will be removed.
  * @returns The resolved value of `task`
  */
 export async function useNpmEnvironment<TReturn>(
-  auth: AuthConfig,
+  options: NormalizedOptions,
   task: NpmCliTask<TReturn>
 ): Promise<TReturn> {
-  const { registry, token } = auth;
+  const { registry, token, logger, temporaryDirectory } = options;
   const npmrcDirectory = await fs.mkdtemp(
-    path.join(os.tmpdir(), "npm-publish-")
+    path.join(temporaryDirectory, "npm-publish-")
   );
   const npmrc = path.join(npmrcDirectory, ".npmrc");
 
   const config = [
     "; created by jsdevtools/npm-publish",
-    `//${registry.value.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
-    `registry=${registry.value.href}`,
+    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${registry.href}`,
     "",
   ].join(os.EOL);
 
   await fs.writeFile(npmrc, config, "utf8");
 
+  logger?.debug(`Temporary .npmrc created at ${npmrc}\n${config}`);
+
   try {
     return await task({
-      NODE_AUTH_TOKEN: token.value,
+      NODE_AUTH_TOKEN: token,
       npm_config_userconfig: npmrc,
     });
   } finally {

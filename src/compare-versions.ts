@@ -6,7 +6,7 @@ import {
 } from "semver";
 
 import { STRATEGY_ALL } from "./options.js";
-import type { PublishConfig } from "./normalize-options.js";
+import type { NormalizedOptions } from "./normalize-options.js";
 import type { PublishedVersions } from "./npm/index.js";
 
 export type ReleaseType = SemverReleaseType | typeof INITIAL | typeof DIFFERENT;
@@ -24,16 +24,16 @@ const DIFFERENT = "different";
  *
  * @param version The current package version.
  * @param publishedVersions The versions that have already been published.
- * @param publishConfig Tag and version comparison strategy.
+ * @param options Configuration options
  * @returns The release type and previous version.
  */
 export function compareVersions(
   version: string,
   publishedVersions: PublishedVersions,
-  publishConfig: PublishConfig
+  options: NormalizedOptions
 ): VersionComparison {
   const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
-  const { strategy, tag: publishTag } = publishConfig;
+  const { strategy, tag: publishTag } = options;
   const oldVersion = semverValid(tags[publishTag.value]) ?? undefined;
   const isUnique = !existingVersions.includes(version);
   let type: ReleaseType | undefined;

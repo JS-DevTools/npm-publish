@@ -1,5 +1,4 @@
-import type { Logger } from "../options.js";
-import type { AuthConfig, PublishConfig } from "../normalize-options.js";
+import type { NormalizedOptions } from "../normalize-options.js";
 import { useNpmEnvironment } from "./use-npm-environment.js";
 import { callNpmCli } from "./call-npm-cli.js";
 import { getPublishArguments } from "./get-publish-arguments.js";
@@ -23,21 +22,19 @@ export interface PublishResult {
  *  Get a package's published versions.
  *
  * @param packageName The name of the package to get published versions for.
- * @param authConfig Registry and auth token.
- * @param logger Optional logger.
+ * @param options Configuration options.
  * @returns All published versions and tags.
  */
 export async function getVersions(
   packageName: string,
-  authConfig: AuthConfig,
-  logger?: Logger
+  options: NormalizedOptions
 ): Promise<PublishedVersions> {
-  return useNpmEnvironment(authConfig, (environment) => {
+  return useNpmEnvironment(options, (environment) => {
     return callNpmCli<PublishedVersions>(
       "view",
       [packageName, "dist-tags", "versions"],
       {
-        logger,
+        logger: options.logger,
         environment,
         ifError: { e404: { "dist-tags": {}, versions: [] } },
       }
@@ -49,22 +46,18 @@ export async function getVersions(
  *  Publish a package.
  *
  * @param packageSpec Package specification to pass to npm.
- * @param publishConfig Publish configuration.
- * @param authConfig Registry and auth token.
- * @param logger Optional logger.
+ * @param options Configuration options.
  * @returns Release metadata.
  */
 export async function publish(
   packageSpec: string,
-  publishConfig: PublishConfig,
-  authConfig: AuthConfig,
-  logger?: Logger
+  options: NormalizedOptions
 ): Promise<PublishResult> {
-  const publishArguments = getPublishArguments(packageSpec, publishConfig);
+  const publishArguments = getPublishArguments(packageSpec, options);
 
-  return useNpmEnvironment(authConfig, (environment) => {
+  return useNpmEnvironment(options, (environment) => {
     return callNpmCli<PublishResult>("publish", publishArguments, {
-      logger,
+      logger: options.logger,
       environment,
     });
   });

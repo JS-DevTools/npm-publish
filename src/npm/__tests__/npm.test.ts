@@ -3,7 +3,7 @@ import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
 import type { Logger } from "../../options.js";
-import type { AuthConfig, PublishConfig } from "../../normalize-options.js";
+import type { NormalizedOptions } from "../../normalize-options.js";
 
 import * as subject from "../index.js";
 import { useNpmEnvironment, type NpmCliTask } from "../use-npm-environment.js";
@@ -17,12 +17,12 @@ vi.mock("../get-publish-arguments", () =>
 );
 
 describe("npm", () => {
-  const authConfig = { token: { value: "abc123" } } as AuthConfig;
   const environment = { foo: "bar" };
   const logger = { debug: (message: string) => void message } as Logger;
+  const options = { token: "abc123", logger } as NormalizedOptions;
 
   beforeEach(() => {
-    td.when(useNpmEnvironment(authConfig, td.matchers.isA(Function))).thenDo(
+    td.when(useNpmEnvironment(options, td.matchers.isA(Function))).thenDo(
       (_: unknown, task: NpmCliTask<unknown>) => task(environment)
     );
   });
@@ -47,11 +47,7 @@ describe("npm", () => {
       versions: ["1.2.3", "4.5.6"],
     });
 
-    const result = await subject.getVersions(
-      "@example/cool-package",
-      authConfig,
-      logger
-    );
+    const result = await subject.getVersions("@example/cool-package", options);
 
     expect(result).toEqual({
       "dist-tags": { latest: "1.2.3" },
@@ -60,9 +56,7 @@ describe("npm", () => {
   });
 
   it("should publish a package", async () => {
-    const publishConfig = { tag: { value: "next" } } as PublishConfig;
-
-    td.when(getPublishArguments("./package", publishConfig)).thenReturn([
+    td.when(getPublishArguments("./package", options)).thenReturn([
       "--tag",
       "next",
     ]);
@@ -73,12 +67,7 @@ describe("npm", () => {
       })
     ).thenResolve({ id: "@example/cool-package@1.2.3" });
 
-    const result = await subject.publish(
-      "./package",
-      publishConfig,
-      authConfig,
-      logger
-    );
+    const result = await subject.publish("./package", options);
 
     expect(result).toEqual({ id: "@example/cool-package@1.2.3" });
   });

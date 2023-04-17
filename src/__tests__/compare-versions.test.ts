@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 
 import * as subject from "../compare-versions.js";
-import type { PublishConfig } from "../normalize-options.js";
+import type { NormalizedOptions } from "../normalize-options.js";
 
 describe("compareVersions", () => {
   it("should recognize initial release on a tag", () => {
     const result = subject.compareVersions(
       "0.0.0",
       { versions: [], "dist-tags": {} },
-      { tag: { value: "next" } } as PublishConfig
+      { tag: { value: "next" } } as NormalizedOptions
     );
 
     expect(result).toEqual({
@@ -21,7 +21,10 @@ describe("compareVersions", () => {
     const result = subject.compareVersions(
       "0.0.0",
       { versions: ["1.2.3", "4.5.6"], "dist-tags": { next: "1.2.3" } },
-      { strategy: { value: "all" }, tag: { value: "next" } } as PublishConfig
+      {
+        strategy: { value: "all" },
+        tag: { value: "next" },
+      } as NormalizedOptions
     );
 
     expect(result).toEqual({
@@ -37,7 +40,7 @@ describe("compareVersions", () => {
       {
         strategy: { value: "upgrade" },
         tag: { value: "next" },
-      } as PublishConfig
+      } as NormalizedOptions
     );
 
     expect(result).toEqual({
@@ -50,7 +53,10 @@ describe("compareVersions", () => {
     const result = subject.compareVersions(
       "4.5.6",
       { versions: ["1.2.3", "4.5.6"], "dist-tags": { next: "4.5.6" } },
-      { strategy: { value: "all" }, tag: { value: "next" } } as PublishConfig
+      {
+        strategy: { value: "all" },
+        tag: { value: "next" },
+      } as NormalizedOptions
     );
 
     expect(result).toEqual({
@@ -66,7 +72,7 @@ describe("compareVersions", () => {
       {
         strategy: { value: "upgrade" },
         tag: { value: "next" },
-      } as PublishConfig
+      } as NormalizedOptions
     );
 
     expect(result).toEqual({
@@ -82,7 +88,7 @@ describe("compareVersions", () => {
       {
         strategy: { value: "upgrade" },
         tag: { value: "next" },
-      } as PublishConfig
+      } as NormalizedOptions
     );
 
     expect(result).toEqual({
