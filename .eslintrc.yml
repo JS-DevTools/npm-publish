@@ -7,7 +7,7 @@ extends:
   - "plugin:@typescript-eslint/strict"
   - "plugin:import/recommended"
   - "plugin:import/typescript"
-  - "plugin:jsdoc/recommended-typescript"
+  - "plugin:jsdoc/recommended-typescript-error"
   - "plugin:n/recommended"
   - "plugin:promise/recommended"
   - "plugin:sonarjs/recommended"
@@ -27,49 +27,39 @@ env:
   es2021: true
   node: true
 
+rules:
+  unicorn/prefer-top-level-await: "off"
+
 overrides:
   - files: ["**/*.js"]
     rules:
       "@typescript-eslint/no-var-requires": "off"
-      "unicorn/prefer-module": "off"
+      unicorn/prefer-module: "off"
 
-  - files: ["test/**/*", "**/__tests__/**/*"]
-    env:
-      mocha: true
+  - files: ["**/__tests__/**/*"]
     rules:
+      "@typescript-eslint/no-unsafe-argument": "off"
       sonarjs/no-duplicate-string: "off"
+      unicorn/no-useless-undefined: "off"
 
-rules:
-  n/no-unpublished-import: "off"
+  - files: ["src/action/**/*"]
+    rules:
+      n/no-unpublished-import: "off"
 
-  # temporary rule overrides
-  # TODO(mc, 2023-04-12): fix problems, remove overrides, and remove  --quiet
-  prefer-const: "warn"
-  no-regex-spaces: "warn"
-  "@typescript-eslint/no-floating-promises": "warn"
-  "@typescript-eslint/no-unsafe-argument": "warn"
-  "@typescript-eslint/no-unsafe-assignment": "warn"
-  "@typescript-eslint/no-unsafe-call": "warn"
-  "@typescript-eslint/no-unsafe-member-access": "warn"
-  "@typescript-eslint/no-unsafe-return": "warn"
-  "@typescript-eslint/require-await": "warn"
-  "@typescript-eslint/restrict-plus-operands": "warn"
-  "@typescript-eslint/restrict-template-expressions": "warn"
-  "@typescript-eslint/unbound-method": "warn"
-  n/no-missing-import: "warn"
-  n/no-missing-require: "warn"
-  n/no-process-exit: "warn"
-  unicorn/better-regex: "warn"
-  unicorn/catch-error-name: "warn"
-  unicorn/import-style: "warn"
-  unicorn/no-array-push-push: "warn"
-  unicorn/no-process-exit: "warn"
-  unicorn/no-useless-undefined: "warn"
-  unicorn/prefer-export-from: "warn"
-  unicorn/prefer-module: "warn"
-  unicorn/prefer-node-protocol: "warn"
-  unicorn/prefer-optional-catch-binding: "warn"
-  unicorn/prefer-spread: "warn"
-  unicorn/prefer-top-level-await: "warn"
-  unicorn/prevent-abbreviations: "warn"
-  unicorn/text-encoding-identifier-case: "warn"
+    # temporary rule overrides
+    # TODO(mc, 2023-04-12): fix problems, remove overrides, and remove  --quiet
+  - files: ["bin/**/*", "src/cli/**/*"]
+    rules:
+      n/no-process-exit: "warn"
+      unicorn/no-process-exit: "warn"
+      prefer-const: "warn"
+      unicorn/prevent-abbreviations: "warn"
+      unicorn/prefer-module: "warn"
+      unicorn/prefer-top-level-await: "warn"
+      "@typescript-eslint/no-floating-promises": "warn"
+      "@typescript-eslint/no-unsafe-call": "warn"
+      "@typescript-eslint/no-unsafe-member-access": "warn"
+      "@typescript-eslint/restrict-template-expressions": "warn"
+      jsdoc/require-jsdoc: "warn"
+      jsdoc/require-param: "warn"
+      jsdoc/require-returns: "warn"

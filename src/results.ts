@@ -1,5 +1,5 @@
-import type { Access } from "./options";
-import type { ReleaseType } from "./compare-versions";
+import type { Access, Strategy } from "./options.js";
+import type { ReleaseType } from "./compare-versions.js";
 
 /**
  * Results of the publish
@@ -24,12 +24,17 @@ export interface Results {
   /**
    * The type of version change that occurred, if any.
    */
-  releaseType: ReleaseType | undefined;
+  type: ReleaseType | undefined;
 
   /**
-   * The version number that was previously published to NPM
+   * The version number that was previously published to NPM, if any.
    */
-  previousVersion: string;
+  oldVersion: string | undefined;
+
+  /**
+   * The registry where the package was published
+   */
+  registry: URL;
 
   /**
    * The tag that the package was published to.
@@ -39,13 +44,17 @@ export interface Results {
   /**
    * Indicates whether the published package is publicly visible
    * or restricted to members of your NPM organization.
+   *
+   * If package is scoped, undefined means npm's scoped package defaults.
+   * If a scoped package has previously been published as public,
+   * the default is public. Otherwise, it is restricted.
    */
-  access: Access;
+  access: Access | undefined;
 
   /**
-   * The registry where the NPM package was published
+   * Version check strategy used.
    */
-  registryUrl: URL;
+  strategy: Strategy;
 
   /**
    * Whether this was a dry run (not published to NPM)

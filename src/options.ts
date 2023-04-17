@@ -1,17 +1,23 @@
 /**
  * The possible access levels for an NPM package
  */
-export type Access = "public" | "restricted";
+export type Access = typeof ACCESS_PUBLIC | typeof ACCESS_RESTRICTED;
+
+export const ACCESS_PUBLIC = "public";
+export const ACCESS_RESTRICTED = "restricted";
 
 /**
  * Version check strategy.
  *
  * - `upgrade`: the package will only be published if its version
  *   is higher than the existing version on the configured tag.
- * - `always`: the package will be published if its version
+ * - `all`: the package will be published if its version
  *   is not yet published, even if its lower that the existing tag.
  */
-export type Strategy = "upgrade" | "always";
+export type Strategy = typeof STRATEGY_UPGRADE | typeof STRATEGY_ALL;
+
+export const STRATEGY_UPGRADE = "upgrade";
+export const STRATEGY_ALL = "all";
 
 /**
  * A function that logs messages
@@ -42,7 +48,7 @@ export interface Options {
    *
    * Defaults to the package in the current working directory.
    */
-  package?: string;
+  package?: string | undefined;
 
   /**
    * The NPM registry URL to use.
@@ -51,7 +57,7 @@ export interface Options {
    *
    * Can be overridden by the package.json's `publishConfig` field.
    */
-  registryUrl?: string | URL;
+  registry?: string | URL | undefined;
 
   /**
    * The tag to publish to.
@@ -60,7 +66,7 @@ export interface Options {
    *
    * Can be overridden by the package.json's `publishConfig` field.
    */
-  tag?: string;
+  tag?: string | undefined;
 
   /**
    * Package access.
@@ -74,7 +80,7 @@ export interface Options {
    *
    * Can be overridden by the package.json's `publishConfig` field.
    */
-  access?: Access;
+  access?: Access | undefined;
 
   /**
    * Version check strategy.
@@ -85,17 +91,12 @@ export interface Options {
    *
    * Defaults to `upgrade`.
    */
-  strategy?: Strategy;
+  strategy?: Strategy | undefined;
 
   /**
    * Pretend to publish, but don't actually upload to the registry.
    *
    * Defaults to `false`.
    */
-  dryRun?: boolean;
-
-  /**
-   * An interface to log messages.
-   */
-  logger?: Logger;
+  dryRun?: boolean | undefined;
 }

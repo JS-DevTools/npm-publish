@@ -1,9 +1,9 @@
-import type { AuthConfig, PublishConfig } from "../normalize-options";
-import { useNpmEnv } from "./use-npm-env";
-import { callNpmCli } from "./call-npm-cli";
-import { getPublishArgs } from "./get-publish-args";
+import type { AuthConfig, PublishConfig } from "../normalize-options.js";
+import { useNpmEnvironment } from "./use-npm-environment.js";
+import { callNpmCli } from "./call-npm-cli.js";
+import { getPublishArguments } from "./get-publish-arguments.js";
 
-export interface VersionsResult {
+export interface PublishedVersions {
   "dist-tags": Record<string, string>;
   versions: string[];
 }
@@ -22,12 +22,12 @@ export interface PublishResult {
 export async function getVersions(
   packageName: string,
   authConfig: AuthConfig
-): Promise<VersionsResult> {
-  return useNpmEnv(authConfig, (env) => {
-    return callNpmCli<VersionsResult>(
+): Promise<PublishedVersions> {
+  return useNpmEnvironment(authConfig, (environment) => {
+    return callNpmCli<PublishedVersions>(
       "view",
       [packageName, "dist-tags", "versions"],
-      { env, ifError: { e404: { "dist-tags": {}, versions: [] } } }
+      { environment, ifError: { e404: { "dist-tags": {}, versions: [] } } }
     );
   });
 }
@@ -35,16 +35,21 @@ export async function getVersions(
 /**
  *  Publish a package.
  *
- * @param publishConfig Publish options.
+ * @param packageSpec Package specification to pass to npm.
+ * @param publishConfig Publish configuration.
+ * @param authConfig Registry and auth token.
  * @returns Release metadata.
  */
 export async function publish(
+  packageSpec: string,
   publishConfig: PublishConfig,
   authConfig: AuthConfig
 ): Promise<PublishResult> {
-  const publishArgs = getPublishArgs(publishConfig);
+  const publishArguments = getPublishArguments(packageSpec, publishConfig);
 
-  return useNpmEnv(authConfig, (env) => {
-    return callNpmCli<PublishResult>("publish", publishArgs, { env });
+  return useNpmEnvironment(authConfig, (environment) => {
+    return callNpmCli<PublishResult>("publish", publishArguments, {
+      environment,
+    });
   });
 }

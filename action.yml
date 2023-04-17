@@ -1,6 +1,3 @@
-# GitHub Action
-# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/metadata-syntax-for-github-actions
-
 name: NPM Publish
 description: Fast, easy publishing to NPM
 
@@ -19,11 +16,11 @@ inputs:
     required: false
 
   package:
-    description: The path of your package.json file
+    description: The path to your package or its package.json file
     required: false
 
   tag:
-    description: The tag to publish to. This allows people to install the package using "npm install <package-name>@<tag>".
+    description: The distribution tag to publish
     required: false
 
   access:
@@ -32,26 +29,52 @@ inputs:
       applies to scoped packages.
     required: false
 
-  dry-run:
-    description: If true, run with the --dry-run flag
+  strategy:
+    description: Version check and release strategy.
+      If "all" (default), package will be published if its version is simply not yet published.
+      If "upgrade", package will be published if its version is higher than the existing tag,
+      according to semantic versioning.
+
     required: false
 
-  strategy:
-    description: Version check strategy. If "upgrade" (default), the package
-      will only be published if its version is higher than the existing version
-      on the configured tag. If "always", the package will be published if its
-      version is simply not yet published.
+  dry-run:
+    description: Run npm with the --dry-run flag to avoid actually publishing anything.
     required: false
 
 outputs:
+  id:
+    description: The identifier of the published package.
+      If a release was published, format is `${name}@${version}.
+      If no release occurred, will be an empty string.
+
   type:
-    description: The type of version change that occurred ("none", "major", "minor", "patch", etc.)
+    description: The type of version change that occurred on the published tag.
+      If release was an upgrade, will be a semver release type ("major", "minor", ...).
+      If the published tag had no previous version, will be "initial".
+      If version was change was not an upgrade, will be "different".
+      If no release occurred, will be an empty string.
+
+  name:
+    description: Name of the package.
 
   version:
-    description: The version that was published
+    description: Version of the package.
 
   old-version:
-    description: The version number that was previously published to NPM
+    description: The previous version on the distribution tag.
+      If there was no previous version on the tag, will be an empty string.
+
+  registry:
+    description: The registry used for version checking and publishing.
+
+  tag:
+    description: The distribution tag used for version checking and publishing.
+
+  access:
+    description: The package access setting used.
+    If configured by the action or package.json, will be "public" or "protected".
+    If not configured for a non-scoped package, will be "public".
+    If not configured for a scoped package, will be "default".
 
 runs:
   using: node16

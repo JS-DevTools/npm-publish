@@ -40,7 +40,7 @@
     "build:lib": "tsc",
     "test": "vitest src",
     "coverage": "vitest run --coverage src",
-    "_eslint": "eslint --quiet \"**/*.@(js|ts)\"",
+    "_eslint": "eslint \"**/*.@(js|ts)\"",
     "_prettier": "prettier \"**/*.@(js|ts|json|md|yml)\""
   },
   "engines": {

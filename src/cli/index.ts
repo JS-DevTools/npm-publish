@@ -1,9 +1,10 @@
-import { join } from "path";
-import { npmPublish } from "../npm-publish";
-import { readManifest } from "../read-manifest";
-import { ExitCode } from "./exit-code";
-import { usageText } from "./help";
-import { parseArgs } from "./parse-args";
+import { join } from "node:path";
+
+import { npmPublish } from "../npm-publish.js";
+import { readManifest } from "../read-manifest.js";
+import { ExitCode } from "./exit-code.js";
+import { usageText } from "./help.js";
+import { parseArgs } from "./parse-args.js";
 
 /**
  * The main entry point of the CLI

@@ -1,22 +1,30 @@
-import { readManifest } from "./read-manifest";
-import { normalizeOptions } from "./normalize-options";
-import { getVersions, publish } from "./npm";
-import { compareVersions } from "./compare-versions";
-import type { Options } from "./options";
-import type { Results } from "./results";
+import { readManifest } from "./read-manifest.js";
+import { normalizeOptions } from "./normalize-options.js";
+import { getVersions, publish } from "./npm/index.js";
+import { compareVersions } from "./compare-versions.js";
+import type { Options } from "./options.js";
+import type { Results } from "./results.js";
 
 /**
- * Publishes a package to NPM, if its version has changed
+ * Publishes a package to NPM, if its version has changed.
+ *
+ * @param options Publish options.
+ * @returns Release metadata.
  */
 export async function npmPublish(options: Options): Promise<Results> {
-  const manifest = await readManifest(options.package);
+  const { packageSpec, manifest } = await readManifest(options.package);
   const { authConfig, publishConfig } = normalizeOptions(options, manifest);
   const publishedVersions = await getVersions(manifest.name, authConfig);
-  const versionComparison = compareVersions(publishedVersions, publishConfig);
+  const versionComparison = compareVersions(
+    manifest.version,
+    publishedVersions,
+    publishConfig
+  );
+
   let publishResult;
 
   if (versionComparison.releaseType !== undefined) {
-    publishResult = await publish(publishConfig, authConfig);
+    publishResult = await publish(packageSpec, publishConfig, authConfig);
   }
 
   return {
@@ -25,9 +33,10 @@ export async function npmPublish(options: Options): Promise<Results> {
     version: manifest.version,
     releaseType: versionComparison.releaseType,
     previousVersion: versionComparison.previousVersion,
+    registry: authConfig.registry.value,
     tag: publishConfig.tag.value,
     access: publishConfig.access.value,
+    strategy: publishConfig.strategy.value,
     dryRun: publishConfig.dryRun.value,
-    registryUrl: authConfig.registryUrl.value,
   };
 }

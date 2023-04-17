@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import * as subject from "../call-npm-cli";
+import * as subject from "../call-npm-cli.js";
 
 describe("callNpmCli", () => {
   it("should call the NPM CLI in JSON mode", async () => {
@@ -37,7 +37,7 @@ describe("callNpmCli", () => {
 
   it("should allow the environment to be overriden", async () => {
     const result = await subject.callNpmCli("config", ["get", "userconfig"], {
-      env: { npm_config_userconfig: "/foo/bar/.npmrc" },
+      environment: { npm_config_userconfig: "/foo/bar/.npmrc" },
     });
 
     expect(result).toEqual("/foo/bar/.npmrc");

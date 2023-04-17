@@ -1,7 +1,7 @@
 import commandLineArgs from "command-line-args";
-import { Access, Options } from "../options";
-import { ExitCode } from "./exit-code";
-import { usageText } from "./help";
+import { Access, Options } from "../options.js";
+import { ExitCode } from "./exit-code.js";
+import { usageText } from "./help.js";
 
 /**
  * The parsed command-line arguments
