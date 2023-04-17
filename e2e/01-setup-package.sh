@@ -2,7 +2,7 @@
 # Create a test fixture package
 # Usage: 01-setup-package.sh <package_directory> <version>
 
-set -e
+set -euo pipefail
 
 PACKAGE_SPEC=$1
 PACKAGE_VERSION=$2

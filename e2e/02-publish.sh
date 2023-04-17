@@ -2,7 +2,7 @@
 # Publish a package to the registry using the CLI
 # Usage: 02-publish.sh <package_directory> <token>
 
-set -e
+set -euo pipefail
 
 REGISTRY_URL="http://localhost:4873"
 PACKAGE_SPEC=$1

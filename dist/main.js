@@ -191,7 +191,7 @@ var require_semver = __commonJS({
             version2 = version2.version;
           }
         } else if (typeof version2 !== "string") {
-          throw new TypeError(`Invalid Version: ${version2}`);
+          throw new TypeError(`Invalid Version: ${require("util").inspect(version2)}`);
         }
         if (version2.length > MAX_LENGTH) {
           throw new TypeError(
@@ -364,9 +364,13 @@ var require_semver = __commonJS({
             }
             this.prerelease = [];
             break;
-          case "pre":
+          case "pre": {
+            const base = Number(identifierBase) ? 1 : 0;
+            if (!identifier && identifierBase === false) {
+              throw new Error("invalid increment argument: identifier is empty");
+            }
             if (this.prerelease.length === 0) {
-              this.prerelease = [0];
+              this.prerelease = [base];
             } else {
               let i = this.prerelease.length;
               while (--i >= 0) {
@@ -376,20 +380,27 @@ var require_semver = __commonJS({
                 }
               }
               if (i === -1) {
-                this.prerelease.push(0);
+                if (identifier === this.prerelease.join(".") && identifierBase === false) {
+                  throw new Error("invalid increment argument: identifier already exists");
+                }
+                this.prerelease.push(base);
               }
             }
             if (identifier) {
-              const base = Number(identifierBase) ? 1 : 0;
+              let prerelease = [identifier, base];
+              if (identifierBase === false) {
+                prerelease = [identifier];
+              }
               if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
                 if (isNaN(this.prerelease[1])) {
-                  this.prerelease = [identifier, base];
+                  this.prerelease = prerelease;
                 }
               } else {
-                this.prerelease = [identifier, base];
+                this.prerelease = prerelease;
               }
             }
             break;
+          }
           default:
             throw new Error(`invalid increment argument: ${release}`);
         }
@@ -405,22 +416,18 @@ var require_semver = __commonJS({
 // node_modules/semver/functions/parse.js
 var require_parse = __commonJS({
   "node_modules/semver/functions/parse.js"(exports, module2) {
-    var { MAX_LENGTH } = require_constants();
     var SemVer = require_semver();
-    var parse2 = (version2, options) => {
+    var parse2 = (version2, options, throwErrors = false) => {
       if (version2 instanceof SemVer) {
         return version2;
-      }
-      if (typeof version2 !== "string") {
-        return null;
-      }
-      if (version2.length > MAX_LENGTH) {
-        return null;
       }
       try {
         return new SemVer(version2, options);
       } catch (er) {
-        return null;
+        if (!throwErrors) {
+          return null;
+        }
+        throw er;
       }
     };
     module2.exports = parse2;
@@ -474,60 +481,41 @@ var require_inc = __commonJS({
   }
 });
 
-// node_modules/semver/functions/compare.js
-var require_compare = __commonJS({
-  "node_modules/semver/functions/compare.js"(exports, module2) {
-    var SemVer = require_semver();
-    var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-    module2.exports = compare;
-  }
-});
-
-// node_modules/semver/functions/eq.js
-var require_eq = __commonJS({
-  "node_modules/semver/functions/eq.js"(exports, module2) {
-    var compare = require_compare();
-    var eq = (a, b, loose) => compare(a, b, loose) === 0;
-    module2.exports = eq;
-  }
-});
-
 // node_modules/semver/functions/diff.js
 var require_diff = __commonJS({
   "node_modules/semver/functions/diff.js"(exports, module2) {
     var parse2 = require_parse();
-    var eq = require_eq();
     var diff = (version1, version2) => {
-      const v12 = parse2(version1);
-      const v2 = parse2(version2);
-      if (eq(v12, v2)) {
+      const v12 = parse2(version1, null, true);
+      const v2 = parse2(version2, null, true);
+      const comparison = v12.compare(v2);
+      if (comparison === 0) {
         return null;
-      } else {
-        const hasPre = v12.prerelease.length || v2.prerelease.length;
-        const prefix = hasPre ? "pre" : "";
-        const defaultResult = hasPre ? "prerelease" : "";
-        if (v12.major !== v2.major) {
-          return prefix + "major";
-        }
-        if (v12.minor !== v2.minor) {
-          return prefix + "minor";
-        }
-        if (v12.patch !== v2.patch) {
-          return prefix + "patch";
-        }
-        if (!v12.prerelease.length || !v2.prerelease.length) {
-          if (v12.patch) {
-            return "patch";
-          }
-          if (v12.minor) {
-            return "minor";
-          }
-          if (v12.major) {
-            return "major";
-          }
-        }
-        return defaultResult;
       }
+      const v1Higher = comparison > 0;
+      const highVersion = v1Higher ? v12 : v2;
+      const lowVersion = v1Higher ? v2 : v12;
+      const highHasPre = !!highVersion.prerelease.length;
+      const prefix = highHasPre ? "pre" : "";
+      if (v12.major !== v2.major) {
+        return prefix + "major";
+      }
+      if (v12.minor !== v2.minor) {
+        return prefix + "minor";
+      }
+      if (v12.patch !== v2.patch) {
+        return prefix + "patch";
+      }
+      if (highHasPre) {
+        return "prerelease";
+      }
+      if (lowVersion.patch) {
+        return "patch";
+      }
+      if (lowVersion.minor) {
+        return "minor";
+      }
+      return "major";
     };
     module2.exports = diff;
   }
@@ -569,6 +557,15 @@ var require_prerelease = __commonJS({
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
     module2.exports = prerelease;
+  }
+});
+
+// node_modules/semver/functions/compare.js
+var require_compare = __commonJS({
+  "node_modules/semver/functions/compare.js"(exports, module2) {
+    var SemVer = require_semver();
+    var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
+    module2.exports = compare;
   }
 });
 
@@ -636,6 +633,15 @@ var require_lt = __commonJS({
     var compare = require_compare();
     var lt = (a, b, loose) => compare(a, b, loose) < 0;
     module2.exports = lt;
+  }
+});
+
+// node_modules/semver/functions/eq.js
+var require_eq = __commonJS({
+  "node_modules/semver/functions/eq.js"(exports, module2) {
+    var compare = require_compare();
+    var eq = (a, b, loose) => compare(a, b, loose) === 0;
+    module2.exports = eq;
   }
 });
 

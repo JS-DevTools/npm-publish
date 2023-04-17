@@ -2,7 +2,7 @@
 # Verify that a package was published
 # Usage: 03-verify.sh <package_directory>
 
-set -e
+set -euo pipefail
 
 REGISTRY_URL="http://localhost:4873"
 PACKAGE_SPEC=$1
