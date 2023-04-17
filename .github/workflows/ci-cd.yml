@@ -178,7 +178,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
-      - lint
       - test
       - build
       - e2e
