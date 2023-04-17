@@ -2,7 +2,7 @@
 # Login into the registry and extract the auth token
 # Usage: 00-login.sh
 
-set -e
+set -eo pipefail
 
 REGISTRY_HOSTNAME="localhost:4873"
 
@@ -15,7 +15,9 @@ npmrc=${temporary_dir}/.npmrc-e2e
 echo -e "test"
 sleep 1
 echo -e "test"
-} | NPM_CONFIG_USERCONFIG=${npmrc} npm login --registry ${registry_url} > /dev/null 2>&1
+sleep 1
+echo -e "example@example.com"
+} | NPM_CONFIG_USERCONFIG=${npmrc} npm login --registry ${registry_url} 1>/dev/null
 
 echo "DEBUG: wrote config to temporary file: ${npmrc}" 1>&2
 
