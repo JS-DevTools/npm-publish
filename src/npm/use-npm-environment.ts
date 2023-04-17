@@ -32,7 +32,7 @@ export async function useNpmEnvironment<TReturn>(
   const config = [
     "; created by jsdevtools/npm-publish",
     `//${registry.value.hostname}/:authToken=\${NODE_AUTH_TOKEN}`,
-    registry.isDefault ? "" : `registry=${registry.value.href}`,
+    `registry=${registry.value.href}`,
     "",
   ].join(os.EOL);
 

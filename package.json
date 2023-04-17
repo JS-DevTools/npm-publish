@@ -31,15 +31,15 @@
     "!__tests__"
   ],
   "scripts": {
-    "all": "npm run clean && npm run lint && npm run build && npm run coverage",
+    "all": "npm run clean && npm run build && npm run lint && npm run coverage",
     "clean": "rimraf coverage lib dist e2e/fixture *.tgz",
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "concurrently -g npm:build:*",
-    "build:dist": "esbuild src/action/index.ts --bundle --sourcemap --outdir=dist --platform=node --target=node16",
+    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node16",
     "build:lib": "tsc",
-    "test": "vitest src",
-    "coverage": "vitest run --coverage src",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "_eslint": "eslint \"**/*.@(js|ts)\"",
     "_prettier": "prettier \"**/*.@(js|ts|json|md|yml)\""
   },

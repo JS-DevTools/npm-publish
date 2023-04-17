@@ -12,8 +12,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: "initial",
-      previousVersion: undefined,
+      type: "initial",
+      oldVersion: undefined,
     });
   });
 
@@ -25,8 +25,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: "different",
-      previousVersion: "1.2.3",
+      type: "different",
+      oldVersion: "1.2.3",
     });
   });
 
@@ -41,8 +41,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: "minor",
-      previousVersion: "1.2.3",
+      type: "minor",
+      oldVersion: "1.2.3",
     });
   });
 
@@ -54,8 +54,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: undefined,
-      previousVersion: "4.5.6",
+      type: undefined,
+      oldVersion: "4.5.6",
     });
   });
 
@@ -70,8 +70,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: undefined,
-      previousVersion: "1.2.3",
+      type: undefined,
+      oldVersion: "1.2.3",
     });
   });
 
@@ -86,8 +86,8 @@ describe("compareVersions", () => {
     );
 
     expect(result).toEqual({
-      releaseType: undefined,
-      previousVersion: "1.2.3",
+      type: undefined,
+      oldVersion: "1.2.3",
     });
   });
 });

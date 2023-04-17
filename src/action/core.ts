@@ -5,7 +5,14 @@ import {
   getInput as ghGetInput,
   setOutput as ghSetOutput,
   setSecret as ghSetSecret,
+  debug as ghLogDebug,
+  info as ghLogInfo,
+  error as ghLogError,
 } from "@actions/core";
+
+import type { Logger } from "../options.js";
+
+export { setFailed } from "@actions/core";
 
 /**
  * Get input by name.
@@ -69,3 +76,9 @@ export function setOutput(
 ): void {
   ghSetOutput(name, value ?? defaultValue);
 }
+
+export const logger: Logger = {
+  debug: ghLogDebug,
+  info: ghLogInfo,
+  error: ghLogError,
+};

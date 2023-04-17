@@ -2,7 +2,6 @@
  * The possible access levels for an NPM package
  */
 export type Access = typeof ACCESS_PUBLIC | typeof ACCESS_RESTRICTED;
-
 export const ACCESS_PUBLIC = "public";
 export const ACCESS_RESTRICTED = "restricted";
 
@@ -15,24 +14,17 @@ export const ACCESS_RESTRICTED = "restricted";
  *   is not yet published, even if its lower that the existing tag.
  */
 export type Strategy = typeof STRATEGY_UPGRADE | typeof STRATEGY_ALL;
-
 export const STRATEGY_UPGRADE = "upgrade";
 export const STRATEGY_ALL = "all";
 
 /**
- * A function that logs messages
+ * An interface that can be used to log messages.
  */
-export type HandleLog = (message: string, data?: object) => void;
-
-/**
- * A level at which a log can occur.
- */
-export type LogLevel = "error" | "warn" | "info" | "debug";
-
-/**
- * An object that can be used to log messages.
- */
-export type Logger = Record<LogLevel, HandleLog>;
+export interface Logger {
+  error: (message: string | Error) => void;
+  info: (message: string) => void;
+  debug: (message: string) => void;
+}
 
 /**
  * Options that determine how/whether the package is published.
@@ -99,4 +91,9 @@ export interface Options {
    * Defaults to `false`.
    */
   dryRun?: boolean | undefined;
+
+  /**
+   * Optional logger.
+   */
+  logger?: Logger | undefined;
 }

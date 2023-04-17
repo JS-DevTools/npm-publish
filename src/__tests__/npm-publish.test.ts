@@ -49,10 +49,13 @@ describe("npmPublish", () => {
     } as PublishConfig;
     const versions: PublishedVersions = { "dist-tags": {}, versions: [] };
     const comparison: VersionComparison = {
-      releaseType: "major",
-      previousVersion: "0.1.2",
+      type: "major",
+      oldVersion: "0.1.2",
     };
-    const publishResult: PublishResult = { id: "cool-package@1.2.3" };
+    const publishResult: PublishResult = {
+      id: "cool-package@1.2.3",
+      files: [],
+    };
 
     td.when(readManifest("./cool-package")).thenResolve({
       packageSpec,
@@ -76,11 +79,11 @@ describe("npmPublish", () => {
       id: "cool-package@1.2.3",
       name: "cool-package",
       version: "1.2.3",
-      previousVersion: "0.1.2",
+      oldVersion: "0.1.2",
       tag: "latest",
       access: "public",
       registry: new URL("http://example.com"),
-      releaseType: "major",
+      type: "major",
       strategy: "upgrade",
       dryRun: false,
     });
@@ -104,8 +107,8 @@ describe("npmPublish", () => {
     } as PublishConfig;
     const versions: PublishedVersions = { "dist-tags": {}, versions: [] };
     const comparison: VersionComparison = {
-      releaseType: undefined,
-      previousVersion: "0.1.2",
+      type: undefined,
+      oldVersion: "0.1.2",
     };
 
     td.when(readManifest("./cool-package")).thenResolve({
@@ -129,11 +132,11 @@ describe("npmPublish", () => {
       id: undefined,
       name: "cool-package",
       version: "1.2.3",
-      previousVersion: "0.1.2",
+      oldVersion: "0.1.2",
       tag: "latest",
       access: "public",
       registry: new URL("http://example.com"),
-      releaseType: undefined,
+      type: undefined,
       strategy: "upgrade",
       dryRun: false,
     });

@@ -24,13 +24,14 @@ inputs:
     required: false
 
   access:
-    description: Determines whether the published package should be publicly
-      visible, or restricted to members of your NPM organization. This only
-      applies to scoped packages.
+    description: >
+      Determines whether the published package should be publicly visible,
+      or restricted to members of your NPM organization.
     required: false
 
   strategy:
-    description: Version check and release strategy.
+    description: >
+      Version check and release strategy.
       If "all" (default), package will be published if its version is simply not yet published.
       If "upgrade", package will be published if its version is higher than the existing tag,
       according to semantic versioning.
@@ -43,12 +44,14 @@ inputs:
 
 outputs:
   id:
-    description: The identifier of the published package.
+    description: >
+      The identifier of the published package.
       If a release was published, format is `${name}@${version}.
       If no release occurred, will be an empty string.
 
   type:
-    description: The type of version change that occurred on the published tag.
+    description: >
+      The type of version change that occurred on the published tag.
       If release was an upgrade, will be a semver release type ("major", "minor", ...).
       If the published tag had no previous version, will be "initial".
       If version was change was not an upgrade, will be "different".
@@ -61,7 +64,8 @@ outputs:
     description: Version of the package.
 
   old-version:
-    description: The previous version on the distribution tag.
+    description: >
+      The previous version on the distribution tag.
       If there was no previous version on the tag, will be an empty string.
 
   registry:
@@ -71,11 +75,12 @@ outputs:
     description: The distribution tag used for version checking and publishing.
 
   access:
-    description: The package access setting used.
-    If configured by the action or package.json, will be "public" or "protected".
-    If not configured for a non-scoped package, will be "public".
-    If not configured for a scoped package, will be "default".
+    description: >
+      The package access setting used.
+      If configured by the action or package.json, will be "public" or "protected".
+      If not configured for a non-scoped package, will be "public".
+      If not configured for a scoped package, will be "default".
 
 runs:
   using: node16
-  main: dist/index.js
+  main: dist/main.js

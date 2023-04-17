@@ -1,4 +1,4 @@
-import { vi, describe, it, afterEach, expect } from "vitest";
+import { vi, describe, it, afterEach } from "vitest";
 import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
@@ -32,13 +32,14 @@ describe("run", () => {
         access: "restricted",
         strategy: "all",
         dryRun: true,
+        logger: core.logger,
       })
     ).thenResolve({
       id: "cool-package@1.2.3",
       name: "cool-package",
       version: "1.2.3",
-      releaseType: "major",
-      previousVersion: "0.1.2",
+      type: "major",
+      oldVersion: "0.1.2",
       registry: new URL("https://example.com/registry"),
       tag: "latest",
       access: "public",

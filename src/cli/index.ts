@@ -1,68 +1,67 @@
-import { join } from "node:path";
+import { npmPublish, type Logger } from "../index.js";
+import { parseCliArguments } from "./parse-cli-arguments.js";
 
-import { npmPublish } from "../npm-publish.js";
-import { readManifest } from "../read-manifest.js";
-import { ExitCode } from "./exit-code.js";
-import { usageText } from "./help.js";
-import { parseArgs } from "./parse-args.js";
+export const USAGE = `Usage:
+
+  npm-publish <options> [package]
+
+Arguments:
+
+  package                 The path to the package to publish.
+                          May be a directory or package.json file.
+                          Defaults to the package in the current directory.
+
+Options:
+
+  --token <token>         (Required) npm authentication token.
+
+  --registry <url>        Registry to read from and write to.
+                          Defaults to "https://registry.npmjs.org/".
+
+  --tag <tag>             The distribution tag to check against and publish to.
+                          Defaults to "latest".
+
+  --access <access>       Package access, may be "public" or "restricted".
+                          See documentation for details.
+
+  --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
+                          Defaults to "all", see documentation for details.
+
+  --dry-run               Do not actually publish anything.
+  --quiet                 Only print errors.
+  --debug                 Print debug logs.
+  -v, --version           Print the version number.
+  -h --help               Show usage text.
+
+Examples:
+
+  $ npm-publish --token abc123 ./my-package
+`;
 
 /**
  * The main entry point of the CLI
  *
- * @param args - The command-line arguments
+ * @param argv - The list of argument strings passed to the program.
+ * @param version - The version of this program.
  */
-export async function main(args: string[]): Promise<void> {
-  try {
-    // Setup global error handlers
-    process.on("uncaughtException", errorHandler);
-    process.on("unhandledRejection", errorHandler);
+export async function main(argv: string[], version: string): Promise<void> {
+  const cliArguments = parseCliArguments(argv);
 
-    // Parse the command-line arguments
-    let { help, version, options } = parseArgs(args);
-
-    if (help) {
-      // Show the help text and exit
-      console.log(usageText);
-      process.exit(ExitCode.Success);
-    } else if (version) {
-      // Show the version number and exit
-      let manifest = await readManifest(join(__dirname, "../../package.json"));
-      console.log(manifest.version.toString());
-      process.exit(ExitCode.Success);
-    } else {
-      let results = await npmPublish(options);
-
-      // if (!options.quiet) {
-      if (!results.releaseType) {
-        console.log(
-          `\n📦 ${results.name} v${results.version} is already published to ${results.registryUrl}`
-        );
-      } else if (results.dryRun) {
-        console.log(
-          `\n📦 ${results.name} v${results.version} was NOT actually published to ${results.registryUrl} (dry run)`
-        );
-      } else {
-        console.log(
-          `\n📦 Successfully published ${results.name} v${results.version} to ${results.registryUrl}`
-        );
-      }
-      // }
-    }
-  } catch (error) {
-    errorHandler(error as Error);
-  }
-}
-
-/**
- * Prints errors to the console
- */
-function errorHandler(error: Error): void {
-  let message = error.message || String(error);
-
-  if (process.env.DEBUG || process.env.NODE_ENV === "development") {
-    message = error.stack || message;
+  if (cliArguments.help) {
+    console.info(USAGE);
+    return;
   }
 
-  console.error(message);
-  process.exit(ExitCode.FatalError);
+  if (cliArguments.version) {
+    console.info(version);
+    return;
+  }
+
+  const logger: Logger = {
+    error: console.error,
+    info: cliArguments.quiet === false ? console.info : (m) => void m,
+    debug: cliArguments.debug === true ? console.debug : (m) => void m,
+  };
+
+  await npmPublish({ ...cliArguments.options, logger });
 }

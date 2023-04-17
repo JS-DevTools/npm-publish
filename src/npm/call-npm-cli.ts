@@ -1,23 +1,31 @@
 import childProcess from "node:child_process";
 
+import type { Logger } from "../options.js";
 import type { NpmCliEnvironment } from "./use-npm-environment.js";
 
 export interface NpmCliOptions<TReturn> {
   environment?: NpmCliEnvironment;
   ifError?: Record<string, TReturn>;
+  logger?: Logger | undefined;
 }
 
 const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
 const execProcess = (
   command: string,
-  environment: Record<string, string> = {}
+  environment: Record<string, string> = {},
+  logger?: Logger
 ): Promise<{ stdout: string; stderr: string; error: Error | null }> => {
+  logger?.debug(`Running command: ${command}`);
+
   return new Promise((resolve) => {
     childProcess.exec(
       command,
       { env: { ...process.env, ...environment } },
       (error, stdout, stderr) => {
+        logger?.debug(`exit code: ${error?.code ?? 0}`);
+        logger?.debug(`stdout: ${stdout.trim()}`);
+        logger?.debug(`stderr: ${stderr.trim()}`);
         return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
       }
     );
@@ -55,7 +63,8 @@ export async function callNpmCli<TReturn = string>(
 ): Promise<TReturn> {
   const { stdout, stderr, error } = await execProcess(
     ["npm", command, "--ignore-scripts", "--json", ...cliArguments].join(" "),
-    options.environment
+    options.environment,
+    options.logger
   );
 
   if (error) {

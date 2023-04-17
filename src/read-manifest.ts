@@ -61,13 +61,13 @@ export async function readManifest(
 
   if (!packagePath) {
     packageSpec = "";
-    manifestPath = "package.json";
+    manifestPath = path.resolve(MANIFEST_BASENAME);
   } else if (isManifest(packagePath)) {
-    packageSpec = path.dirname(packagePath);
-    manifestPath = packagePath;
+    packageSpec = path.resolve(path.dirname(packagePath));
+    manifestPath = path.resolve(packagePath);
   } else if (isDirectory(packagePath)) {
-    packageSpec = packagePath;
-    manifestPath = path.join(packagePath, MANIFEST_BASENAME);
+    packageSpec = path.resolve(packagePath);
+    manifestPath = path.resolve(packagePath, MANIFEST_BASENAME);
   } else {
     throw new errors.InvalidPackageError(packagePath);
   }
@@ -86,9 +86,9 @@ export async function readManifest(
 
   try {
     manifestJson = JSON.parse(manifestContents) as Record<string, unknown>;
-    name = manifestJson.name;
-    version = manifestJson.version;
-    publishConfig = manifestJson.publishConfig ?? {};
+    name = manifestJson["name"];
+    version = manifestJson["version"];
+    publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
     throw new errors.PackageJsonParseError(manifestPath, error);
   }

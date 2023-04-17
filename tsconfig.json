@@ -32,6 +32,5 @@
     "rootDir": "src",
     "outDir": "lib"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/cli/**/*"]
+  "include": ["src/**/*.ts"]
 }

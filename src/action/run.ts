@@ -18,6 +18,7 @@ export async function run(): Promise<void> {
     access: core.getInput<Access>("access"),
     strategy: core.getInput<Strategy>("strategy"),
     dryRun: core.getBooleanInput("dry-run"),
+    logger: core.logger,
   };
 
   const results = await npmPublish(options);
@@ -25,8 +26,8 @@ export async function run(): Promise<void> {
   core.setOutput("id", results.id, "");
   core.setOutput("name", results.name);
   core.setOutput("version", results.version);
-  core.setOutput("type", results.releaseType, "");
-  core.setOutput("old-version", results.previousVersion, "");
+  core.setOutput("type", results.type, "");
+  core.setOutput("old-version", results.oldVersion, "");
   core.setOutput("registry", results.registry.href);
   core.setOutput("tag", results.tag);
   core.setOutput("access", results.access, "default");

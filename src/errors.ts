@@ -7,21 +7,6 @@ import {
   STRATEGY_UPGRADE,
 } from "./options.js";
 
-export class NpmPublishError extends Error {
-  public originalError: Error | undefined;
-
-  public constructor(message: string, originalError?: Error) {
-    if (originalError) {
-      super(`${message}\n${originalError.message}`);
-    } else {
-      super(message);
-    }
-
-    this.name = "NpmPublishError";
-    this.originalError = originalError;
-  }
-}
-
 export class InvalidPackageError extends TypeError {
   public constructor(value: unknown) {
     super(
@@ -36,7 +21,9 @@ export class PackageJsonReadError extends Error {
     const message = [
       `Could not read package.json at ${manifestPath}`,
       originalError instanceof Error ? originalError.message : "",
-    ].join(os.EOL);
+    ]
+      .filter(Boolean)
+      .join(os.EOL);
 
     super(message);
     this.name = "PackageJsonReadError";
@@ -48,7 +35,9 @@ export class PackageJsonParseError extends SyntaxError {
     const message = [
       `Invalid JSON, could not parse package.json at ${manifestPath}`,
       originalError instanceof Error ? originalError.message : "",
-    ].join(os.EOL);
+    ]
+      .filter(Boolean)
+      .join(os.EOL);
 
     super(message);
     this.name = "PackageJsonParseError";

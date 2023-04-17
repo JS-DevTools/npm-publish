@@ -39,27 +39,10 @@ overrides:
   - files: ["**/__tests__/**/*"]
     rules:
       "@typescript-eslint/no-unsafe-argument": "off"
+      "@typescript-eslint/no-unsafe-assignment": "off"
       sonarjs/no-duplicate-string: "off"
       unicorn/no-useless-undefined: "off"
 
   - files: ["src/action/**/*"]
     rules:
       n/no-unpublished-import: "off"
-
-    # temporary rule overrides
-    # TODO(mc, 2023-04-12): fix problems, remove overrides, and remove  --quiet
-  - files: ["bin/**/*", "src/cli/**/*"]
-    rules:
-      n/no-process-exit: "warn"
-      unicorn/no-process-exit: "warn"
-      prefer-const: "warn"
-      unicorn/prevent-abbreviations: "warn"
-      unicorn/prefer-module: "warn"
-      unicorn/prefer-top-level-await: "warn"
-      "@typescript-eslint/no-floating-promises": "warn"
-      "@typescript-eslint/no-unsafe-call": "warn"
-      "@typescript-eslint/no-unsafe-member-access": "warn"
-      "@typescript-eslint/restrict-template-expressions": "warn"
-      jsdoc/require-jsdoc: "warn"
-      jsdoc/require-param: "warn"
-      jsdoc/require-returns: "warn"

@@ -2,6 +2,7 @@ import { vi, describe, it, beforeEach, afterEach, expect } from "vitest";
 import { imitateEsm, reset } from "testdouble-vitest";
 import * as td from "testdouble";
 
+import type { Logger } from "../../options.js";
 import type { AuthConfig, PublishConfig } from "../../normalize-options.js";
 
 import * as subject from "../index.js";
@@ -18,6 +19,7 @@ vi.mock("../get-publish-arguments", () =>
 describe("npm", () => {
   const authConfig = { token: { value: "abc123" } } as AuthConfig;
   const environment = { foo: "bar" };
+  const logger = { debug: (message: string) => void message } as Logger;
 
   beforeEach(() => {
     td.when(useNpmEnvironment(authConfig, td.matchers.isA(Function))).thenDo(
@@ -34,7 +36,11 @@ describe("npm", () => {
       callNpmCli<subject.PublishedVersions>(
         "view",
         ["@example/cool-package", "dist-tags", "versions"],
-        { environment, ifError: { e404: { "dist-tags": {}, versions: [] } } }
+        {
+          logger,
+          environment,
+          ifError: { e404: { "dist-tags": {}, versions: [] } },
+        }
       )
     ).thenResolve({
       "dist-tags": { latest: "1.2.3" },
@@ -43,7 +49,8 @@ describe("npm", () => {
 
     const result = await subject.getVersions(
       "@example/cool-package",
-      authConfig
+      authConfig,
+      logger
     );
 
     expect(result).toEqual({
@@ -62,13 +69,15 @@ describe("npm", () => {
     td.when(
       callNpmCli<subject.PublishResult>("publish", ["--tag", "next"], {
         environment,
+        logger,
       })
     ).thenResolve({ id: "@example/cool-package@1.2.3" });
 
     const result = await subject.publish(
       "./package",
       publishConfig,
-      authConfig
+      authConfig,
+      logger
     );
 
     expect(result).toEqual({ id: "@example/cool-package@1.2.3" });

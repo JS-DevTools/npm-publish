@@ -12,8 +12,8 @@ import type { PublishedVersions } from "./npm/index.js";
 export type ReleaseType = SemverReleaseType | typeof INITIAL | typeof DIFFERENT;
 
 export interface VersionComparison {
-  releaseType: ReleaseType | undefined;
-  previousVersion: string | undefined;
+  type: ReleaseType | undefined;
+  oldVersion: string | undefined;
 }
 
 const INITIAL = "initial";
@@ -34,19 +34,19 @@ export function compareVersions(
 ): VersionComparison {
   const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
   const { strategy, tag: publishTag } = publishConfig;
-  const previousVersion = semverValid(tags[publishTag.value]) ?? undefined;
+  const oldVersion = semverValid(tags[publishTag.value]) ?? undefined;
   const isUnique = !existingVersions.includes(version);
-  let releaseType: ReleaseType | undefined;
+  let type: ReleaseType | undefined;
 
   if (isUnique) {
-    if (!previousVersion) {
-      releaseType = INITIAL;
-    } else if (semverGreaterThan(version, previousVersion)) {
-      releaseType = semverDifference(version, previousVersion) ?? undefined;
+    if (!oldVersion) {
+      type = INITIAL;
+    } else if (semverGreaterThan(version, oldVersion)) {
+      type = semverDifference(version, oldVersion) ?? DIFFERENT;
     } else if (strategy.value === STRATEGY_ALL) {
-      releaseType = DIFFERENT;
+      type = DIFFERENT;
     }
   }
 
-  return { releaseType, previousVersion };
+  return { type, oldVersion };
 }
