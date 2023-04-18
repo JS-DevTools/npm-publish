@@ -4778,7 +4778,7 @@ function normalizeOptions(options, manifest) {
     temporaryDirectory: options.temporaryDirectory ?? import_node_os2.default.tmpdir()
   };
 }
-var setValue = (value, defaultValue, validate2 = (_) => _) => ({
+var setValue = (value, defaultValue, validate2) => ({
   value: validate2(value ?? defaultValue),
   isDefault: value === void 0
 });
@@ -4819,6 +4819,7 @@ var import_promises2 = __toESM(require("node:fs/promises"));
 var import_node_os3 = __toESM(require("node:os"));
 var import_node_path2 = __toESM(require("node:path"));
 async function useNpmEnvironment(options, task) {
+  var _a;
   const { registry, token, logger: logger2, temporaryDirectory } = options;
   const npmrcDirectory = await import_promises2.default.mkdtemp(
     import_node_path2.default.join(temporaryDirectory, "npm-publish-")
@@ -4831,7 +4832,7 @@ async function useNpmEnvironment(options, task) {
     ""
   ].join(import_node_os3.default.EOL);
   await import_promises2.default.writeFile(npmrc, config, "utf8");
-  logger2 == null ? void 0 : logger2.debug(`Temporary .npmrc created at ${npmrc}
+  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Temporary .npmrc created at ${npmrc}
 ${config}`);
   try {
     return await task({
@@ -4847,15 +4848,17 @@ ${config}`);
 var import_node_child_process = __toESM(require("node:child_process"));
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var execProcess = (command, environment = {}, logger2) => {
-  logger2 == null ? void 0 : logger2.debug(`Running command: ${command}`);
+  var _a;
+  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${command}`);
   return new Promise((resolve) => {
     import_node_child_process.default.exec(
       command,
       { env: { ...process.env, ...environment } },
       (error, stdout, stderr) => {
-        logger2 == null ? void 0 : logger2.debug(`exit code: ${(error == null ? void 0 : error.code) ?? 0}`);
-        logger2 == null ? void 0 : logger2.debug(`stdout: ${stdout.trim()}`);
-        logger2 == null ? void 0 : logger2.debug(`stderr: ${stderr.trim()}`);
+        var _a2, _b, _c;
+        (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `exit code: ${(error == null ? void 0 : error.code) ?? 0}`);
+        (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `stdout: ${stdout.trim()}`);
+        (_c = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _c.call(logger2, `stderr: ${stderr.trim()}`);
         return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
       }
     );
@@ -4980,12 +4983,12 @@ var formatSize = (size) => {
   if (size < 1e6) {
     return `${(size / 1e3).toFixed(1)} kB`;
   }
-  return `${(size / 1e6).toFixed(1)} mB`;
+  return `${(size / 1e6).toFixed(1)} MB`;
 };
 
 // src/npm-publish.ts
 async function npmPublish(options) {
-  var _a;
+  var _a, _b;
   const { packageSpec, manifest } = await readManifest(options.package);
   const normalizedOptions = normalizeOptions(options, manifest);
   const publishedVersions = await getVersions(manifest.name, normalizedOptions);
@@ -4998,7 +5001,8 @@ async function npmPublish(options) {
   if (versionComparison.type !== void 0) {
     publishResult = await publish(packageSpec, normalizedOptions);
   }
-  (_a = normalizedOptions.logger) == null ? void 0 : _a.info(
+  (_b = (_a = normalizedOptions.logger) == null ? void 0 : _a.info) == null ? void 0 : _b.call(
+    _a,
     formatPublishResult(manifest, normalizedOptions, publishResult)
   );
   return {

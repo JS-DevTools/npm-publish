@@ -28,7 +28,7 @@ export async function npmPublish(options: Options): Promise<Results> {
     publishResult = await publish(packageSpec, normalizedOptions);
   }
 
-  normalizedOptions.logger?.info(
+  normalizedOptions.logger?.info?.(
     formatPublishResult(manifest, normalizedOptions, publishResult)
   );
 

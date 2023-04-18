@@ -29,6 +29,7 @@ env:
 
 rules:
   unicorn/prefer-top-level-await: "off"
+  jsdoc/tag-lines: "off"
 
 overrides:
   - files: ["**/*.js"]
@@ -38,6 +39,7 @@ overrides:
 
   - files: ["**/__tests__/**/*"]
     rules:
+      "@typescript-eslint/no-non-null-assertion": "off"
       "@typescript-eslint/no-unsafe-argument": "off"
       "@typescript-eslint/no-unsafe-assignment": "off"
       sonarjs/no-duplicate-string: "off"

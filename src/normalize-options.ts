@@ -16,9 +16,7 @@ import {
 const DEFAULT_REGISTRY = "https://registry.npmjs.org/";
 const DEFAULT_TAG = "latest";
 
-/**
- * Normalized and sanitized auth, publish, and runtime configurations.
- */
+/** Normalized and sanitized auth, publish, and runtime configurations. */
 export interface NormalizedOptions {
   registry: URL;
   token: string;
@@ -30,9 +28,7 @@ export interface NormalizedOptions {
   temporaryDirectory: string;
 }
 
-/**
- * A config value, and whether that value differs from default.
- */
+/** A config value, and whether that value differs from default. */
 export interface ConfigValue<TValue> {
   value: TValue;
   isDefault: boolean;
@@ -71,8 +67,8 @@ export function normalizeOptions(
 
 const setValue = <TValue>(
   value: unknown,
-  defaultValue?: unknown,
-  validate: (value: unknown) => TValue = (_) => _ as TValue
+  defaultValue: unknown,
+  validate: (value: unknown) => TValue
 ): ConfigValue<TValue> => ({
   value: validate(value ?? defaultValue),
   isDefault: value === undefined,

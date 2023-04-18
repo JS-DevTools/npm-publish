@@ -4,7 +4,6 @@ import * as td from "testdouble";
 
 import { npmPublish } from "../../index.js";
 import * as core from "../core.js";
-import * as subject from "../run.js";
 
 vi.mock("../../index", () => imitateEsm("../../index"));
 vi.mock("../core", () => imitateEsm("../core"));
@@ -15,6 +14,8 @@ describe("run", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
     reset();
   });
 
@@ -52,7 +53,7 @@ describe("run", () => {
       dryRun: false,
     });
 
-    await subject.run();
+    await import("../main.js");
 
     td.verify(core.setOutput("id", "cool-package@1.2.3", ""));
     td.verify(core.setOutput("name", "cool-package"));
@@ -64,5 +65,35 @@ describe("run", () => {
     td.verify(core.setOutput("access", "public", "default"));
     td.verify(core.setOutput("strategy", "upgrade"));
     td.verify(core.setOutput("dry-run", false));
+  });
+
+  it("should fail the action if something raises", async () => {
+    const error = new Error("oh no");
+
+    td.when(core.getRequiredSecretInput("token")).thenReturn("abc123");
+    td.when(core.getInput("package")).thenReturn("./package.json");
+    td.when(core.getInput("registry")).thenReturn("https://example.com");
+    td.when(core.getInput("tag")).thenReturn("next");
+    td.when(core.getInput("access")).thenReturn("restricted");
+    td.when(core.getInput("strategy")).thenReturn("all");
+    td.when(core.getBooleanInput("dry-run")).thenReturn(true);
+
+    td.when(
+      npmPublish({
+        token: "abc123",
+        package: "./package.json",
+        registry: "https://example.com",
+        tag: "next",
+        access: "restricted",
+        strategy: "all",
+        dryRun: true,
+        logger: core.logger,
+        temporaryDirectory: "/path/to/temp",
+      })
+    ).thenReject(error);
+
+    await import("../main.js");
+
+    td.verify(core.setFailed(error), { times: 1 });
   });
 });

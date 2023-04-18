@@ -1,10 +1,9 @@
-/**
- * Wrapper module for @actions/core
- */
+/** Wrapper module for @actions/core */
 import {
   getInput as ghGetInput,
   setOutput as ghSetOutput,
   setSecret as ghSetSecret,
+  setFailed as ghSetFailed,
   debug as ghLogDebug,
   info as ghLogInfo,
   error as ghLogError,
@@ -12,7 +11,12 @@ import {
 
 import type { Logger } from "../options.js";
 
-export { setFailed } from "@actions/core";
+/** Logger using the methods from @actions/core. */
+export const logger: Logger = {
+  debug: ghLogDebug,
+  info: ghLogInfo,
+  error: ghLogError,
+};
 
 /**
  * Get input by name.
@@ -48,6 +52,15 @@ export function getBooleanInput(name: string): boolean {
 }
 
 /**
+ * Set the action as failed due to an error.
+ *
+ * @param error An value from a `catch`
+ */
+export function setFailed(error: unknown) {
+  ghSetFailed(error as Error);
+}
+
+/**
  * Set an output by name.
  *
  * @param name Output name
@@ -76,9 +89,3 @@ export function setOutput(
 ): void {
   ghSetOutput(name, value ?? defaultValue);
 }
-
-export const logger: Logger = {
-  debug: ghLogDebug,
-  info: ghLogInfo,
-  error: ghLogError,
-};

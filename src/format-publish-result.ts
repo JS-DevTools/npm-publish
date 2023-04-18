@@ -36,5 +36,5 @@ const formatSize = (size: number): string => {
     return `${(size / 1000).toFixed(1)} kB`;
   }
 
-  return `${(size / 1_000_000).toFixed(1)} mB`;
+  return `${(size / 1_000_000).toFixed(1)} MB`;
 };

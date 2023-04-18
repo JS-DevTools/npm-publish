@@ -16,16 +16,16 @@ const execProcess = (
   environment: Record<string, string> = {},
   logger?: Logger
 ): Promise<{ stdout: string; stderr: string; error: Error | null }> => {
-  logger?.debug(`Running command: ${command}`);
+  logger?.debug?.(`Running command: ${command}`);
 
   return new Promise((resolve) => {
     childProcess.exec(
       command,
       { env: { ...process.env, ...environment } },
       (error, stdout, stderr) => {
-        logger?.debug(`exit code: ${error?.code ?? 0}`);
-        logger?.debug(`stdout: ${stdout.trim()}`);
-        logger?.debug(`stderr: ${stderr.trim()}`);
+        logger?.debug?.(`exit code: ${error?.code ?? 0}`);
+        logger?.debug?.(`stdout: ${stdout.trim()}`);
+        logger?.debug?.(`stderr: ${stderr.trim()}`);
         return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
       }
     );

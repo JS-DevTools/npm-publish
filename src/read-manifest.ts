@@ -4,17 +4,13 @@ import { valid as semverValid } from "semver";
 
 import * as errors from "./errors.js";
 
-/**
- * The result of reading a package manifest
- */
+/** The result of reading a package manifest */
 export interface ManifestReadResult {
   packageSpec: string;
   manifest: PackageManifest;
 }
 
-/**
- * A package manifest (package.json)
- */
+/** A package manifest (package.json) */
 export interface PackageManifest {
   name: string;
   version: string;
@@ -22,9 +18,7 @@ export interface PackageManifest {
   publishConfig: PackagePublishConfig | undefined;
 }
 
-/**
- * Any publish configuration defined in package.json.
- */
+/** Any publish configuration defined in package.json. */
 export interface PackagePublishConfig {
   tag?: string;
   access?: string;

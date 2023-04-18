@@ -1,6 +1,4 @@
-/**
- * Wrapper module for command-line-args
- */
+/** Wrapper module for command-line-args */
 
 import commandLineArgs from "command-line-args";
 import type { Options } from "../options.js";
@@ -19,9 +17,7 @@ const ARGUMENTS_OPTIONS = [
   { name: "help", alias: "h", type: Boolean },
 ];
 
-/**
- * The parsed command-line arguments
- */
+/** The parsed command-line arguments */
 export interface ParsedArguments {
   help?: boolean;
   version?: boolean;
@@ -37,20 +33,16 @@ export interface ParsedArguments {
  * @returns A parsed object of options.
  */
 export function parseCliArguments(argv: string[]): ParsedArguments {
-  const { help, version, quiet, debug, ...rawOptions } = commandLineArgs(
+  const { help, version, quiet, debug, ...options } = commandLineArgs(
     ARGUMENTS_OPTIONS,
     { argv, camelCase: true }
   );
-
-  const options = Object.fromEntries(
-    Object.entries(rawOptions).map(([key, value]) => [key, value ?? undefined])
-  ) as Options;
 
   return {
     help: Boolean(help),
     version: Boolean(version),
     quiet: Boolean(quiet),
     debug: Boolean(debug),
-    options,
+    options: options as Options,
   };
 }

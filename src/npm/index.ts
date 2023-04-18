@@ -19,7 +19,7 @@ export interface PublishResult {
 }
 
 /**
- *  Get a package's published versions.
+ * Get a package's published versions.
  *
  * @param packageName The name of the package to get published versions for.
  * @param options Configuration options.
@@ -43,7 +43,7 @@ export async function getVersions(
 }
 
 /**
- *  Publish a package.
+ * Publish a package.
  *
  * @param packageSpec Package specification to pass to npm.
  * @param options Configuration options.

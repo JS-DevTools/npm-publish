@@ -11,12 +11,12 @@ export type NpmCliTask<TReturn> = (
 ) => Promise<TReturn>;
 
 /**
- * Create a temporary .npmrc file with the given auth token,
- * and call a task with env vars set to use that .npmrc.
+ * Create a temporary .npmrc file with the given auth token, and call a task
+ * with env vars set to use that .npmrc.
  *
  * @param options Configuration options.
- * @param task A function called with the configured environment.
- * After the function resolves, the temporary .npmrc file will be removed.
+ * @param task A function called with the configured environment. After the
+ *   function resolves, the temporary .npmrc file will be removed.
  * @returns The resolved value of `task`
  */
 export async function useNpmEnvironment<TReturn>(
@@ -38,7 +38,7 @@ export async function useNpmEnvironment<TReturn>(
 
   await fs.writeFile(npmrc, config, "utf8");
 
-  logger?.debug(`Temporary .npmrc created at ${npmrc}\n${config}`);
+  logger?.debug?.(`Temporary .npmrc created at ${npmrc}\n${config}`);
 
   try {
     return await task({

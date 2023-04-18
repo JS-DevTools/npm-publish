@@ -1,6 +1,4 @@
-/**
- * The possible access levels for an NPM package
- */
+/** The possible access levels for an NPM package */
 export type Access = typeof ACCESS_PUBLIC | typeof ACCESS_RESTRICTED;
 export const ACCESS_PUBLIC = "public";
 export const ACCESS_RESTRICTED = "restricted";
@@ -8,31 +6,25 @@ export const ACCESS_RESTRICTED = "restricted";
 /**
  * Version check strategy.
  *
- * - `upgrade`: the package will only be published if its version
- *   is higher than the existing version on the configured tag.
- * - `all`: the package will be published if its version
- *   is not yet published, even if its lower that the existing tag.
+ * - `upgrade`: the package will only be published if its version is higher than
+ *   the existing version on the configured tag.
+ * - `all`: the package will be published if its version is not yet published,
+ *   even if its lower that the existing tag.
  */
 export type Strategy = typeof STRATEGY_UPGRADE | typeof STRATEGY_ALL;
 export const STRATEGY_UPGRADE = "upgrade";
 export const STRATEGY_ALL = "all";
 
-/**
- * An interface that can be used to log messages.
- */
+/** An interface that can be used to log messages. */
 export interface Logger {
   error: (message: string | Error) => void;
-  info: (message: string) => void;
-  debug: (message: string) => void;
+  info?: undefined | ((message: string) => void);
+  debug?: undefined | ((message: string) => void);
 }
 
-/**
- * Options that determine how/whether the package is published.
- */
+/** Options that determine how/whether the package is published. */
 export interface Options {
-  /**
-   * The NPM access token to use when publishing.
-   */
+  /** The NPM access token to use when publishing. */
   token: string;
 
   /**
@@ -63,9 +55,9 @@ export interface Options {
   /**
    * Package access.
    *
-   * Determines whether the published package should be publicly visible,
-   * or restricted to members of your NPM organization. This only applies
-   * to scoped packages.
+   * Determines whether the published package should be publicly visible, or
+   * restricted to members of your NPM organization. This only applies to scoped
+   * packages.
    *
    * Defaults to "restricted" for scoped packages, unless that package has been
    * previously published as `public`
@@ -78,8 +70,8 @@ export interface Options {
    * Version check strategy.
    *
    * If "upgrade" (default), the package will only be published if its version
-   * is higher than the existing version on the configured tag. If "always",
-   * the package will be published if its version is simply not yet published.
+   * is higher than the existing version on the configured tag. If "always", the
+   * package will be published if its version is simply not yet published.
    *
    * Defaults to `upgrade`.
    */
@@ -92,9 +84,7 @@ export interface Options {
    */
   dryRun?: boolean | undefined;
 
-  /**
-   * Optional logger.
-   */
+  /** Optional logger. */
   logger?: Logger | undefined;
 
   /**

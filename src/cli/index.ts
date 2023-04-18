@@ -59,8 +59,8 @@ export async function main(argv: string[], version: string): Promise<void> {
 
   const logger: Logger = {
     error: console.error,
-    info: cliArguments.quiet === false ? console.info : (m) => void m,
-    debug: cliArguments.debug === true ? console.debug : (m) => void m,
+    info: cliArguments.quiet === false ? console.info : undefined,
+    debug: cliArguments.debug === true ? console.debug : undefined,
   };
 
   await npmPublish({ ...cliArguments.options, logger });
