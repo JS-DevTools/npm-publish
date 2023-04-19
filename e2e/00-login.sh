@@ -11,7 +11,7 @@ create_user_response=$(curl -s -X PUT -H 'content-type: application/json' -d '{"
 
 echo "DEBUG: Create user response - ${create_user_response}" 1>&2
 
-if [[ "${create_user_response}" =~ ${token_matcher} ]]; then
+if [[ ${create_user_response} =~ ${token_matcher} ]]; then
   echo "${BASH_REMATCH[1]}"
   exit 0
 fi

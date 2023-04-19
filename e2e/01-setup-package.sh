@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-PACKAGE_SPEC=$1
-PACKAGE_VERSION=$2
+PACKAGE_SPEC="$1"
+PACKAGE_VERSION="$2"
 
 package_manifest="${PACKAGE_SPEC}/package.json"
 
@@ -17,4 +17,4 @@ echo "  \"version\": \"${PACKAGE_VERSION}\"" >> "${package_manifest}"
 echo "}"                                     >> "${package_manifest}"
 
 echo "DEBUG: wrote ${package_manifest}" 1>&2
-echo ${PACKAGE_SPEC}
+echo "${PACKAGE_SPEC}"
