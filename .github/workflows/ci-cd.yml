@@ -133,12 +133,12 @@ jobs:
           TOKEN: ${{ steps.setup.outputs.token }}
           PACKAGE: ${{ steps.setup.outputs.package }}
         run: |
-          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
-          ./e2e/03-verify.sh "${PACKAGE}"
-          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
-          ./e2e/01-setup-package.sh "${PACKAGE}" 0.0.2
-          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
-          ./e2e/03-verify.sh "${PACKAGE}"
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/01-setup-package.sh ${PACKAGE} 0.0.2
+          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
+          ./e2e/03-verify.sh ${PACKAGE}
 
       - id: action-no-publish
         name: Publish with already published version
