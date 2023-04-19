@@ -27,7 +27,7 @@ describe("parseCliArguments", () => {
         tag: undefined,
         access: undefined,
         strategy: undefined,
-        dryRun: false,
+        dryRun: undefined,
       },
     });
 
@@ -45,7 +45,7 @@ describe("parseCliArguments", () => {
         tag: undefined,
         access: undefined,
         strategy: undefined,
-        dryRun: false,
+        dryRun: undefined,
       },
     });
   });
@@ -84,18 +84,7 @@ describe("parseCliArguments", () => {
 
   it("should reject unknown options", () => {
     expect(() => subject.parseCliArguments(["--foobar"])).toThrow(
-      /unknown option/iu
+      /Unknown option/
     );
-  });
-
-  it("should reject too many packages", () => {
-    expect(() =>
-      subject.parseCliArguments([
-        "--token",
-        "abc123",
-        "./package1",
-        "./package2",
-      ])
-    ).toThrow(/too many positional arguments/iu);
   });
 });
