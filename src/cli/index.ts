@@ -1,7 +1,8 @@
 import { npmPublish, type Logger } from "../index.js";
 import { parseCliArguments } from "./parse-cli-arguments.js";
 
-export const USAGE = `Usage:
+export const USAGE = `
+Usage:
 
   npm-publish <options> [package]
 
@@ -30,8 +31,9 @@ Options:
   --dry-run               Do not actually publish anything.
   --quiet                 Only print errors.
   --debug                 Print debug logs.
+
   -v, --version           Print the version number.
-  -h --help               Show usage text.
+  -h, --help              Show usage text.
 
 Examples:
 
