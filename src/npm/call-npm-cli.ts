@@ -1,5 +1,6 @@
 import childProcess from "node:child_process";
 
+import * as errors from "../errors.js";
 import type { Logger } from "../options.js";
 import type { NpmCliEnvironment } from "./use-npm-environment.js";
 
@@ -15,21 +16,26 @@ const execNpm = (
   commandArguments: string[],
   environment: Record<string, string> = {},
   logger?: Logger
-): Promise<{ stdout: string; stderr: string; error: Error | null }> => {
+): Promise<{ stdout: string; stderr: string; exitCode: number }> => {
   logger?.debug?.(`Running command: npm ${commandArguments.join(" ")}`);
 
   return new Promise((resolve) => {
-    const child = childProcess.execFile(
-      "npm",
-      commandArguments,
-      { env: { ...process.env, ...environment } },
-      (error, stdout, stderr) => {
-        logger?.debug?.(`exit code: ${child.exitCode ?? 0}`);
-        logger?.debug?.(`stdout: ${stdout.trim()}`);
-        logger?.debug?.(`stderr: ${stderr.trim()}`);
-        return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
-      }
-    );
+    let stdout = "";
+    let stderr = "";
+
+    const npm = childProcess.spawn("npm", commandArguments, {
+      env: { ...process.env, ...environment },
+    });
+
+    npm.stdout.on("data", (data) => (stdout += data));
+    npm.stderr.on("data", (data) => (stderr += data));
+    npm.on("close", (code) => {
+      resolve({
+        stdout: stdout.trim(),
+        stderr: stderr.trim(),
+        exitCode: code ?? 0,
+      });
+    });
   });
 };
 
@@ -62,13 +68,13 @@ export async function callNpmCli<TReturn = string>(
   cliArguments: string[],
   options: NpmCliOptions<TReturn> = {}
 ): Promise<TReturn> {
-  const { stdout, stderr, error } = await execNpm(
+  const { stdout, stderr, exitCode } = await execNpm(
     [command, "--ignore-scripts", "--json", ...cliArguments],
     options.environment,
     options.logger
   );
 
-  if (error) {
+  if (exitCode !== 0) {
     const errorPayload = parseJson<{ error?: { code?: string | null } }>(
       stdout,
       stderr
@@ -83,7 +89,7 @@ export async function callNpmCli<TReturn = string>(
       return options.ifError[errorCode] as TReturn;
     }
 
-    throw error;
+    throw new errors.NpmCalError(command, exitCode, stderr);
   }
 
   return parseJson(stdout) ?? (stdout as unknown as TReturn);

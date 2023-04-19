@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 
+import * as errors from "../../errors.js";
 import * as subject from "../call-npm-cli.js";
 
 describe("callNpmCli", () => {
@@ -18,7 +19,7 @@ describe("callNpmCli", () => {
   it("should raise if error", async () => {
     const result = subject.callNpmCli("explain", ["not-a-real-package"]);
 
-    await expect(result).rejects.toThrow(/No dependencies found/);
+    await expect(result).rejects.toThrow(errors.NpmCalError);
   });
 
   it("should map an error code to a return value", async () => {

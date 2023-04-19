@@ -100,3 +100,15 @@ export class InvalidStrategyError extends TypeError {
     this.name = "InvalidStrategyError";
   }
 }
+
+export class NpmCalError extends Error {
+  public constructor(command: string, exitCode: number, stderr: string) {
+    super(
+      [
+        `Call to "npm ${command}" exited with non-zero exit code ${exitCode}`,
+        stderr,
+      ].join(os.EOL)
+    );
+    this.name = "NpmCalError";
+  }
+}
