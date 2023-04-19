@@ -1,4 +1,5 @@
 import childProcess from "node:child_process";
+import os from "node:os";
 
 import * as errors from "../errors.js";
 import type { Logger } from "../options.js";
@@ -10,6 +11,7 @@ export interface NpmCliOptions<TReturn> {
   logger?: Logger | undefined;
 }
 
+const NPM = os.platform() === "win32" ? "npm.cmd" : "npm";
 const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
 const execNpm = (
@@ -17,13 +19,13 @@ const execNpm = (
   environment: Record<string, string> = {},
   logger?: Logger
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> => {
-  logger?.debug?.(`Running command: npm ${commandArguments.join(" ")}`);
+  logger?.debug?.(`Running command: ${NPM} ${commandArguments.join(" ")}`);
 
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
 
-    const npm = childProcess.spawn("npm", commandArguments, {
+    const npm = childProcess.spawn(NPM, commandArguments, {
       env: { ...process.env, ...environment },
     });
 

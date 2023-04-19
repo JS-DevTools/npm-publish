@@ -2507,11 +2507,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os5 = __importStar(require("os"));
+    var os6 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os5.EOL);
+      process.stdout.write(cmd.toString() + os6.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -2928,7 +2928,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs3 = __importStar(require("fs"));
-    var os5 = __importStar(require("os"));
+    var os6 = __importStar(require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -2939,7 +2939,7 @@ var require_file_command = __commonJS({
       if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os5.EOL}`, {
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os6.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -2953,7 +2953,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os5.EOL}${convertedValue}${os5.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os6.EOL}${convertedValue}${os6.EOL}${delimiter}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -4442,7 +4442,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os5 = __importStar(require("os"));
+    var os6 = __importStar(require("os"));
     var path3 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -4510,7 +4510,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os5.EOL);
+      process.stdout.write(os6.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput2;
@@ -4544,7 +4544,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice;
     function info(message) {
-      process.stdout.write(message + os5.EOL);
+      process.stdout.write(message + os6.EOL);
     }
     exports.info = info;
     function startGroup(name) {
@@ -4691,6 +4691,17 @@ var InvalidStrategyError = class extends TypeError {
       )}".`
     );
     this.name = "InvalidStrategyError";
+  }
+};
+var NpmCalError = class extends Error {
+  constructor(command, exitCode, stderr) {
+    super(
+      [
+        `Call to "npm ${command}" exited with non-zero exit code ${exitCode}`,
+        stderr
+      ].join(import_node_os.default.EOL)
+    );
+    this.name = "NpmCalError";
   }
 };
 
@@ -4846,23 +4857,27 @@ ${config}`);
 
 // src/npm/call-npm-cli.ts
 var import_node_child_process = __toESM(require("node:child_process"));
+var import_node_os4 = __toESM(require("node:os"));
+var NPM = import_node_os4.default.platform() === "win32" ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var execNpm = (commandArguments, environment = {}, logger2) => {
   var _a;
-  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: npm ${commandArguments.join(" ")}`);
+  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${NPM} ${commandArguments.join(" ")}`);
   return new Promise((resolve) => {
-    const child = import_node_child_process.default.execFile(
-      "npm",
-      commandArguments,
-      { env: { ...process.env, ...environment } },
-      (error, stdout, stderr) => {
-        var _a2, _b, _c;
-        (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `exit code: ${child.exitCode ?? 0}`);
-        (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `stdout: ${stdout.trim()}`);
-        (_c = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _c.call(logger2, `stderr: ${stderr.trim()}`);
-        return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
-      }
-    );
+    let stdout = "";
+    let stderr = "";
+    const npm = import_node_child_process.default.spawn(NPM, commandArguments, {
+      env: { ...process.env, ...environment }
+    });
+    npm.stdout.on("data", (data) => stdout += data);
+    npm.stderr.on("data", (data) => stderr += data);
+    npm.on("close", (code) => {
+      resolve({
+        stdout: stdout.trim(),
+        stderr: stderr.trim(),
+        exitCode: code ?? 0
+      });
+    });
   });
 };
 var parseJson = (...values) => {
@@ -4881,12 +4896,12 @@ var parseJson = (...values) => {
 };
 async function callNpmCli(command, cliArguments, options = {}) {
   var _a, _b;
-  const { stdout, stderr, error } = await execNpm(
+  const { stdout, stderr, exitCode } = await execNpm(
     [command, "--ignore-scripts", "--json", ...cliArguments],
     options.environment,
     options.logger
   );
-  if (error) {
+  if (exitCode !== 0) {
     const errorPayload = parseJson(
       stdout,
       stderr
@@ -4895,7 +4910,7 @@ async function callNpmCli(command, cliArguments, options = {}) {
     if (typeof errorCode === "string" && options.ifError && errorCode in options.ifError) {
       return options.ifError[errorCode];
     }
-    throw error;
+    throw new NpmCalError(command, exitCode, stderr);
   }
   return parseJson(stdout) ?? stdout;
 }
@@ -4966,7 +4981,7 @@ function compareVersions(version2, publishedVersions, options) {
 }
 
 // src/format-publish-result.ts
-var import_node_os4 = __toESM(require("node:os"));
+var import_node_os5 = __toESM(require("node:os"));
 function formatPublishResult(manifest, options, results) {
   if (results === void 0) {
     return `\u{1F645}\u200D\u2640\uFE0F ${manifest.name}@${manifest.version} publish skipped.`;
@@ -4975,7 +4990,7 @@ function formatPublishResult(manifest, options, results) {
     `\u{1F4E6} ${results.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
     "=== Contents ===",
     ...results.files.map(({ path: path3, size }) => `${formatSize(size)}	${path3}`)
-  ].join(import_node_os4.default.EOL);
+  ].join(import_node_os5.default.EOL);
 }
 var formatSize = (size) => {
   if (size < 1e3) {
