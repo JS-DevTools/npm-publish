@@ -11,19 +11,20 @@ export interface NpmCliOptions<TReturn> {
 
 const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
-const execProcess = (
-  command: string,
+const execNpm = (
+  commandArguments: string[],
   environment: Record<string, string> = {},
   logger?: Logger
 ): Promise<{ stdout: string; stderr: string; error: Error | null }> => {
-  logger?.debug?.(`Running command: ${command}`);
+  logger?.debug?.(`Running command: npm ${commandArguments.join(" ")}`);
 
   return new Promise((resolve) => {
-    childProcess.exec(
-      command,
+    const child = childProcess.execFile(
+      "npm",
+      commandArguments,
       { env: { ...process.env, ...environment } },
       (error, stdout, stderr) => {
-        logger?.debug?.(`exit code: ${error?.code ?? 0}`);
+        logger?.debug?.(`exit code: ${child.exitCode ?? 0}`);
         logger?.debug?.(`stdout: ${stdout.trim()}`);
         logger?.debug?.(`stderr: ${stderr.trim()}`);
         return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
@@ -61,8 +62,8 @@ export async function callNpmCli<TReturn = string>(
   cliArguments: string[],
   options: NpmCliOptions<TReturn> = {}
 ): Promise<TReturn> {
-  const { stdout, stderr, error } = await execProcess(
-    ["npm", command, "--ignore-scripts", "--json", ...cliArguments].join(" "),
+  const { stdout, stderr, error } = await execNpm(
+    [command, "--ignore-scripts", "--json", ...cliArguments],
     options.environment,
     options.logger
   );

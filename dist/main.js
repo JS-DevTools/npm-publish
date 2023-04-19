@@ -4847,16 +4847,17 @@ ${config}`);
 // src/npm/call-npm-cli.ts
 var import_node_child_process = __toESM(require("node:child_process"));
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
-var execProcess = (command, environment = {}, logger2) => {
+var execNpm = (commandArguments, environment = {}, logger2) => {
   var _a;
-  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${command}`);
+  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: npm ${commandArguments.join(" ")}`);
   return new Promise((resolve) => {
-    import_node_child_process.default.exec(
-      command,
+    const child = import_node_child_process.default.execFile(
+      "npm",
+      commandArguments,
       { env: { ...process.env, ...environment } },
       (error, stdout, stderr) => {
         var _a2, _b, _c;
-        (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `exit code: ${(error == null ? void 0 : error.code) ?? 0}`);
+        (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `exit code: ${child.exitCode ?? 0}`);
         (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `stdout: ${stdout.trim()}`);
         (_c = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _c.call(logger2, `stderr: ${stderr.trim()}`);
         return resolve({ stdout: stdout.trim(), stderr: stderr.trim(), error });
@@ -4880,8 +4881,8 @@ var parseJson = (...values) => {
 };
 async function callNpmCli(command, cliArguments, options = {}) {
   var _a, _b;
-  const { stdout, stderr, error } = await execProcess(
-    ["npm", command, "--ignore-scripts", "--json", ...cliArguments].join(" "),
+  const { stdout, stderr, error } = await execNpm(
+    [command, "--ignore-scripts", "--json", ...cliArguments],
     options.environment,
     options.logger
   );

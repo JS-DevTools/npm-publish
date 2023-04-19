@@ -4,9 +4,9 @@ import commandLineArgs from "command-line-args";
 import type { Options } from "../options.js";
 
 const ARGUMENTS_OPTIONS = [
+  { name: "package", type: String, defaultOption: true },
   { name: "token", type: String },
   { name: "registry", type: String },
-  { name: "package", type: String, defaultOption: true },
   { name: "tag", type: String },
   { name: "access", type: String },
   { name: "strategy", type: String },

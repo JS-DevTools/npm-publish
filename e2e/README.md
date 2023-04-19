@@ -22,7 +22,7 @@ Login to the local registry and create a fixture package.
 
 ```shell
 export TOKEN=$(./e2e/00-login.sh)
-export PACKAGE=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)
+export PACKAGE=$(./e2e/01-setup-package.sh "./e2e/fixture/cool package" 0.0.1)
 ```
 
 ### Test the CLI

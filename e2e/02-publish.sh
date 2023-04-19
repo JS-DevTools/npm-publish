@@ -8,4 +8,4 @@ REGISTRY_URL="http://localhost:4873"
 PACKAGE_SPEC=$1
 TOKEN=$2
 
-node ./bin/npm-publish --token=${TOKEN} --registry=${REGISTRY_URL} ${PACKAGE_SPEC}
+node ./bin/npm-publish --token=${TOKEN} --registry=${REGISTRY_URL} "${PACKAGE_SPEC}"
