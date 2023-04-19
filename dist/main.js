@@ -4913,8 +4913,8 @@ function getPublishArguments(packageSpec, options) {
   if (!access.isDefault && access.value) {
     publishArguments.push("--access", access.value);
   }
-  if (!dryRun.isDefault) {
-    publishArguments.push("--dry-run", JSON.stringify(dryRun.value));
+  if (dryRun.value) {
+    publishArguments.push("--dry-run");
   }
   return publishArguments;
 }

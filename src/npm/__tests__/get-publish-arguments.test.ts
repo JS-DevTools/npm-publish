@@ -8,7 +8,7 @@ describe("getPublishArguments", () => {
     const result = subject.getPublishArguments("./cool-package", {
       tag: { value: "next", isDefault: false },
       access: { value: "restricted", isDefault: false },
-      dryRun: { value: false, isDefault: false },
+      dryRun: { value: true, isDefault: false },
       strategy: { value: "upgrade", isDefault: true },
     } as NormalizedOptions);
 
@@ -19,7 +19,6 @@ describe("getPublishArguments", () => {
       "--access",
       "restricted",
       "--dry-run",
-      "false",
     ]);
   });
 
@@ -34,7 +33,7 @@ describe("getPublishArguments", () => {
     expect(result).toEqual(["./cool-package"]);
   });
 
-  it("should omit undefined arguments", () => {
+  it("should omit undefined string arguments and false boolean arguments", () => {
     const result = subject.getPublishArguments("./cool-package", {
       tag: { value: "next", isDefault: false },
       access: { value: undefined, isDefault: false },
@@ -42,12 +41,6 @@ describe("getPublishArguments", () => {
       strategy: { value: "upgrade", isDefault: true },
     } as NormalizedOptions);
 
-    expect(result).toEqual([
-      "./cool-package",
-      "--tag",
-      "next",
-      "--dry-run",
-      "false",
-    ]);
+    expect(result).toEqual(["./cool-package", "--tag", "next"]);
   });
 });
