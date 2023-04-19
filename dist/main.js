@@ -5021,7 +5021,11 @@ async function npmPublish(options) {
 
 // src/action/core.ts
 var import_core = __toESM(require_core());
-var import_core2 = __toESM(require_core());
+var logger = {
+  debug: import_core.debug,
+  info: import_core.info,
+  error: import_core.error
+};
 function getInput(name) {
   const inputString = (0, import_core.getInput)(name);
   return inputString.length > 0 ? inputString : void 0;
@@ -5034,18 +5038,16 @@ function getRequiredSecretInput(name) {
 function getBooleanInput(name) {
   return (0, import_core.getInput)(name) === "true";
 }
+function setFailed(error) {
+  (0, import_core.setFailed)(error);
+}
 function setOutput(name, value, defaultValue) {
   (0, import_core.setOutput)(name, value ?? defaultValue);
 }
-var logger = {
-  debug: import_core.debug,
-  info: import_core.info,
-  error: import_core.error
-};
 
-// src/action/run.ts
+// src/action/main.ts
 async function run() {
-  const options = {
+  const results = await npmPublish({
     token: getRequiredSecretInput("token"),
     registry: getInput("registry"),
     package: getInput("package"),
@@ -5055,8 +5057,7 @@ async function run() {
     dryRun: getBooleanInput("dry-run"),
     logger,
     temporaryDirectory: process.env["RUNNER_TEMP"]
-  };
-  const results = await npmPublish(options);
+  });
   setOutput("id", results.id, "");
   setOutput("name", results.name);
   setOutput("version", results.version);
@@ -5068,7 +5069,5 @@ async function run() {
   setOutput("strategy", results.strategy);
   setOutput("dry-run", results.dryRun);
 }
-
-// src/action/main.ts
-run().catch((error) => (0, import_core2.setFailed)(error));
+run().catch((error) => setFailed(error));
 //# sourceMappingURL=main.js.map
