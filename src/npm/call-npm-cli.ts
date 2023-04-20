@@ -91,7 +91,7 @@ export async function callNpmCli<TReturn = string>(
       return options.ifError[errorCode] as TReturn;
     }
 
-    throw new errors.NpmCalError(command, exitCode, stderr);
+    throw new errors.NpmCallError(command, exitCode, stderr);
   }
 
   return parseJson(stdout) ?? (stdout as unknown as TReturn);
