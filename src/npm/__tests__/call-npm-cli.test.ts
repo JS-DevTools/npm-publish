@@ -1,3 +1,5 @@
+import os from "node:os";
+import path from "node:path";
 import { describe, it, expect } from "vitest";
 
 import * as errors from "../../errors.js";
@@ -37,10 +39,14 @@ describe("callNpmCli", () => {
   });
 
   it("should allow the environment to be overriden", async () => {
+    const customPath = path.join(os.homedir(), "foo", ".npmrc");
+
     const result = await subject.callNpmCli("config", ["get", "userconfig"], {
-      environment: { npm_config_userconfig: "/foo/bar/.npmrc" },
+      environment: {
+        npm_config_userconfig: customPath,
+      },
     });
 
-    expect(result).toEqual("/foo/bar/.npmrc");
+    expect(result).toEqual(customPath);
   });
 });

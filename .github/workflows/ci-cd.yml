@@ -149,7 +149,7 @@ jobs:
           token: ${{ steps.setup.outputs.token }}
 
       - name: Check action output
-        if: ${{ steps.action-no-publish.outputs.type != '' }}
+        if: ${{ steps.action-no-publish.outputs.type }}
         run: |
           echo "::error::Expected release type to be '', got '${{ steps.action-no-publish.outputs.type }}'"
           exit 1
