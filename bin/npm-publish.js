@@ -7,6 +7,6 @@ const { version } = require("../package.json");
 const { main } = require("../lib/cli/index.js");
 
 main(process.argv.slice(2), version).catch((error) => {
-  console.log(error);
+  console.error(error);
   process.exitCode = 1;
 });

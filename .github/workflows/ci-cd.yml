@@ -27,6 +27,7 @@ jobs:
         node-version:
           - 16
           - 18
+          - 20
 
     steps:
       - name: Checkout source
@@ -99,6 +100,7 @@ jobs:
         node-version:
           - 16
           - 18
+          - 20
 
     services:
       verdaccio:

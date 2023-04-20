@@ -1,4 +1,8 @@
-# Change Log
+# Change Log (Archived)
+
+See [releases](https://github.com/JS-DevTools/npm-publish/releases) for current change log.
+
+---
 
 All notable changes will be documented in this file.
 NPM Publish adheres to [Semantic Versioning](http://semver.org/).
