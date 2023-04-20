@@ -4693,7 +4693,7 @@ var InvalidStrategyError = class extends TypeError {
     this.name = "InvalidStrategyError";
   }
 };
-var NpmCalError = class extends Error {
+var NpmCallError = class extends Error {
   constructor(command, exitCode, stderr) {
     super(
       [
@@ -4701,7 +4701,7 @@ var NpmCalError = class extends Error {
         stderr
       ].join(import_node_os.default.EOL)
     );
-    this.name = "NpmCalError";
+    this.name = "NpmCallError";
   }
 };
 
@@ -4910,7 +4910,7 @@ async function callNpmCli(command, cliArguments, options = {}) {
     if (typeof errorCode === "string" && options.ifError && errorCode in options.ifError) {
       return options.ifError[errorCode];
     }
-    throw new NpmCalError(command, exitCode, stderr);
+    throw new NpmCallError(command, exitCode, stderr);
   }
   return parseJson(stdout) ?? stdout;
 }
