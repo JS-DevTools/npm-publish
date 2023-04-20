@@ -1,10 +1,7 @@
 # Fast, easy publishing to NPM
 
-[![Cross-Platform Compatibility](https://jstools.dev/img/badges/os-badges.svg)](https://github.com/JS-DevTools/npm-publish/actions)
 [![Build Status](https://github.com/JS-DevTools/npm-publish/workflows/CI-CD/badge.svg)](https://github.com/JS-DevTools/npm-publish/actions)
-
 [![Coverage Status](https://coveralls.io/repos/github/JS-DevTools/npm-publish/badge.svg?branch=main)](https://coveralls.io/github/JS-DevTools/npm-publish)
-
 [![npm](https://img.shields.io/npm/v/@jsdevtools/npm-publish.svg)](https://www.npmjs.com/package/@jsdevtools/npm-publish)
 [![License](https://img.shields.io/npm/l/@jsdevtools/npm-publish.svg)](LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/JS-DevTools/npm-publish)
@@ -12,16 +9,16 @@
 ## Features
 
 - 🧠 **Smart**<br>
-  Only publishes if the version number in `package.json` differs from the latest on NPM
+  Only publishes if the version number in `package.json` differs from the latest on npm.
 
 - 🛠 **Configurable**<br>
-  Customize the version-checking behavior, the registry URL, and path of your package
+  Customize the version-checking behavior, the registry URL, and path of your package.
 
 - 🔐 **Secure**<br>
-  Keeps your NPM access token secret. Doesn't write it to `~/.npmrc`
+  Keeps your npm authentication token secret. Doesn't read from or write to `~/.npmrc`.
 
 - ⚡ **Fast**<br>
-  100% JavaScript (which is faster than Docker) and bundled to optimize loading time
+  100% JavaScript (which is faster than Docker) and bundled to optimize loading time.
 
 - 📤 **Outputs**<br>
   Exposes the old and new version numbers, and the type of change (major, minor, patch, etc.) as variables that you can use in your workflow.
@@ -36,9 +33,42 @@ This package can be used three different ways:
 
 - 🖥 A [**CLI**](#command-line-interface) that you run in your terminal
 
+## v2 Migration Guide
+
+The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, make the following updates:
+
+- The `type` output is now an empty string instead of `none` when no release occurs
+  ```diff
+  - - if: ${{ steps.publish.outputs.type != 'none' }}
+  + - if: ${{ steps.publish.outputs.type }}
+      run:  echo "Version changed!"
+  ```
+- The `check-version` and `greater-version-only` options have been removed and replaced with `strategy`.
+  - Use `strategy: all` (default) to publish all versions that do not yet exist in the registry.
+    ```diff
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+    -   check-version: true
+    -   greater-version-only: false
+    +   strategy: all
+    ```
+  - Use `strategy: upgrade` to only publish versions that upgrade the selected tag.
+    ```diff
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+    -   check-version: true
+    -   greater-version-only: true
+    +   strategy: upgrade
+    ```
+  - `check-version: false` has been removed. You don't need this action if you're not checking already published versions; use `npm` directly, instead.
+
+See the [change log][] for more details and other changes in the v2 release.
+
+[change log]: https://github.com/JS-DevTools/npm-publish/releases
+
 ## GitHub Action
 
-To use the GitHub Action, you'll need to add it as a step in your [Workflow file](https://help.github.com/en/actions/automating-your-workflow-with-github-actions). By default, the only thing you need to do is set the `token` parameter to your [NPM auth token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens).
+To use the GitHub Action, you'll need to add it as a step in your [workflow file][]. By default, the only thing you need to do is set the `token` parameter to your [npm authentication token][].
 
 ```yaml
 on: push
@@ -53,123 +83,136 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_TOKEN }}
 ```
 
-## Input Parameters
+[workflow file]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions
+[npm authentication token]: https://docs.npmjs.com/creating-and-viewing-authentication-tokens
 
-You can set any or all of the following input parameters:
+### Usage
 
-| Name                   | Type    | Default                                                             | Description                                                                                                             |
-| ---------------------- | ------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `token`                | string  | **required**                                                        | The NPM auth token to use for publishing                                                                                |
-| `registry`             | string  | https://registry.npmjs.org/                                         | The NPM registry URL to use                                                                                             |
-| `package`              | string  | ./package.json                                                      | The path of your package.json file                                                                                      |
-| `tag`                  | string  | "latest"                                                            | The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.              |
-| `access`               | string  | "public" for non-scoped packages. "restricted" for scoped packages. | Determines whether the published package should be publicly visible, or restricted to members of your NPM organization. |
-| `dry-run`              | boolean | false                                                               | Run NPM publish with the `--dry-run` flag to prevent publication                                                        |
-| `check-version`        | boolean | true                                                                | Only publish to NPM if the version number in `package.json` differs from the latest on NPM                              |
-| `greater-version-only` | boolean | false                                                               | Only publish to NPM if the version number in `package.json` is greater than the latest on NPM                           |
+You can set any or all of the following input parameters using `with`:
 
-## Output Variables
+| Name       | Type                   | Default                       | Description                                                                   |
+| ---------- | ---------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| `token`    | string                 | **required**                  | Authentication token to use with the configured registry.                     |
+| `registry` | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                          |
+| `package`  | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish  |
+| `tag`      | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                    |
+| `access`   | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                 |
+| `strategy` | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades. |
+| `dry-run`  | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.           |
+
+[npm-tag]: https://docs.npmjs.com/cli/v9/commands/npm-publish#tag
+[npm-access]: https://docs.npmjs.com/cli/v9/commands/npm-publish#access
+
+### Output
 
 npm-publish exposes some output variables, which you can use in later steps of your workflow. To access the output variables, you'll need to set an `id` for the npm-publish step.
 
 ```yaml
 steps:
   - id: publish
-    uses: JS-DevTools/npm-publish@v1
+    uses: JS-DevTools/npm-publish@v2
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
-  - if: steps.publish.outputs.type != 'none'
+  - if: ${{ steps.publish.outputs.type }}
     run: |
-      echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
+      echo "Version changed!"
 ```
 
-| Variable      | Type    | Description                                                                                                                                                                                                                 |
-| ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`        | string  | The type of version change that occurred ("major", "minor", "patch", etc.). If there was no version change, then type will be "none". If `greater-version-only` is set and the version is lower, then type will be "lower". |
-| `version`     | string  | The version that was published                                                                                                                                                                                              |
-| `old-version` | string  | The version number that was previously published to NPM                                                                                                                                                                     |
-| `tag`         | string  | The tag that the package was published to.                                                                                                                                                                                  |
-| `access`      | string  | Indicates whether the published package is publicly visible or restricted to members of your NPM organization.                                                                                                              |
-| `dry-run`     | boolean | Indicates whether NPM was run in "dry run" mode                                                                                                                                                                             |
+| Name          | Type    | Description                                                                                                   |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`          | string  | Package identifier of the release: `${name}@${version}` or empty if no release.                               |
+| `type`        | string  | [Semver release type][], `initial` if first release, `different` if other change, or empty if no release.     |
+| `name`        | string  | Name of the package.                                                                                          |
+| `version`     | string  | Version of the package.                                                                                       |
+| `old-version` | string  | Previously published version on `tag` or empty if no previous version on tag.                                 |
+| `tag`         | string  | [Distribution tag][npm-tag] the package was published to.                                                     |
+| `access`      | string  | [Access level][npm-access] the package was published with, or `default` if scoped-package defaults were used. |
+| `dry-run`     | boolean | Whether `npm publish` was run in "dry run" mode.                                                              |
+
+[semver release type]: https://github.com/npm/node-semver#release_types
 
 ## JavaScript Function
 
-To use npm-package in your JavaScript code, you'll need to install it using [NPM](https://docs.npmjs.com/about-npm/):
+To use npm-package in your JavaScript code, you'll need to install it using [npm][] or other package manager of choice:
 
 ```bash
-npm install @jsdevtools/npm-publish
+npm install --save-dev @jsdevtools/npm-publish
 ```
 
 You can then import it and use it in your code like this:
 
 ```javascript
-const npmPublish = require("@jsdevtools/npm-publish");
+import { npmPublish } from "@jsdevtools/npm-publish";
 
 // Run npm-publish with all defaults
-await npmPublish();
-
-// Run npm-publish with options
-await npmPublish({
-  package: "./path/to/package.json",
-  token: "YOUR_NPM_AUTH_TOKEN_HERE",
-});
+await npmPublish({ token: "YOUR_NPM_AUTH_TOKEN_HERE" });
 ```
 
-### Options
+[npm]: https://docs.npmjs.com/about-npm/
 
-As shown in the example above, you can pass options to the `npmPublish()` function. Here are the available options:
+### Usage
 
-| Name                 | Type     | Default                                                             | Description                                                                                                                                                                  |
-| -------------------- | -------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `token`              | string   | NPM's default credentials                                           | The NPM auth token to use for publishing. If not set, then NPM will                                                                                                          |
-| `registry`           | string   | https://registry.npmjs.org/                                         | The NPM registry URL to use                                                                                                                                                  |
-| `package`            | string   | ./package.json                                                      | The path of your package.json file                                                                                                                                           |
-| `tag`                | string   | "latest"                                                            | The tag to publish to. This allows people to install the package using `npm install <package-name>@<tag>`.                                                                   |
-| `access`             | string   | "public" for non-scoped packages. "restricted" for scoped packages. | Determines whether the published package should be publicly visible, or restricted to members of your NPM organization.                                                      |
-| `dryRun`             | boolean  | false                                                               | Run NPM publish with the `--dry-run` flag to prevent publication                                                                                                             |
-| `checkVersion`       | boolean  | true                                                                | Only publish to NPM if the version number in `package.json` differs from the latest on NPM                                                                                   |
-| `greaterVersionOnly` | boolean  | false                                                               | Only publish to NPM if the version number in `package.json` is greater then the latest on NPM                                                                                |
-| `quiet`              | boolean  | false                                                               | Suppress console output from NPM and npm-publish                                                                                                                             |
-| `debug`              | function | no-op                                                               | A function to log debug messages. You can set this to a custom function to receive debug messages, or just set it to `console.debug` to print debug messages to the console. |
+As shown in the example above, you should pass an options object to the `npmPublish` function. In TypeScript, the `Options` interface is available as an import.
 
-### Return Value
+```ts
+import type { Options } from "@jsdevtools/npm-publish";
+```
 
-The `npmPublish()` function asynchronously returns an object with the following properties:
+| Name                 | Type                   | Default                       | Description                                                                   |
+| -------------------- | ---------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| `token`              | string                 | **required**                  | Authentication token to use with the configured registry.                     |
+| `registry`           | string, `URL`          | `https://registry.npmjs.org/` | Registry URL to use.                                                          |
+| `package`            | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish  |
+| `tag`                | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                    |
+| `access`             | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                 |
+| `strategy`           | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades. |
+| `dryRun`             | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.           |
+| `logger`             | object                 | `undefined`                   | Logging interface with `debug`, `info`, and `error` log methods.              |
+| `temporaryDirectory` | string                 | `os.tmpdir()`                 | Temporary directory to hold a generated `.npmrc` file                         |
 
-| Name         | Type    | Description                                                                                                                                                                                                                   |
-| ------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`       | string  | The type of version change that occurred ("major", "minor", "patch", etc.) If there was no version change, then the the type is "none". If `greater-version-only` is set and the version is lower, then type will be "lower". |
-| `package`    | string  | The name of the NPM package that was published                                                                                                                                                                                |
-| `version`    | string  | The version number that was published                                                                                                                                                                                         |
-| `oldVersion` | string  | The version number that was previously published to NPM                                                                                                                                                                       |
-| `tag`        | string  | The tag that the package was published to.                                                                                                                                                                                    |
-| `access`     | string  | Indicates whether the published package is publicly visible or restricted to members of your NPM organization.                                                                                                                |
-| `dryRun`     | boolean | Indicates whether NPM was run in "dry run" mode                                                                                                                                                                               |
+### Output
+
+The `npmPublish()` function returns a promise of a `Results` object. In TypeScript, the `Results` interface is available as an import.
+
+```ts
+import type { Results } from "@jsdevtools/npm-publish";
+```
+
+| Name         | Type            | Description                                                                                                     |
+| ------------ | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| `id`         | Optional string | Package identifier of the release: `${name}@${version}` or `undefined` if no release.                           |
+| `type`       | Optional string | [Semver release type][], `initial` if first release, `different` if other change, or `undefined` if no release. |
+| `name`       | string          | Name of the package.                                                                                            |
+| `version`    | string          | Version of the package.                                                                                         |
+| `oldVersion` | Optional string | Previously published version on `tag` or `undefined` if no previous version.                                    |
+| `tag`        | string          | [Distribution tag][npm-tag] that the package was published to.                                                  |
+| `access`     | Optional string | [Access level][npm-access] the package was published with, or `undefined` if scoped-package defaults were used. |
+| `dryRun`     | boolean         | Whether `npm publish` was run in "dry run" mode.                                                                |
 
 ## Command Line Interface
 
-To use npm-package from as a command-line tool in your terminal, you'll need to install it globally using [NPM](https://docs.npmjs.com/about-npm/):
+You can also use `npm-publish` as a command-line tool in your terminal.
 
 ```bash
-npm install -g @jsdevtools/npm-publish
+npm install --save-dev @jsdevtools/npm-publish
 ```
 
-You can then use it in your terminal or in Bash scripts. You can call it without any arguments, and it will publish the current directory using NPM's default credentials.
+You can then use it in your terminal or in `npm run` scripts.
 
 ```bash
-npm-publish
+npx npm-publish --token YOUR_NPM_AUTH_TOKEN_HERE
 ```
 
-Or you can call it with arguments to explicitly set the NPM auth token, registry, package path, etc.
+You can customize your call with options to change the registry, package, etc.
 
 ```bash
-npm-publish --token=YOUR_NPM_AUTH_TOKEN_HERE ./path/to/package.json
+npm-publish --token YOUR_NPM_AUTH_TOKEN_HERE --registry http://example.com ./path/to/package
 ```
 
 ### Options
@@ -177,36 +220,41 @@ npm-publish --token=YOUR_NPM_AUTH_TOKEN_HERE ./path/to/package.json
 Run `npm-publish --help` to see the full list of options available.
 
 ```
-> npm-publish --help
+Usage:
 
-Usage: npm-publish [options] [package_path]
+  npm-publish <options> [package]
 
-options:
-  --token <token>     The NPM access token to use when publishing
+Arguments:
 
-  --registry <url>    The NPM registry URL to use
+  package                 The path to the package to publish.
+                          May be a directory or package.json file.
+                          Defaults to the package in the current directory.
 
-  --tag <tag>         The tag to publish to. Allows the package to be installed
-                      using "npm install <package-name>@<tag>"
+Options:
 
-  --access <access>   "public" = The package will be publicly visible.
-                      "restricted" = The package will only be visible to members
-                      of your NPM organization.
+  --token <token>         (Required) npm authentication token.
 
-  --dry-run           Don't actually publish to NPM, but report what would have
-                      been published
+  --registry <url>        Registry to read from and write to.
+                          Defaults to "https://registry.npmjs.org/".
 
-  --debug, -d         Enable debug mode, with increased logging
+  --tag <tag>             The distribution tag to check against and publish to.
+                          Defaults to "latest".
 
-  --quiet, -q         Suppress unnecessary output
+  --access <access>       Package access, may be "public" or "restricted".
+                          See documentation for details.
 
-  --version, -v       Print the version number
+  --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
+                          Defaults to "all", see documentation for details.
 
-  --help, -h          Show help
+  --dry-run               Do not actually publish anything.
+  --quiet                 Only print errors.
+  --debug                 Print debug logs.
+  -v, --version           Print the version number.
+  -h --help               Show usage text.
 
-package_path          The absolute or relative path of the NPM package to publish.
-                      Can be a directory path, or the path of a package.json file.
-                      Defaults to the current directory.
+Examples:
+
+  $ npm-publish --token abc123 ./my-package
 ```
 
 ## License
