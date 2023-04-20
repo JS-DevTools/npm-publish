@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: Run unit tests with Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    name: Unit tests / Node.js ${{ matrix.node-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -86,7 +86,7 @@ jobs:
           path: lib
 
   e2e:
-    name: Run E2E tests with Node.js ${{ matrix.node-version }}
+    name: E2E tests / Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
@@ -174,7 +174,7 @@ jobs:
 
   deploy:
     if: ${{ github.ref == 'refs/heads/main' }}
-    name: Publish to NPM
+    name: Publish
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
