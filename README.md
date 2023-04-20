@@ -46,8 +46,8 @@ The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, mak
 - The `check-version` and `greater-version-only` options have been removed and replaced with `strategy`.
   - Use `strategy: all` (default) to publish all versions that do not yet exist in the registry.
     ```diff
-    with:
-      token: ${{ secrets.NPM_TOKEN }}
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
     -   check-version: true
     -   greater-version-only: false
     +   strategy: all
@@ -227,7 +227,7 @@ Usage:
 Arguments:
 
   package                 The path to the package to publish.
-                          May be a directory or package.json file.
+                          May be a directory, package.json, or .tgz file.
                           Defaults to the package in the current directory.
 
 Options:
@@ -249,6 +249,7 @@ Options:
   --dry-run               Do not actually publish anything.
   --quiet                 Only print errors.
   --debug                 Print debug logs.
+
   -v, --version           Print the version number.
   -h --help               Show usage text.
 
