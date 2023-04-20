@@ -9,7 +9,7 @@ Usage:
 Arguments:
 
   package                 The path to the package to publish.
-                          May be a directory or package.json file.
+                          May be a directory, package.json, or .tgz file.
                           Defaults to the package in the current directory.
 
 Options:
