@@ -10,7 +10,9 @@ import {
 export class InvalidPackageError extends TypeError {
   public constructor(value: unknown) {
     super(
-      `Package must be a directory or package.json file, got "${String(value)}"`
+      `Package must be a directory, package.json, or .tgz file, got "${String(
+        value
+      )}"`
     );
     this.name = "PackageJsonReadError";
   }
@@ -30,10 +32,24 @@ export class PackageJsonReadError extends Error {
   }
 }
 
-export class PackageJsonParseError extends SyntaxError {
-  public constructor(manifestPath: string, originalError: unknown) {
+export class PackageTarballReadError extends Error {
+  public constructor(tarballPath: string, originalError: unknown) {
     const message = [
-      `Invalid JSON, could not parse package.json at ${manifestPath}`,
+      `Could not read package.json from ${tarballPath}`,
+      originalError instanceof Error ? originalError.message : "",
+    ]
+      .filter(Boolean)
+      .join(os.EOL);
+
+    super(message);
+    this.name = "PackageTarballReadError";
+  }
+}
+
+export class PackageJsonParseError extends SyntaxError {
+  public constructor(packageSpec: string, originalError: unknown) {
+    const message = [
+      `Invalid JSON, could not parse package.json for ${packageSpec}`,
       originalError instanceof Error ? originalError.message : "",
     ]
       .filter(Boolean)
