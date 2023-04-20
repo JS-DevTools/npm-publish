@@ -10909,7 +10909,7 @@ var PackageTarballReadError = class extends Error {
       originalError instanceof Error ? originalError.message : ""
     ].filter(Boolean).join(import_node_os.default.EOL);
     super(message);
-    this.name = "PackageJsonReadError";
+    this.name = "PackageTarballReadError";
   }
 };
 var PackageJsonParseError = class extends SyntaxError {
