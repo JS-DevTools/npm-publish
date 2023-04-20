@@ -42,7 +42,7 @@ export class PackageTarballReadError extends Error {
       .join(os.EOL);
 
     super(message);
-    this.name = "PackageJsonReadError";
+    this.name = "PackageTarballReadError";
   }
 }
 
