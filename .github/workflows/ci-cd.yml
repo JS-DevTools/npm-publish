@@ -156,7 +156,7 @@ jobs:
 
       - name: Create new version for Action end-to-end test
         shell: bash
-        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.package }} 0.0.3
+        run: ./e2e/01-setup-package.sh "${{ steps.setup.outputs.package }}" 0.0.3
 
       - id: action-publish
         name: Publish a new version
