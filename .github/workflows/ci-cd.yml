@@ -37,9 +37,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build the code
-        run: npm run build
-
       - name: Run tests
         run: npm run coverage
 
@@ -75,6 +72,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify no un-staged changes
+        run: |
+          git status --porcelain
+          git diff-files --quiet
 
       - name: Run lints
         run: npm run lint
