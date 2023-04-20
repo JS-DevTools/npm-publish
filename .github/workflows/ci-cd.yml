@@ -15,7 +15,7 @@ on:
 jobs:
   test:
     name: Run unit tests with Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       fail-fast: false
