@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
+import { create as tarCreate } from "tar";
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 
 import * as subject from "../read-manifest.js";
@@ -63,6 +64,36 @@ describe("readManifest", () => {
     });
   });
 
+  it("should read a .tgz file", async () => {
+    await fs.mkdir(path.join(directory, "package"), { recursive: true });
+    await fs.writeFile(
+      path.join(directory, "package/package.json"),
+      JSON.stringify({ name: "cool-name", version: "1.2.3" }),
+      "utf8"
+    );
+    await tarCreate(
+      {
+        gzip: true,
+        file: path.join(directory, "package-tarball.tgz"),
+        cwd: directory,
+      },
+      ["package/package.json"]
+    );
+    await fs.rm(path.join(directory, "package"), {
+      force: true,
+      recursive: true,
+    });
+
+    const result = await subject.readManifest(
+      path.join(directory, "package-tarball.tgz")
+    );
+
+    expect(result).toMatchObject({
+      packageSpec: path.join(directory, "package-tarball.tgz"),
+      manifest: { name: "cool-name" },
+    });
+  });
+
   it("should reject invalid packages", async () => {
     await expect(subject.readManifest(42)).rejects.toThrow(
       errors.InvalidPackageError
@@ -111,6 +142,33 @@ describe("readManifest", () => {
     const result = subject.readManifest(directory);
 
     await expect(result).rejects.toThrow(errors.PackageJsonReadError);
+  });
+
+  it("should error if no package in .tgz file", async () => {
+    await fs.mkdir(path.join(directory, "package"), { recursive: true });
+    await fs.writeFile(
+      path.join(directory, "package/nope.json"),
+      JSON.stringify({ name: "cool-name", version: "1.2.3" }),
+      "utf8"
+    );
+    await tarCreate(
+      {
+        gzip: true,
+        file: path.join(directory, "package-tarball.tgz"),
+        cwd: directory,
+      },
+      ["package/nope.json"]
+    );
+    await fs.rm(path.join(directory, "package"), {
+      force: true,
+      recursive: true,
+    });
+
+    const result = subject.readManifest(
+      path.join(directory, "package-tarball.tgz")
+    );
+
+    await expect(result).rejects.toThrow(errors.PackageTarballReadError);
   });
 
   it("should error if package.json file is malformed", async () => {
