@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { valid as semverValid } from "semver";
+import { list as tarList, type ReadEntry } from "tar";
 
 import * as errors from "./errors.js";
 
@@ -28,17 +29,53 @@ export interface PackagePublishConfig {
 const SCOPE_RE = /^(@.+)\/.+$/u;
 
 const MANIFEST_BASENAME = "package.json";
+const TARBALL_EXTNAME = ".tgz";
 
-const isManifest = (name: unknown): name is string => {
-  return typeof name === "string" && path.basename(name) === MANIFEST_BASENAME;
+const isManifest = (file: unknown): file is string => {
+  return typeof file === "string" && path.basename(file) === MANIFEST_BASENAME;
 };
 
-const isDirectory = (name: unknown): name is string => {
-  return typeof name === "string" && path.extname(name) === "";
+const isDirectory = (file: unknown): file is string => {
+  return typeof file === "string" && path.extname(file) === "";
+};
+
+const isTarball = (file: unknown): file is string => {
+  return typeof file === "string" && path.extname(file) === TARBALL_EXTNAME;
 };
 
 const isVersion = (version: unknown): version is string => {
   return semverValid(version as string) !== null;
+};
+
+const readPackageJson = async (...pathSegments: string[]): Promise<string> => {
+  const file = path.resolve(...pathSegments);
+
+  try {
+    return await fs.readFile(file, "utf8");
+  } catch (error) {
+    throw new errors.PackageJsonReadError(file, error);
+  }
+};
+
+const readTarballPackageJson = async (file: string): Promise<string> => {
+  const data: Buffer[] = [];
+  const onentry = (entry: ReadEntry) => {
+    if (entry.path === "package/package.json") {
+      entry.on("data", (chunk) => data.push(chunk));
+    }
+  };
+
+  try {
+    await tarList({ file, onentry });
+
+    if (data.length === 0) {
+      throw new Error("package.json not found inside archive");
+    }
+  } catch (error) {
+    throw new errors.PackageTarballReadError(file, error);
+  }
+
+  return Buffer.concat(data).toString();
 };
 
 /**
@@ -51,32 +88,28 @@ export async function readManifest(
   packagePath: unknown
 ): Promise<ManifestReadResult> {
   let packageSpec: string | undefined;
-  let manifestPath: string;
+  let manifestContents: string;
 
   if (!packagePath) {
     packageSpec = "";
-    manifestPath = path.resolve(MANIFEST_BASENAME);
+    manifestContents = await readPackageJson(MANIFEST_BASENAME);
   } else if (isManifest(packagePath)) {
     packageSpec = path.resolve(path.dirname(packagePath));
-    manifestPath = path.resolve(packagePath);
+    manifestContents = await readPackageJson(packagePath);
   } else if (isDirectory(packagePath)) {
     packageSpec = path.resolve(packagePath);
-    manifestPath = path.resolve(packagePath, MANIFEST_BASENAME);
+    manifestContents = await readPackageJson(packagePath, MANIFEST_BASENAME);
+  } else if (isTarball(packagePath)) {
+    packageSpec = path.resolve(packagePath);
+    manifestContents = await readTarballPackageJson(packageSpec);
   } else {
     throw new errors.InvalidPackageError(packagePath);
   }
 
-  let manifestContents: string;
   let manifestJson: Record<string, unknown>;
   let name: unknown;
   let version: unknown;
   let publishConfig: unknown;
-
-  try {
-    manifestContents = await fs.readFile(manifestPath, "utf8");
-  } catch (error) {
-    throw new errors.PackageJsonReadError(manifestPath, error);
-  }
 
   try {
     manifestJson = JSON.parse(manifestContents) as Record<string, unknown>;
@@ -84,7 +117,7 @@ export async function readManifest(
     version = manifestJson["version"];
     publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
-    throw new errors.PackageJsonParseError(manifestPath, error);
+    throw new errors.PackageJsonParseError(packageSpec, error);
   }
 
   if (typeof name !== "string" || name.length === 0) {
