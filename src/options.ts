@@ -1,91 +1,96 @@
-import { URL } from "url";
+/** The possible access levels for an NPM package */
+export type Access = typeof ACCESS_PUBLIC | typeof ACCESS_RESTRICTED;
+export const ACCESS_PUBLIC = "public";
+export const ACCESS_RESTRICTED = "restricted";
 
 /**
- * Options that determine how/whether the package is published.
+ * Version check strategy.
+ *
+ * - `upgrade`: the package will only be published if its version is higher than
+ *   the existing version on the configured tag.
+ * - `all`: the package will be published if its version is not yet published,
+ *   even if its lower that the existing tag.
  */
+export type Strategy = typeof STRATEGY_UPGRADE | typeof STRATEGY_ALL;
+export const STRATEGY_UPGRADE = "upgrade";
+export const STRATEGY_ALL = "all";
+
+/** An interface that can be used to log messages. */
+export interface Logger {
+  error: (message: string | Error) => void;
+  info?: undefined | ((message: string) => void);
+  debug?: undefined | ((message: string) => void);
+}
+
+/** Options that determine how/whether the package is published. */
 export interface Options {
+  /** The NPM access token to use when publishing. */
+  token: string;
+
   /**
-   * The NPM access token to use when publishing
+   * The absolute or relative path of your package.
+   *
+   * Defaults to the package in the current working directory.
    */
-  token?: string;
+  package?: string | undefined;
 
   /**
    * The NPM registry URL to use.
    *
-   * Defaults to "https://registry.npmjs.org/"
+   * Defaults to "https://registry.npmjs.org/".
+   *
+   * Can be overridden by the package.json's `publishConfig` field.
    */
-  registry?: string | URL;
+  registry?: string | URL | undefined;
 
   /**
-   * The absolute or relative path of your package.json file.
+   * The tag to publish to.
    *
-   * Defaults to "./package.json"
+   * Defaults to "latest".
+   *
+   * Can be overridden by the package.json's `publishConfig` field.
    */
-  package?: string;
+  tag?: string | undefined;
 
   /**
-   * The tag to publish to. This allows people to install the package
-   * using "npm install <package-name>@<tag>".
+   * Package access.
    *
-   * Defaults to "latest"
+   * Determines whether the published package should be publicly visible, or
+   * restricted to members of your NPM organization. This only applies to scoped
+   * packages.
+   *
+   * Defaults to "restricted" for scoped packages, unless that package has been
+   * previously published as `public`
+   *
+   * Can be overridden by the package.json's `publishConfig` field.
    */
-  tag?: string;
+  access?: Access | undefined;
 
   /**
-   * Determines whether the published package should be publicly visible,
-   * or restricted to members of your NPM organization. This only applies
-   * to scoped packages.
+   * Version check strategy.
    *
-   * Defaults to "restricted" for scoped packages and "public" for non-scoped packages.
+   * If "upgrade" (default), the package will only be published if its version
+   * is higher than the existing version on the configured tag. If "always", the
+   * package will be published if its version is simply not yet published.
+   *
+   * Defaults to `upgrade`.
    */
-  access?: Access;
+  strategy?: Strategy | undefined;
 
   /**
-   * If true, run npm publish with the --dry-run flag
-   * so that the package is not published. Used for
-   * testing workflows.
+   * Pretend to publish, but don't actually upload to the registry.
    *
-   * Defaults to `false`
+   * Defaults to `false`.
    */
-  dryRun?: boolean;
+  dryRun?: boolean | undefined;
+
+  /** Optional logger. */
+  logger?: Logger | undefined;
 
   /**
-   * Only publish the package if the version number in package.json
-   * differs from the latest on NPM.
+   * Temporary directory.
    *
-   * Defaults to `true`
+   * Defaults to os.tmpdir()
    */
-  checkVersion?: boolean;
-
-  /**
-   * Suppress console output from NPM and npm-publish.
-   *
-   * Defaults to `false`
-   */
-  quiet?: boolean;
-
-  /**
-   * Only publish the package if the version number in package.json
-   * is greater than the latest on NPM.
-   *
-   * Defaults to `false`
-   */
-  greaterVersionOnly?: boolean;
-
-  /**
-   * A function to call to log debug messages.
-   *
-   * Defaults to a no-op function
-   */
-  debug?: Debug;
+  temporaryDirectory?: string | undefined;
 }
-
-/**
- * The possible access levels for an NPM package
- */
-export type Access = "public" | "restricted";
-
-/**
- * A function that receives debug messages
- */
-export type Debug = (message: string, data?: object) => void;

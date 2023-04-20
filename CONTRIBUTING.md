@@ -13,16 +13,19 @@ git clone https://github.com/JS-DevTools/npm-publish.git
 # Install dependencies*
 npm install
 
-# Build the code
-npm run build
-
-# Run the tests
-npm test
+# Run all checks, builds, and unit tests
+npm run all
 ```
 
 There are also various code quality checks and tests you can run:
 
 ```shell
+# Run builds and typechecking
+npm run build
+
+# Run the unit tests in watch mode
+npm run test
+
 # Autoformat the code
 npm run format
 

@@ -1,50 +1,45 @@
-import { ReleaseType } from "semver";
-import { Access } from "./options";
+import type { Access, Strategy } from "./options.js";
+import type { ReleaseType } from "./compare-versions.js";
 
-export { ReleaseType };
-
-/**
- * Results of the publish
- */
+/** Results of the publish */
 export interface Results {
   /**
-   * The type of version change that occurred
+   * The identifier of the published package, if published. Format is
+   * `${packageName}@${version}`
    */
-  type: ReleaseType | "lower" | "none";
+  id: string | undefined;
 
-  /**
-   * The name of the NPM package that was published
-   */
-  package: string;
+  /** The name of the NPM package that was published */
+  name: string;
 
-  /**
-   * The registry where the NPM package was published
-   */
-  registry: URL;
-
-  /**
-   * The version that was published
-   */
+  /** The version that was published */
   version: string;
 
-  /**
-   * The version number that was previously published to NPM
-   */
-  oldVersion: string;
+  /** The type of version change that occurred, if any. */
+  type: ReleaseType | undefined;
 
-  /**
-   * The tag that the package was published to.
-   */
+  /** The version number that was previously published to NPM, if any. */
+  oldVersion: string | undefined;
+
+  /** The registry where the package was published */
+  registry: URL;
+
+  /** The tag that the package was published to. */
   tag: string;
 
   /**
-   * Indicates whether the published package is publicly visible
-   * or restricted to members of your NPM organization.
+   * Indicates whether the published package is publicly visible or restricted
+   * to members of your NPM organization.
+   *
+   * If package is scoped, undefined means npm's scoped package defaults. If a
+   * scoped package has previously been published as public, the default is
+   * public. Otherwise, it is restricted.
    */
-  access: Access;
+  access: Access | undefined;
 
-  /**
-   * Whether this was a dry run (not published to NPM)
-   */
+  /** Version check strategy used. */
+  strategy: Strategy;
+
+  /** Whether this was a dry run (not published to NPM) */
   dryRun: boolean;
 }

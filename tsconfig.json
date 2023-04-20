@@ -17,11 +17,11 @@
     "strict": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    // "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    // "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -30,13 +30,7 @@
     "declaration": true,
     "sourceMap": true,
     "rootDir": "src",
-    "outDir": "lib",
-
-    // temporary overrides
-    // TODO(mc, 2023-04-12): fix errors and remove overrides
-    "useUnknownInCatchVariables": false,
-    "exactOptionalPropertyTypes": false,
-    "noPropertyAccessFromIndexSignature": false
+    "outDir": "lib"
   },
   "include": ["src/**/*.ts"]
 }

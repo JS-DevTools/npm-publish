@@ -13,23 +13,8 @@ on:
     - cron: "25 12 * * 1"
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-
-      - name: Install Node.js and dependencies
-        uses: ./.github/actions/setup
-
-      - name: Run linters
-        run: npm run lint
-
   test:
-    name: Run tests using Node ${{ matrix.node }} on ${{ matrix.os }}
+    name: Unit tests / Node.js ${{ matrix.node-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -38,9 +23,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          # TODO(mc, 2023-04-07): investigate and fix coverage-related failures on Windows
-          # - windows-latest
-        node:
+          - windows-latest
+        node-version:
           - 16
           - 18
 
@@ -51,10 +35,7 @@ jobs:
       - name: Install Node.js ${{ matrix.node }} and dependencies
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: Build the code
-        run: npm run build
+          node-version: ${{ matrix.node-version }}
 
       - name: Run tests
         run: npm run coverage
@@ -78,7 +59,7 @@ jobs:
           parallel-finished: true
 
   build:
-    name: Build
+    name: Build and lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -92,6 +73,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify no un-staged changes
+        run: |
+          git status --porcelain
+          git diff-files --quiet
+
+      - name: Run lints
+        run: npm run lint
+
       - name: Upload publish artifact
         uses: actions/upload-artifact@v3
         with:
@@ -99,10 +88,17 @@ jobs:
           path: lib
 
   e2e:
-    name: Run end-to-end tests
+    name: E2E tests / Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 16
+          - 18
 
     services:
       verdaccio:
@@ -117,6 +113,7 @@ jobs:
       - name: Install Node.js and dependencies
         uses: ./.github/actions/setup
         with:
+          node-version: ${{ matrix.node-version }}
           install-command: npm install --production
 
       - name: Download publish artifact
@@ -130,7 +127,7 @@ jobs:
         shell: bash
         run: |
           echo "token=$(./e2e/00-login.sh)" >> "$GITHUB_OUTPUT"
-          echo "package=$(./e2e/01-setup-package.sh ./e2e/fixture 0.0.1)" >> "$GITHUB_OUTPUT"
+          echo "package=$(./e2e/01-setup-package.sh ./e2e/fixture/cool\ package 0.0.1)" >> "$GITHUB_OUTPUT"
 
       - name: Run CLI end-to-end test
         shell: bash
@@ -138,12 +135,12 @@ jobs:
           TOKEN: ${{ steps.setup.outputs.token }}
           PACKAGE: ${{ steps.setup.outputs.package }}
         run: |
-          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
-          ./e2e/03-verify.sh ${PACKAGE}
-          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
-          ./e2e/01-setup-package.sh ${PACKAGE} 0.0.2
-          ./e2e/02-publish.sh ${PACKAGE} ${TOKEN}
-          ./e2e/03-verify.sh ${PACKAGE}
+          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
+          ./e2e/03-verify.sh "${PACKAGE}"
+          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
+          ./e2e/01-setup-package.sh "${PACKAGE}" 0.0.2
+          ./e2e/02-publish.sh "${PACKAGE}" ${TOKEN}
+          ./e2e/03-verify.sh "${PACKAGE}"
 
       - id: action-no-publish
         name: Publish with already published version
@@ -154,14 +151,14 @@ jobs:
           token: ${{ steps.setup.outputs.token }}
 
       - name: Check action output
-        if: ${{ steps.action-no-publish.outputs.type != 'none' }}
+        if: ${{ steps.action-no-publish.outputs.type }}
         run: |
-          echo "::error::Expected release type to be 'none', got '${{ steps.action-no-publish.outputs.type }}'"
+          echo "::error::Expected release type to be '', got '${{ steps.action-no-publish.outputs.type }}'"
           exit 1
 
       - name: Create new version for Action end-to-end test
         shell: bash
-        run: ./e2e/01-setup-package.sh ${{ steps.setup.outputs.package }} 0.0.3
+        run: ./e2e/01-setup-package.sh "${{ steps.setup.outputs.package }}" 0.0.3
 
       - id: action-publish
         name: Publish a new version
@@ -179,11 +176,10 @@ jobs:
 
   deploy:
     if: ${{ github.ref == 'refs/heads/main' }}
-    name: Publish to NPM
+    name: Publish
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
-      - lint
       - test
       - build
       - e2e

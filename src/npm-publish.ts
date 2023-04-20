@@ -1,53 +1,47 @@
-import * as semver from "semver";
-import { normalizeOptions } from "./normalize-options";
-import { npm } from "./npm";
-import { Options } from "./options";
-import { readManifest } from "./read-manifest";
-import { Results } from "./results";
+import { readManifest } from "./read-manifest.js";
+import { normalizeOptions } from "./normalize-options.js";
+import { getVersions, publish } from "./npm/index.js";
+import { compareVersions } from "./compare-versions.js";
+import { formatPublishResult } from "./format-publish-result.js";
+import type { Options } from "./options.js";
+import type { Results } from "./results.js";
 
 /**
- * Publishes a package to NPM, if its version has changed
+ * Publishes a package to NPM, if its version has changed.
+ *
+ * @param options Publish options.
+ * @returns Release metadata.
  */
-export async function npmPublish(opts: Options = {}): Promise<Results> {
-  let options = normalizeOptions(opts);
+export async function npmPublish(options: Options): Promise<Results> {
+  const { packageSpec, manifest } = await readManifest(options.package);
+  const normalizedOptions = normalizeOptions(options, manifest);
+  const publishedVersions = await getVersions(manifest.name, normalizedOptions);
+  const versionComparison = compareVersions(
+    manifest.version,
+    publishedVersions,
+    normalizedOptions
+  );
 
-  // Get the old and new version numbers
-  let manifest = await readManifest(options.package, options.debug);
-  let publishedVersion = await npm.getLatestVersion(manifest.name, options);
+  let publishResult;
 
-  // Determine if/how the version has changed
-  let diff = semver.diff(manifest.version, publishedVersion);
-
-  // Compare both versions to see if it's changed
-  let cmp = semver.compare(manifest.version, publishedVersion);
-
-  let shouldPublish =
-    !options.checkVersion ||
-    // compare returns 1 if manifest is higher than published
-    (options.greaterVersionOnly && cmp === 1) ||
-    // compare returns 0 if the manifest is the same as published
-    cmp !== 0;
-
-  if (shouldPublish) {
-    // Publish the new version to NPM
-    await npm.publish(manifest, options);
+  if (versionComparison.type !== undefined) {
+    publishResult = await publish(packageSpec, normalizedOptions);
   }
 
-  let results: Results = {
-    package: manifest.name,
-    registry: options.registry,
-    // The version should be marked as lower if we disallow decrementing the version
-    type:
-      (options.greaterVersionOnly && cmp === -1 && "lower") || diff || "none",
-    version: manifest.version.raw,
-    oldVersion: publishedVersion.raw,
-    tag: options.tag,
-    access:
-      options.access ||
-      (manifest.name.startsWith("@") ? "restricted" : "public"),
-    dryRun: options.dryRun,
-  };
+  normalizedOptions.logger?.info?.(
+    formatPublishResult(manifest, normalizedOptions, publishResult)
+  );
 
-  options.debug("OUTPUT:", results);
-  return results;
+  return {
+    id: publishResult?.id,
+    name: manifest.name,
+    version: manifest.version,
+    type: versionComparison.type,
+    oldVersion: versionComparison.oldVersion,
+    registry: normalizedOptions.registry,
+    tag: normalizedOptions.tag.value,
+    access: normalizedOptions.access.value,
+    strategy: normalizedOptions.strategy.value,
+    dryRun: normalizedOptions.dryRun.value,
+  };
 }
