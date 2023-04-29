@@ -8,6 +8,7 @@ import type { NpmCliEnvironment } from "./use-npm-environment.js";
 export interface NpmCliOptions<TReturn> {
   environment?: NpmCliEnvironment;
   ifError?: Record<string, TReturn>;
+  retryIfEmpty?: string[] | undefined;
   logger?: Logger | undefined;
 }
 
@@ -65,7 +66,7 @@ const parseJson = <TParsed>(...values: string[]): TParsed | undefined => {
  * @param options Customize environment variables or add an error handler.
  * @returns The parsed JSON, or stdout if unparsable.
  */
-export async function callNpmCli<TReturn = string>(
+export async function callNpmCli<TReturn>(
   command: string,
   cliArguments: string[],
   options: NpmCliOptions<TReturn> = {}
@@ -92,6 +93,15 @@ export async function callNpmCli<TReturn = string>(
     }
 
     throw new errors.NpmCallError(command, exitCode, stderr);
+  }
+
+  if (stdout === "") {
+    return options.retryIfEmpty
+      ? callNpmCli(command, options.retryIfEmpty, {
+          ...options,
+          retryIfEmpty: undefined,
+        })
+      : ({} as unknown as TReturn);
   }
 
   return parseJson(stdout) ?? (stdout as unknown as TReturn);

@@ -8,18 +8,20 @@ import type { NormalizedOptions } from "../../normalize-options.js";
 import * as subject from "../index.js";
 import { useNpmEnvironment, type NpmCliTask } from "../use-npm-environment.js";
 import { callNpmCli } from "../call-npm-cli.js";
-import { getPublishArguments } from "../get-publish-arguments.js";
+import { getViewArguments, getPublishArguments } from "../get-arguments.js";
 
 vi.mock("../use-npm-environment", () => imitateEsm("../use-npm-environment"));
 vi.mock("../call-npm-cli", () => imitateEsm("../call-npm-cli"));
-vi.mock("../get-publish-arguments", () =>
-  imitateEsm("../get-publish-arguments")
-);
+vi.mock("../get-arguments", () => imitateEsm("../get-arguments"));
 
 describe("npm", () => {
   const environment = { foo: "bar" };
   const logger = { debug: (message: string) => void message } as Logger;
-  const options = { token: "abc123", logger } as NormalizedOptions;
+  const options = {
+    logger,
+    token: "abc123",
+    tag: { value: "cool-tag" },
+  } as NormalizedOptions;
 
   beforeEach(() => {
     td.when(useNpmEnvironment(options, td.matchers.isA(Function))).thenDo(
@@ -32,6 +34,16 @@ describe("npm", () => {
   });
 
   it("should get existing versions", async () => {
+    td.when(getViewArguments("@example/cool-package", options)).thenReturn([
+      "@example/cool-package",
+      "dist-tags",
+      "versions",
+    ]);
+
+    td.when(
+      getViewArguments("@example/cool-package", options, true)
+    ).thenReturn(["@example/cool-package@cool-tag", "dist-tags", "versions"]);
+
     td.when(
       callNpmCli<subject.PublishedVersions>(
         "view",
@@ -40,6 +52,11 @@ describe("npm", () => {
           logger,
           environment,
           ifError: { e404: { "dist-tags": {}, versions: [] } },
+          retryIfEmpty: [
+            "@example/cool-package@cool-tag",
+            "dist-tags",
+            "versions",
+          ],
         }
       )
     ).thenResolve({

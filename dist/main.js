@@ -11077,12 +11077,12 @@ async function readManifest(packagePath) {
 
 // src/normalize-options.ts
 var import_node_os2 = __toESM(require("node:os"));
-var DEFAULT_REGISTRY = "https://registry.npmjs.org/";
-var DEFAULT_TAG = "latest";
+var REGISTRY_NPM = "https://registry.npmjs.org/";
+var TAG_LATEST = "latest";
 function normalizeOptions(options, manifest) {
   var _a, _b, _c;
-  const defaultTag = ((_a = manifest.publishConfig) == null ? void 0 : _a.tag) ?? DEFAULT_TAG;
-  const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? DEFAULT_REGISTRY;
+  const defaultTag = ((_a = manifest.publishConfig) == null ? void 0 : _a.tag) ?? TAG_LATEST;
+  const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? REGISTRY_NPM;
   const defaultAccess = ((_c = manifest.publishConfig) == null ? void 0 : _c.access) ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
   return {
     token: validateToken(options.token),
@@ -11218,10 +11218,23 @@ async function callNpmCli(command, cliArguments, options = {}) {
     }
     throw new NpmCallError(command, exitCode, stderr);
   }
+  if (stdout === "") {
+    return options.retryIfEmpty ? callNpmCli(command, options.retryIfEmpty, {
+      ...options,
+      retryIfEmpty: void 0
+    }) : {};
+  }
   return parseJson(stdout) ?? stdout;
 }
 
-// src/npm/get-publish-arguments.ts
+// src/npm/get-arguments.ts
+function getViewArguments(packageName, options, retryWithTag) {
+  const packageSpec = retryWithTag ? `${packageName}@${options.tag.value}` : packageName;
+  if (retryWithTag && options.tag.value === TAG_LATEST) {
+    return void 0;
+  }
+  return [packageSpec, "dist-tags", "versions"];
+}
 function getPublishArguments(packageSpec, options) {
   const { tag, access, dryRun } = options;
   const publishArguments = [];
@@ -11242,16 +11255,15 @@ function getPublishArguments(packageSpec, options) {
 
 // src/npm/index.ts
 async function getVersions(packageName, options) {
+  const viewArguments = getViewArguments(packageName, options);
+  const viewRetryArguments = getViewArguments(packageName, options, true);
   return useNpmEnvironment(options, (environment) => {
-    return callNpmCli(
-      "view",
-      [packageName, "dist-tags", "versions"],
-      {
-        logger: options.logger,
-        environment,
-        ifError: { e404: { "dist-tags": {}, versions: [] } }
-      }
-    );
+    return callNpmCli("view", viewArguments, {
+      logger: options.logger,
+      environment,
+      ifError: { e404: { "dist-tags": {}, versions: [] } },
+      retryIfEmpty: viewRetryArguments
+    });
   });
 }
 async function publish(packageSpec, options) {
@@ -11265,20 +11277,22 @@ async function publish(packageSpec, options) {
 }
 
 // src/compare-versions.ts
-var import_semver2 = __toESM(require_semver2());
+var import_diff = __toESM(require_diff());
+var import_gt = __toESM(require_gt());
+var import_valid = __toESM(require_valid());
 var INITIAL = "initial";
 var DIFFERENT = "different";
 function compareVersions(version2, publishedVersions, options) {
   const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
   const { strategy, tag: publishTag } = options;
-  const oldVersion = (0, import_semver2.valid)(tags[publishTag.value]) ?? void 0;
-  const isUnique = !existingVersions.includes(version2);
+  const oldVersion = (0, import_valid.default)(tags == null ? void 0 : tags[publishTag.value]) ?? void 0;
+  const isUnique = !(existingVersions == null ? void 0 : existingVersions.includes(version2));
   let type;
   if (isUnique) {
     if (!oldVersion) {
       type = INITIAL;
-    } else if ((0, import_semver2.gt)(version2, oldVersion)) {
-      type = (0, import_semver2.diff)(version2, oldVersion) ?? DIFFERENT;
+    } else if ((0, import_gt.default)(version2, oldVersion)) {
+      type = (0, import_diff.default)(version2, oldVersion) ?? DIFFERENT;
     } else if (strategy.value === STRATEGY_ALL) {
       type = DIFFERENT;
     }

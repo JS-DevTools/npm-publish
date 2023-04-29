@@ -17,6 +17,17 @@ describe("compareVersions", () => {
     });
   });
 
+  it("should handle no known versions or dist tags", () => {
+    const result = subject.compareVersions("0.0.0", {}, {
+      tag: { value: "next" },
+    } as NormalizedOptions);
+
+    expect(result).toEqual({
+      type: "initial",
+      oldVersion: undefined,
+    });
+  });
+
   it("should recognize an unpublished release", () => {
     const result = subject.compareVersions(
       "0.0.0",

@@ -49,4 +49,26 @@ describe("callNpmCli", () => {
 
     expect(result).toEqual(customPath);
   });
+
+  it("should return empty object if stdout is empty", async () => {
+    const result = await subject.callNpmCli("config", ["get", "scope"], {
+      environment: {
+        npm_config_scope: "",
+      },
+    });
+
+    expect(result).toEqual({});
+  });
+
+  it("should retry a command with new arguments if empty", async () => {
+    const result = await subject.callNpmCli("config", ["get", "scope"], {
+      retryIfEmpty: ["get", "preid"],
+      environment: {
+        npm_config_scope: "",
+        npm_config_preid: "hello",
+      },
+    });
+
+    expect(result).toEqual("hello");
+  });
 });

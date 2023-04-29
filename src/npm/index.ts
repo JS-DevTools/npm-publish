@@ -1,11 +1,11 @@
 import type { NormalizedOptions } from "../normalize-options.js";
 import { useNpmEnvironment } from "./use-npm-environment.js";
 import { callNpmCli } from "./call-npm-cli.js";
-import { getPublishArguments } from "./get-publish-arguments.js";
+import { getViewArguments, getPublishArguments } from "./get-arguments.js";
 
 export interface PublishedVersions {
-  "dist-tags": Record<string, string>;
-  versions: string[];
+  "dist-tags"?: Record<string, string>;
+  versions?: string[];
 }
 
 export interface PublishFile {
@@ -23,22 +23,23 @@ export interface PublishResult {
  *
  * @param packageName The name of the package to get published versions for.
  * @param options Configuration options.
- * @returns All published versions and tags.
+ * @returns All published versions and tags. May return an empty object if
+ *   package exists but has no `latest` tag.
  */
 export async function getVersions(
   packageName: string,
   options: NormalizedOptions
 ): Promise<PublishedVersions> {
+  const viewArguments = getViewArguments(packageName, options);
+  const viewRetryArguments = getViewArguments(packageName, options, true);
+
   return useNpmEnvironment(options, (environment) => {
-    return callNpmCli<PublishedVersions>(
-      "view",
-      [packageName, "dist-tags", "versions"],
-      {
-        logger: options.logger,
-        environment,
-        ifError: { e404: { "dist-tags": {}, versions: [] } },
-      }
-    );
+    return callNpmCli<PublishedVersions>("view", viewArguments, {
+      logger: options.logger,
+      environment,
+      ifError: { e404: { "dist-tags": {}, versions: [] } },
+      retryIfEmpty: viewRetryArguments,
+    });
   });
 }
 

@@ -1,9 +1,7 @@
-import {
-  valid as semverValid,
-  gt as semverGreaterThan,
-  diff as semverDifference,
-  type ReleaseType as SemverReleaseType,
-} from "semver";
+import semverDifference from "semver/functions/diff.js";
+import semverGreaterThan from "semver/functions/gt.js";
+import semverValid from "semver/functions/valid.js";
+import type { ReleaseType as SemverReleaseType } from "semver";
 
 import { STRATEGY_ALL } from "./options.js";
 import type { NormalizedOptions } from "./normalize-options.js";
@@ -34,8 +32,8 @@ export function compareVersions(
 ): VersionComparison {
   const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
   const { strategy, tag: publishTag } = options;
-  const oldVersion = semverValid(tags[publishTag.value]) ?? undefined;
-  const isUnique = !existingVersions.includes(version);
+  const oldVersion = semverValid(tags?.[publishTag.value]) ?? undefined;
+  const isUnique = !existingVersions?.includes(version);
   let type: ReleaseType | undefined;
 
   if (isUnique) {
