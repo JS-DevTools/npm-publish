@@ -41,7 +41,7 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "_eslint": "eslint \"**/*.@(js|ts)\"",
-    "_prettier": "prettier \"**/*.@(js|ts|json|md|yml)\""
+    "_prettier": "prettier \"**/*.@(js|ts|json|md|yaml)\""
   },
   "engines": {
     "node": ">=16"

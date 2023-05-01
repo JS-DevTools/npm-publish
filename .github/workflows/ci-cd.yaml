@@ -33,10 +33,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js ${{ matrix.node }} and dependencies
-        uses: ./.github/actions/setup
+      - name: Install Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run tests
         run: npm run coverage
@@ -68,8 +72,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js and dependencies
-        uses: ./.github/actions/setup
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: npm
+
+      - name: Install development dependencies
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -112,11 +122,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Node.js and dependencies
-        uses: ./.github/actions/setup
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          install-command: npm install --production
+
+      - name: Install production dependencies
+        run: npm install --production
 
       - name: Download publish artifact
         uses: actions/download-artifact@v3
