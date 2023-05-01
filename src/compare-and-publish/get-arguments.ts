@@ -1,8 +1,4 @@
-import { TAG_LATEST, type NormalizedOptions } from "../normalize-options.js";
-
-type ViewArguments<RetryWithTagT> = RetryWithTagT extends false
-  ? string[]
-  : string[] | undefined;
+import type { NormalizedOptions } from "../normalize-options.js";
 
 /**
  * Given a package name and publish configuration, get the NPM CLI view
@@ -15,18 +11,14 @@ type ViewArguments<RetryWithTagT> = RetryWithTagT extends false
  * @returns Arguments to pass to the NPM CLI. If `retryWithTag` is true, but the
  *   publish config is using the `latest` tag, will return `undefined`.
  */
-export function getViewArguments<RetryWithTagT extends boolean = false>(
+export function getViewArguments(
   packageName: string,
   options: NormalizedOptions,
-  retryWithTag?: RetryWithTagT
-): ViewArguments<RetryWithTagT> {
+  retryWithTag = false
+): string[] {
   const packageSpec = retryWithTag
     ? `${packageName}@${options.tag.value}`
     : packageName;
-
-  if (retryWithTag && options.tag.value === TAG_LATEST) {
-    return undefined as ViewArguments<RetryWithTagT>;
-  }
 
   return [packageSpec, "dist-tags", "versions"];
 }

@@ -11071,7 +11071,10 @@ async function readManifest(packagePath) {
   }
   return {
     packageSpec,
-    manifest: { name, version: version2, publishConfig, scope: (_a = SCOPE_RE.exec(name)) == null ? void 0 : _a[1] }
+    name,
+    version: version2,
+    publishConfig,
+    scope: (_a = SCOPE_RE.exec(name)) == null ? void 0 : _a[1]
   };
 }
 
@@ -11079,7 +11082,7 @@ async function readManifest(packagePath) {
 var import_node_os2 = __toESM(require("node:os"));
 var REGISTRY_NPM = "https://registry.npmjs.org/";
 var TAG_LATEST = "latest";
-function normalizeOptions(options, manifest) {
+function normalizeOptions(manifest, options) {
   var _a, _b, _c;
   const defaultTag = ((_a = manifest.publishConfig) == null ? void 0 : _a.tag) ?? TAG_LATEST;
   const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? REGISTRY_NPM;
@@ -11131,42 +11134,38 @@ var validateStrategy = (value) => {
   throw new InvalidStrategyError(value);
 };
 
-// src/npm/use-npm-environment.ts
-var import_promises2 = __toESM(require("node:fs/promises"));
-var import_node_os3 = __toESM(require("node:os"));
-var import_node_path2 = __toESM(require("node:path"));
-async function useNpmEnvironment(options, task) {
-  var _a;
-  const { registry, token, logger: logger2, temporaryDirectory } = options;
-  const npmrcDirectory = await import_promises2.default.mkdtemp(
-    import_node_path2.default.join(temporaryDirectory, "npm-publish-")
-  );
-  const npmrc = import_node_path2.default.join(npmrcDirectory, ".npmrc");
-  const config = [
-    "; created by jsdevtools/npm-publish",
-    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
-    `registry=${registry.href}`,
-    ""
-  ].join(import_node_os3.default.EOL);
-  await import_promises2.default.writeFile(npmrc, config, "utf8");
-  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Temporary .npmrc created at ${npmrc}
-${config}`);
-  try {
-    return await task({
-      NODE_AUTH_TOKEN: token,
-      npm_config_userconfig: npmrc
-    });
-  } finally {
-    await import_promises2.default.rm(npmrcDirectory, { force: true, recursive: true });
-  }
-}
-
 // src/npm/call-npm-cli.ts
 var import_node_child_process = __toESM(require("node:child_process"));
-var import_node_os4 = __toESM(require("node:os"));
-var NPM = import_node_os4.default.platform() === "win32" ? "npm.cmd" : "npm";
+var import_node_os3 = __toESM(require("node:os"));
+var VIEW = "view";
+var PUBLISH = "publish";
+var E404 = "E404";
+var EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
+var NPM = import_node_os3.default.platform() === "win32" ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
-var execNpm = (commandArguments, environment = {}, logger2) => {
+async function callNpmCli(command, cliArguments, options) {
+  var _a, _b;
+  const { stdout, stderr, exitCode } = await execNpm(
+    [command, "--ignore-scripts", "--json", ...cliArguments],
+    options.environment,
+    options.logger
+  );
+  let successData;
+  let errorCode;
+  let error;
+  if (exitCode === 0) {
+    successData = parseJson(stdout);
+  } else {
+    const errorPayload = parseJson(
+      stdout,
+      stderr
+    );
+    errorCode = (_b = (_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) == null ? void 0 : _b.toUpperCase();
+    error = new NpmCallError(command, exitCode, stderr);
+  }
+  return { successData, errorCode, error };
+}
+async function execNpm(commandArguments, environment = {}, logger2) {
   var _a;
   (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${NPM} ${commandArguments.join(" ")}`);
   return new Promise((resolve) => {
@@ -11185,8 +11184,8 @@ var execNpm = (commandArguments, environment = {}, logger2) => {
       });
     });
   });
-};
-var parseJson = (...values) => {
+}
+function parseJson(...values) {
   var _a;
   for (const value of values) {
     const jsonValue = (_a = JSON_MATCH_RE.exec(value)) == null ? void 0 : _a[1];
@@ -11199,40 +11198,66 @@ var parseJson = (...values) => {
     }
   }
   return void 0;
-};
-async function callNpmCli(command, cliArguments, options = {}) {
-  var _a, _b;
-  const { stdout, stderr, exitCode } = await execNpm(
-    [command, "--ignore-scripts", "--json", ...cliArguments],
-    options.environment,
-    options.logger
-  );
-  if (exitCode !== 0) {
-    const errorPayload = parseJson(
-      stdout,
-      stderr
-    );
-    const errorCode = (_b = (_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) == null ? void 0 : _b.toLowerCase();
-    if (typeof errorCode === "string" && options.ifError && errorCode in options.ifError) {
-      return options.ifError[errorCode];
-    }
-    throw new NpmCallError(command, exitCode, stderr);
-  }
-  if (stdout === "") {
-    return options.retryIfEmpty ? callNpmCli(command, options.retryIfEmpty, {
-      ...options,
-      retryIfEmpty: void 0
-    }) : {};
-  }
-  return parseJson(stdout) ?? stdout;
 }
 
-// src/npm/get-arguments.ts
-function getViewArguments(packageName, options, retryWithTag) {
-  const packageSpec = retryWithTag ? `${packageName}@${options.tag.value}` : packageName;
-  if (retryWithTag && options.tag.value === TAG_LATEST) {
-    return void 0;
+// src/npm/use-npm-environment.ts
+var import_promises2 = __toESM(require("node:fs/promises"));
+var import_node_os4 = __toESM(require("node:os"));
+var import_node_path2 = __toESM(require("node:path"));
+async function useNpmEnvironment(manifest, options, task) {
+  var _a;
+  const { registry, token, logger: logger2, temporaryDirectory } = options;
+  const npmrcDirectory = await import_promises2.default.mkdtemp(
+    import_node_path2.default.join(temporaryDirectory, "npm-publish-")
+  );
+  const npmrc = import_node_path2.default.join(npmrcDirectory, ".npmrc");
+  const environment = {
+    NODE_AUTH_TOKEN: token,
+    npm_config_userconfig: npmrc
+  };
+  const config = [
+    "; created by jsdevtools/npm-publish",
+    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${registry.href}`,
+    ""
+  ].join(import_node_os4.default.EOL);
+  await import_promises2.default.writeFile(npmrc, config, "utf8");
+  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Temporary .npmrc created at ${npmrc}
+${config}`);
+  try {
+    return await task(manifest, options, environment);
+  } finally {
+    await import_promises2.default.rm(npmrcDirectory, { force: true, recursive: true });
   }
+}
+
+// src/compare-and-publish/compare-versions.ts
+var import_diff = __toESM(require_diff());
+var import_gt = __toESM(require_gt());
+var import_valid = __toESM(require_valid());
+var INITIAL = "initial";
+var DIFFERENT = "different";
+function compareVersions(currentVersion, publishedVersions, options) {
+  const { versions, "dist-tags": tags } = publishedVersions ?? {};
+  const { strategy, tag: publishTag } = options;
+  const oldVersion = (0, import_valid.default)(tags == null ? void 0 : tags[publishTag.value]) ?? void 0;
+  const isUnique = !(versions == null ? void 0 : versions.includes(currentVersion));
+  let type;
+  if (isUnique) {
+    if (!oldVersion) {
+      type = INITIAL;
+    } else if ((0, import_gt.default)(currentVersion, oldVersion)) {
+      type = (0, import_diff.default)(currentVersion, oldVersion) ?? DIFFERENT;
+    } else if (strategy.value === STRATEGY_ALL) {
+      type = DIFFERENT;
+    }
+  }
+  return { type, oldVersion };
+}
+
+// src/compare-and-publish/get-arguments.ts
+function getViewArguments(packageName, options, retryWithTag = false) {
+  const packageSpec = retryWithTag ? `${packageName}@${options.tag.value}` : packageName;
   return [packageSpec, "dist-tags", "versions"];
 }
 function getPublishArguments(packageSpec, options) {
@@ -11253,63 +11278,44 @@ function getPublishArguments(packageSpec, options) {
   return publishArguments;
 }
 
-// src/npm/index.ts
-async function getVersions(packageName, options) {
-  const viewArguments = getViewArguments(packageName, options);
-  const viewRetryArguments = getViewArguments(packageName, options, true);
-  return useNpmEnvironment(options, (environment) => {
-    return callNpmCli("view", viewArguments, {
-      logger: options.logger,
-      environment,
-      ifError: { e404: { "dist-tags": {}, versions: [] } },
-      retryIfEmpty: viewRetryArguments
-    });
-  });
-}
-async function publish(packageSpec, options) {
+// src/compare-and-publish/compare-and-publish.ts
+async function compareAndPublish(manifest, options, environment) {
+  const { name, version: version2, packageSpec } = manifest;
+  const cliOptions = { environment, logger: options.logger };
+  const viewArguments = getViewArguments(name, options);
   const publishArguments = getPublishArguments(packageSpec, options);
-  return useNpmEnvironment(options, (environment) => {
-    return callNpmCli("publish", publishArguments, {
-      logger: options.logger,
-      environment
-    });
-  });
-}
-
-// src/compare-versions.ts
-var import_diff = __toESM(require_diff());
-var import_gt = __toESM(require_gt());
-var import_valid = __toESM(require_valid());
-var INITIAL = "initial";
-var DIFFERENT = "different";
-function compareVersions(version2, publishedVersions, options) {
-  const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
-  const { strategy, tag: publishTag } = options;
-  const oldVersion = (0, import_valid.default)(tags == null ? void 0 : tags[publishTag.value]) ?? void 0;
-  const isUnique = !(existingVersions == null ? void 0 : existingVersions.includes(version2));
-  let type;
-  if (isUnique) {
-    if (!oldVersion) {
-      type = INITIAL;
-    } else if ((0, import_gt.default)(version2, oldVersion)) {
-      type = (0, import_diff.default)(version2, oldVersion) ?? DIFFERENT;
-    } else if (strategy.value === STRATEGY_ALL) {
-      type = DIFFERENT;
-    }
+  let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
+  if (viewCall.error && viewCall.errorCode !== E404) {
+    throw viewCall.error;
   }
-  return { type, oldVersion };
+  if (!viewCall.successData && !viewCall.error) {
+    const viewWithTagArguments = getViewArguments(name, options, true);
+    viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
+  }
+  const comparison = compareVersions(version2, viewCall.successData, options);
+  const publishCall = comparison.type ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : { successData: void 0, errorCode: void 0, error: void 0 };
+  if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) {
+    throw publishCall.error;
+  }
+  const { successData: publishData } = publishCall;
+  return {
+    id: publishData == null ? void 0 : publishData.id,
+    files: (publishData == null ? void 0 : publishData.files) ?? [],
+    type: publishData ? comparison.type : void 0,
+    oldVersion: comparison.oldVersion
+  };
 }
 
 // src/format-publish-result.ts
 var import_node_os5 = __toESM(require("node:os"));
-function formatPublishResult(manifest, options, results) {
-  if (results === void 0) {
+function formatPublishResult(manifest, options, result) {
+  if (result.id === void 0) {
     return `\u{1F645}\u200D\u2640\uFE0F ${manifest.name}@${manifest.version} publish skipped.`;
   }
   return [
-    `\u{1F4E6} ${results.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
+    `\u{1F4E6} ${result.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
     "=== Contents ===",
-    ...results.files.map(({ path: path3, size }) => `${formatSize(size)}	${path3}`)
+    ...result.files.map(({ path: path3, size }) => `${formatSize(size)}	${path3}`)
   ].join(import_node_os5.default.EOL);
 }
 var formatSize = (size) => {
@@ -11325,28 +11331,23 @@ var formatSize = (size) => {
 // src/npm-publish.ts
 async function npmPublish(options) {
   var _a, _b;
-  const { packageSpec, manifest } = await readManifest(options.package);
-  const normalizedOptions = normalizeOptions(options, manifest);
-  const publishedVersions = await getVersions(manifest.name, normalizedOptions);
-  const versionComparison = compareVersions(
-    manifest.version,
-    publishedVersions,
-    normalizedOptions
+  const manifest = await readManifest(options.package);
+  const normalizedOptions = normalizeOptions(manifest, options);
+  const publishResult = await useNpmEnvironment(
+    manifest,
+    normalizedOptions,
+    compareAndPublish
   );
-  let publishResult;
-  if (versionComparison.type !== void 0) {
-    publishResult = await publish(packageSpec, normalizedOptions);
-  }
   (_b = (_a = normalizedOptions.logger) == null ? void 0 : _a.info) == null ? void 0 : _b.call(
     _a,
     formatPublishResult(manifest, normalizedOptions, publishResult)
   );
   return {
-    id: publishResult == null ? void 0 : publishResult.id,
+    id: publishResult.id,
+    type: publishResult.type,
+    oldVersion: publishResult.oldVersion,
     name: manifest.name,
     version: manifest.version,
-    type: versionComparison.type,
-    oldVersion: versionComparison.oldVersion,
     registry: normalizedOptions.registry,
     tag: normalizedOptions.tag.value,
     access: normalizedOptions.access.value,

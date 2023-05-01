@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import * as subject from "../compare-versions.js";
-import type { NormalizedOptions } from "../normalize-options.js";
+import type { NormalizedOptions } from "../../normalize-options.js";
 
 describe("compareVersions", () => {
   it("should recognize initial release on a tag", () => {
@@ -18,7 +18,7 @@ describe("compareVersions", () => {
   });
 
   it("should handle no known versions or dist tags", () => {
-    const result = subject.compareVersions("0.0.0", {}, {
+    const result = subject.compareVersions("0.0.0", undefined, {
       tag: { value: "next" },
     } as NormalizedOptions);
 

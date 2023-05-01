@@ -31,12 +31,10 @@ describe("readManifest", () => {
 
     expect(result).toEqual({
       packageSpec: directory,
-      manifest: {
-        name: "cool-name",
-        version: "1.2.3",
-        scope: undefined,
-        publishConfig: {},
-      },
+      name: "cool-name",
+      version: "1.2.3",
+      scope: undefined,
+      publishConfig: {},
     });
   });
 
@@ -51,7 +49,7 @@ describe("readManifest", () => {
 
     expect(result).toMatchObject({
       packageSpec: directory,
-      manifest: { name: "cool-name" },
+      name: "cool-name",
     });
   });
 
@@ -60,7 +58,7 @@ describe("readManifest", () => {
 
     expect(result).toMatchObject({
       packageSpec: "",
-      manifest: { name: "@jsdevtools/npm-publish" },
+      name: "@jsdevtools/npm-publish",
     });
   });
 
@@ -90,7 +88,7 @@ describe("readManifest", () => {
 
     expect(result).toMatchObject({
       packageSpec: path.join(directory, "package-tarball.tgz"),
-      manifest: { name: "cool-name" },
+      name: "cool-name",
     });
   });
 
@@ -116,7 +114,7 @@ describe("readManifest", () => {
 
     const result = await subject.readManifest(directory);
 
-    expect(result.manifest).toMatchObject({
+    expect(result).toMatchObject({
       publishConfig: { access: "public" },
     });
   });
@@ -133,7 +131,7 @@ describe("readManifest", () => {
 
     const result = await subject.readManifest(directory);
 
-    expect(result.manifest).toMatchObject({
+    expect(result).toMatchObject({
       scope: "@cool-scope",
     });
   });

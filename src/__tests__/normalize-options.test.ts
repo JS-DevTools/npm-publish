@@ -7,6 +7,7 @@ import type { Logger } from "../options.js";
 
 describe("normalizeOptions", () => {
   const manifest = {
+    packageSpec: ".",
     name: "cool-package",
     version: "1.2.3",
     scope: undefined,
@@ -15,7 +16,7 @@ describe("normalizeOptions", () => {
 
   describe("authConfig", () => {
     it("should set auth config defaults", () => {
-      const result = subject.normalizeOptions({ token: "abc123" }, manifest);
+      const result = subject.normalizeOptions(manifest, { token: "abc123" });
 
       expect(result).toMatchObject({
         token: "abc123",
@@ -24,10 +25,10 @@ describe("normalizeOptions", () => {
     });
 
     it("should normalize registry URL", () => {
-      const result = subject.normalizeOptions(
-        { token: "abc123", registry: "https://example.com" },
-        manifest
-      );
+      const result = subject.normalizeOptions(manifest, {
+        token: "abc123",
+        registry: "https://example.com",
+      });
 
       expect(result).toMatchObject({
         registry: new URL("https://example.com"),
@@ -36,13 +37,8 @@ describe("normalizeOptions", () => {
 
     it("should take defaults from `pkg.publishConfig`", () => {
       const result = subject.normalizeOptions(
-        { token: "abc123" },
-        {
-          ...manifest,
-          publishConfig: {
-            registry: "https://example.com",
-          },
-        }
+        { ...manifest, publishConfig: { registry: "https://example.com" } },
+        { token: "abc123" }
       );
 
       expect(result).toMatchObject({
@@ -52,16 +48,16 @@ describe("normalizeOptions", () => {
 
     it("should throw if registry URL invalid", () => {
       expect(() => {
-        subject.normalizeOptions(
-          { token: "abc123", registry: "hello world" },
-          manifest
-        );
+        subject.normalizeOptions(manifest, {
+          token: "abc123",
+          registry: "hello world",
+        });
       }).toThrow(errors.InvalidRegistryUrlError);
     });
 
     it("should throw if token invalid", () => {
       expect(() => {
-        subject.normalizeOptions({ token: "" }, manifest);
+        subject.normalizeOptions(manifest, { token: "" });
       }).toThrow(errors.InvalidTokenError);
 
       expect(() => {
@@ -73,7 +69,7 @@ describe("normalizeOptions", () => {
 
   describe("publishConfig", () => {
     it("should set publish config defaults", () => {
-      const result = subject.normalizeOptions({ token: "abc123" }, manifest);
+      const result = subject.normalizeOptions(manifest, { token: "abc123" });
 
       expect(result).toMatchObject({
         tag: { value: "latest", isDefault: true },
@@ -85,8 +81,8 @@ describe("normalizeOptions", () => {
 
     it("should set publish config defaults for scoped package", () => {
       const result = subject.normalizeOptions(
-        { token: "abc123" },
-        { ...manifest, scope: "@cool-scope" }
+        { ...manifest, scope: "@cool-scope" },
+        { token: "abc123" }
       );
 
       expect(result).toMatchObject({
@@ -96,6 +92,7 @@ describe("normalizeOptions", () => {
 
     it("should allow options to be overridden", () => {
       const result = subject.normalizeOptions(
+        { ...manifest, scope: "@cool-scope" },
         {
           token: "abc123",
           package: "./cool-package",
@@ -103,8 +100,7 @@ describe("normalizeOptions", () => {
           access: "public",
           dryRun: true,
           strategy: "all",
-        },
-        { ...manifest, scope: "@cool-scope" }
+        }
       );
 
       expect(result).toMatchObject({
@@ -117,15 +113,12 @@ describe("normalizeOptions", () => {
 
     it("should take default configs from `pkg.publishConfig`", () => {
       const result = subject.normalizeOptions(
-        { token: "abc123" },
         {
           ...manifest,
           scope: "@cool-scope",
-          publishConfig: {
-            tag: "next",
-            access: "public",
-          },
-        }
+          publishConfig: { tag: "next", access: "public" },
+        },
+        { token: "abc123" }
       );
 
       expect(result).toMatchObject({
@@ -136,34 +129,28 @@ describe("normalizeOptions", () => {
 
     it("should validate access value", () => {
       expect(() => {
-        subject.normalizeOptions(
-          {
-            token: "abc123",
-            // @ts-expect-error: intentionally mistyped for validation testing
-            access: "NOT-VALID-ACCESS",
-          },
-          manifest
-        );
+        subject.normalizeOptions(manifest, {
+          token: "abc123",
+          // @ts-expect-error: intentionally mistyped for validation testing
+          access: "NOT-VALID-ACCESS",
+        });
       }).toThrow(errors.InvalidAccessError);
     });
 
     it("should validate strategy value", () => {
       expect(() => {
-        subject.normalizeOptions(
-          {
-            token: "abc123",
-            // @ts-expect-error: intentionally mistyped for validation testing
-            strategy: "NOT-VALID-STRATEGY",
-          },
-          manifest
-        );
+        subject.normalizeOptions(manifest, {
+          token: "abc123",
+          // @ts-expect-error: intentionally mistyped for validation testing
+          strategy: "NOT-VALID-STRATEGY",
+        });
       }).toThrow(errors.InvalidStrategyError);
     });
   });
 
   describe("runtime config", () => {
     it("should have no logger and set a temporary directory by default", () => {
-      const result = subject.normalizeOptions({ token: "abc123" }, manifest);
+      const result = subject.normalizeOptions(manifest, { token: "abc123" });
 
       expect(result).toMatchObject({
         logger: undefined,
@@ -175,10 +162,11 @@ describe("normalizeOptions", () => {
       const logger = { debug: (message) => void message } as Logger;
       const temporaryDirectory = "/some/temp/dir";
 
-      const result = subject.normalizeOptions(
-        { token: "abc123", logger, temporaryDirectory },
-        manifest
-      );
+      const result = subject.normalizeOptions(manifest, {
+        token: "abc123",
+        logger,
+        temporaryDirectory,
+      });
 
       expect(result).toMatchObject({ logger, temporaryDirectory });
     });

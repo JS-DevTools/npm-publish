@@ -37,13 +37,13 @@ export interface ConfigValue<TValue> {
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
  *
- * @param options User-input options.
  * @param manifest Package metadata from package.json.
+ * @param options User-input options.
  * @returns Validated auth and publish configuration.
  */
 export function normalizeOptions(
-  options: Options,
-  manifest: PackageManifest
+  manifest: PackageManifest,
+  options: Options
 ): NormalizedOptions {
   const defaultTag = manifest.publishConfig?.tag ?? TAG_LATEST;
 

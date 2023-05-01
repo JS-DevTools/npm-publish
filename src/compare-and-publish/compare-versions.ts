@@ -1,13 +1,11 @@
 import semverDifference from "semver/functions/diff.js";
 import semverGreaterThan from "semver/functions/gt.js";
 import semverValid from "semver/functions/valid.js";
-import type { ReleaseType as SemverReleaseType } from "semver";
 
-import { STRATEGY_ALL } from "./options.js";
-import type { NormalizedOptions } from "./normalize-options.js";
-import type { PublishedVersions } from "./npm/index.js";
-
-export type ReleaseType = SemverReleaseType | typeof INITIAL | typeof DIFFERENT;
+import { STRATEGY_ALL } from "../options.js";
+import type { NormalizedOptions } from "../normalize-options.js";
+import type { ReleaseType } from "../results.js";
+import type { NpmViewData } from "../npm/index.js";
 
 export interface VersionComparison {
   type: ReleaseType | undefined;
@@ -20,27 +18,27 @@ const DIFFERENT = "different";
 /**
  * Compare previously published versions with the package's current version.
  *
- * @param version The current package version.
+ * @param currentVersion The current package version.
  * @param publishedVersions The versions that have already been published.
  * @param options Configuration options
  * @returns The release type and previous version.
  */
 export function compareVersions(
-  version: string,
-  publishedVersions: PublishedVersions,
+  currentVersion: string,
+  publishedVersions: NpmViewData | undefined,
   options: NormalizedOptions
 ): VersionComparison {
-  const { versions: existingVersions, "dist-tags": tags } = publishedVersions;
+  const { versions, "dist-tags": tags } = publishedVersions ?? {};
   const { strategy, tag: publishTag } = options;
   const oldVersion = semverValid(tags?.[publishTag.value]) ?? undefined;
-  const isUnique = !existingVersions?.includes(version);
+  const isUnique = !versions?.includes(currentVersion);
   let type: ReleaseType | undefined;
 
   if (isUnique) {
     if (!oldVersion) {
       type = INITIAL;
-    } else if (semverGreaterThan(version, oldVersion)) {
-      type = semverDifference(version, oldVersion) ?? DIFFERENT;
+    } else if (semverGreaterThan(currentVersion, oldVersion)) {
+      type = semverDifference(currentVersion, oldVersion) ?? DIFFERENT;
     } else if (strategy.value === STRATEGY_ALL) {
       type = DIFFERENT;
     }

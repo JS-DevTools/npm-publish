@@ -1,6 +1,6 @@
 import os from "node:os";
 
-import type { PublishResult } from "./npm/index.js";
+import type { PublishResult } from "./compare-and-publish/index.js";
 import type { PackageManifest } from "./read-manifest.js";
 import type { NormalizedOptions } from "./normalize-options.js";
 
@@ -9,22 +9,22 @@ import type { NormalizedOptions } from "./normalize-options.js";
  *
  * @param manifest Package manifest
  * @param options Configuration options.
- * @param results Results from running npm publish.
+ * @param result Results from running npm publish.
  * @returns Formatted string.
  */
 export function formatPublishResult(
   manifest: PackageManifest,
   options: NormalizedOptions,
-  results?: PublishResult
+  result: PublishResult
 ): string {
-  if (results === undefined) {
+  if (result.id === undefined) {
     return `🙅‍♀️ ${manifest.name}@${manifest.version} publish skipped.`;
   }
 
   return [
-    `📦 ${results.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
+    `📦 ${result.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
     "=== Contents ===",
-    ...results.files.map(({ path, size }) => `${formatSize(size)}\t${path}`),
+    ...result.files.map(({ path, size }) => `${formatSize(size)}\t${path}`),
   ].join(os.EOL);
 }
 

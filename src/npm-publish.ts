@@ -1,7 +1,7 @@
 import { readManifest } from "./read-manifest.js";
 import { normalizeOptions } from "./normalize-options.js";
-import { getVersions, publish } from "./npm/index.js";
-import { compareVersions } from "./compare-versions.js";
+import { useNpmEnvironment } from "./npm/index.js";
+import { compareAndPublish } from "./compare-and-publish/index.js";
 import { formatPublishResult } from "./format-publish-result.js";
 import type { Options } from "./options.js";
 import type { Results } from "./results.js";
@@ -13,31 +13,24 @@ import type { Results } from "./results.js";
  * @returns Release metadata.
  */
 export async function npmPublish(options: Options): Promise<Results> {
-  const { packageSpec, manifest } = await readManifest(options.package);
-  const normalizedOptions = normalizeOptions(options, manifest);
-  const publishedVersions = await getVersions(manifest.name, normalizedOptions);
-  const versionComparison = compareVersions(
-    manifest.version,
-    publishedVersions,
-    normalizedOptions
+  const manifest = await readManifest(options.package);
+  const normalizedOptions = normalizeOptions(manifest, options);
+  const publishResult = await useNpmEnvironment(
+    manifest,
+    normalizedOptions,
+    compareAndPublish
   );
-
-  let publishResult;
-
-  if (versionComparison.type !== undefined) {
-    publishResult = await publish(packageSpec, normalizedOptions);
-  }
 
   normalizedOptions.logger?.info?.(
     formatPublishResult(manifest, normalizedOptions, publishResult)
   );
 
   return {
-    id: publishResult?.id,
+    id: publishResult.id,
+    type: publishResult.type,
+    oldVersion: publishResult.oldVersion,
     name: manifest.name,
     version: manifest.version,
-    type: versionComparison.type,
-    oldVersion: versionComparison.oldVersion,
     registry: normalizedOptions.registry,
     tag: normalizedOptions.tag.value,
     access: normalizedOptions.access.value,

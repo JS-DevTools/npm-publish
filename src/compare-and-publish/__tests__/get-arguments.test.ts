@@ -24,13 +24,6 @@ describe("get command arguments", () => {
         "versions",
       ]);
     });
-
-    it("should return undefined if tag is latest", () => {
-      const options = { tag: { value: "latest" } } as NormalizedOptions;
-      const result = subject.getViewArguments("cool-package", options, true);
-
-      expect(result).toEqual(undefined);
-    });
   });
 
   describe("getPublishArguments", () => {
