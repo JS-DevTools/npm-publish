@@ -222,4 +222,34 @@ describe("compareAndPublish", () => {
       type: "major",
     });
   });
+
+  it("should raise if the retried npm view call fails", async () => {
+    td.when(getViewArguments("fizzbuzz", normalizedOptions, true)).thenReturn([
+      "fizzbuzz@cool-tag",
+    ]);
+
+    td.when(
+      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+    ).thenResolve({
+      successData: undefined,
+      errorCode: undefined,
+      error: undefined,
+    });
+
+    td.when(
+      callNpmCli("view", ["fizzbuzz@cool-tag"], { logger, environment })
+    ).thenResolve({
+      successData: undefined,
+      errorCode: "E500",
+      error: new errors.NpmCallError("view", 1, "oh no"),
+    });
+
+    const result = subject.compareAndPublish(
+      manifest,
+      normalizedOptions,
+      environment
+    );
+
+    await expect(result).rejects.toThrow(errors.NpmCallError);
+  });
 });

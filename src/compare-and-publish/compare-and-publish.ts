@@ -41,10 +41,6 @@ export async function compareAndPublish(
   const publishArguments = getPublishArguments(packageSpec, options);
   let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
 
-  if (viewCall.error && viewCall.errorCode !== E404) {
-    throw viewCall.error;
-  }
-
   // `npm view` will succeed with no output the package exists in the registry
   // with no `latest` tag. This is only possible with third-party registries.
   // https://github.com/npm/cli/issues/6408
@@ -53,6 +49,10 @@ export async function compareAndPublish(
     // to at least try to get something.
     const viewWithTagArguments = getViewArguments(name, options, true);
     viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
+  }
+
+  if (viewCall.error && viewCall.errorCode !== E404) {
+    throw viewCall.error;
   }
 
   const comparison = compareVersions(version, viewCall.successData, options);
