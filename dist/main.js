@@ -10952,6 +10952,12 @@ var InvalidTokenError = class extends TypeError {
     this.name = "InvalidTokenError";
   }
 };
+var InvalidTagError = class extends TypeError {
+  constructor(value) {
+    super(`Tag must be a non-empty string, got "${String(value)}".`);
+    this.name = "InvalidTagError";
+  }
+};
 var InvalidAccessError = class extends TypeError {
   constructor(value) {
     super(
@@ -11083,16 +11089,18 @@ var import_node_os2 = __toESM(require("node:os"));
 var REGISTRY_NPM = "https://registry.npmjs.org/";
 var TAG_LATEST = "latest";
 function normalizeOptions(manifest, options) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d;
   const defaultTag = ((_a = manifest.publishConfig) == null ? void 0 : _a.tag) ?? TAG_LATEST;
   const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? REGISTRY_NPM;
   const defaultAccess = ((_c = manifest.publishConfig) == null ? void 0 : _c.access) ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
+  const defaultProvenance = ((_d = manifest.publishConfig) == null ? void 0 : _d.provenance) ?? false;
   return {
     token: validateToken(options.token),
     registry: validateRegistry(options.registry ?? defaultRegistry),
     tag: setValue(options.tag, defaultTag, validateTag),
     access: setValue(options.access, defaultAccess, validateAccess),
-    dryRun: setValue(options.dryRun, false, validateDryRun),
+    provenance: setValue(options.provenance, defaultProvenance, Boolean),
+    dryRun: setValue(options.dryRun, false, Boolean),
     strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
     logger: options.logger,
     temporaryDirectory: options.temporaryDirectory ?? import_node_os2.default.tmpdir()
@@ -11116,10 +11124,10 @@ var validateRegistry = (value) => {
   }
 };
 var validateTag = (value) => {
-  return value;
-};
-var validateDryRun = (value) => {
-  return value;
+  if (typeof value === "string" && value.length > 0) {
+    return value;
+  }
+  throw new InvalidTagError(value);
 };
 var validateAccess = (value) => {
   if (value === void 0 || value === ACCESS_PUBLIC || value === ACCESS_RESTRICTED) {
@@ -11261,7 +11269,7 @@ function getViewArguments(packageName, options, retryWithTag = false) {
   return [packageSpec, "dist-tags", "versions"];
 }
 function getPublishArguments(packageSpec, options) {
-  const { tag, access, dryRun } = options;
+  const { tag, access, dryRun, provenance } = options;
   const publishArguments = [];
   if (packageSpec.length > 0) {
     publishArguments.push(packageSpec);
@@ -11272,7 +11280,10 @@ function getPublishArguments(packageSpec, options) {
   if (!access.isDefault && access.value) {
     publishArguments.push("--access", access.value);
   }
-  if (dryRun.value) {
+  if (!provenance.isDefault && provenance.value) {
+    publishArguments.push("--provenance");
+  }
+  if (!dryRun.isDefault && dryRun.value) {
     publishArguments.push("--dry-run");
   }
   return publishArguments;
@@ -11390,6 +11401,7 @@ async function run() {
     package: getInput("package"),
     tag: getInput("tag"),
     access: getInput("access"),
+    provenance: getBooleanInput("provenance"),
     strategy: getInput("strategy"),
     dryRun: getBooleanInput("dry-run"),
     logger,

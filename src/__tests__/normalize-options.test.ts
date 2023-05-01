@@ -74,6 +74,7 @@ describe("normalizeOptions", () => {
       expect(result).toMatchObject({
         tag: { value: "latest", isDefault: true },
         access: { value: "public", isDefault: true },
+        provenance: { value: false, isDefault: true },
         dryRun: { value: false, isDefault: true },
         strategy: { value: "all", isDefault: true },
       });
@@ -98,6 +99,7 @@ describe("normalizeOptions", () => {
           package: "./cool-package",
           tag: "next",
           access: "public",
+          provenance: true,
           dryRun: true,
           strategy: "all",
         }
@@ -106,6 +108,7 @@ describe("normalizeOptions", () => {
       expect(result).toMatchObject({
         tag: { value: "next", isDefault: false },
         access: { value: "public", isDefault: false },
+        provenance: { value: true, isDefault: false },
         dryRun: { value: true, isDefault: false },
         strategy: { value: "all", isDefault: false },
       });
@@ -116,7 +119,7 @@ describe("normalizeOptions", () => {
         {
           ...manifest,
           scope: "@cool-scope",
-          publishConfig: { tag: "next", access: "public" },
+          publishConfig: { tag: "next", access: "public", provenance: true },
         },
         { token: "abc123" }
       );
@@ -124,7 +127,18 @@ describe("normalizeOptions", () => {
       expect(result).toMatchObject({
         tag: { value: "next", isDefault: true },
         access: { value: "public", isDefault: true },
+        provenance: { value: true, isDefault: true },
       });
+    });
+
+    it("should validate tag value", () => {
+      expect(() => {
+        subject.normalizeOptions(manifest, {
+          token: "abc123",
+          // @ts-expect-error: intentionally mistyped for validation testing
+          tag: 42,
+        });
+      }).toThrow(errors.InvalidTagError);
     });
 
     it("should validate access value", () => {

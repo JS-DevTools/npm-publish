@@ -193,6 +193,11 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    permissions:
+      contents: read
+      id-token: write
+
     needs:
       - test
       - build
@@ -201,6 +206,14 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install latest npm
+        run: npm install -g npm
 
       - name: Download publish artifact
         uses: actions/download-artifact@v3

@@ -10,6 +10,7 @@ async function run(): Promise<void> {
     package: core.getInput("package"),
     tag: core.getInput("tag"),
     access: core.getInput("access"),
+    provenance: core.getBooleanInput("provenance"),
     strategy: core.getInput("strategy"),
     dryRun: core.getBooleanInput("dry-run"),
     logger: core.logger,

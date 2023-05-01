@@ -23,7 +23,10 @@ Options:
                           Defaults to "latest".
 
   --access <access>       Package access, may be "public" or "restricted".
-                          See documentation for details.
+                          See npm documentation for details.
+
+  --provenance            Publish with provenance statements.
+                          See npm documentation for details.
 
   --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
                           Defaults to "all", see documentation for details.

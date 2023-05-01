@@ -34,7 +34,7 @@ export function getPublishArguments(
   packageSpec: string,
   options: NormalizedOptions
 ): string[] {
-  const { tag, access, dryRun } = options;
+  const { tag, access, dryRun, provenance } = options;
   const publishArguments = [];
 
   if (packageSpec.length > 0) {
@@ -49,7 +49,11 @@ export function getPublishArguments(
     publishArguments.push("--access", access.value);
   }
 
-  if (dryRun.value) {
+  if (!provenance.isDefault && provenance.value) {
+    publishArguments.push("--provenance");
+  }
+
+  if (!dryRun.isDefault && dryRun.value) {
     publishArguments.push("--dry-run");
   }
 
