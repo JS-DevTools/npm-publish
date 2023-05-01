@@ -45,7 +45,12 @@ export async function compareAndPublish(
     throw viewCall.error;
   }
 
+  // `npm view` will succeed with no output the package exists in the registry
+  // with no `latest` tag. This is only possible with third-party registries.
+  // https://github.com/npm/cli/issues/6408
   if (!viewCall.successData && !viewCall.error) {
+    // Retry the call to `npm view` with the configured publish tag,
+    // to at least try to get something.
     const viewWithTagArguments = getViewArguments(name, options, true);
     viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
   }
