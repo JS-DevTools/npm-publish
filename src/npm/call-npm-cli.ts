@@ -89,7 +89,7 @@ export async function callNpmCli<CommandT extends Command>(
  */
 async function execNpm(
   commandArguments: string[],
-  environment: Record<string, string> = {},
+  environment: Record<string, string>,
   logger?: Logger
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   logger?.debug?.(`Running command: ${NPM} ${commandArguments.join(" ")}`);

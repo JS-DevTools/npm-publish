@@ -11165,7 +11165,7 @@ async function callNpmCli(command, cliArguments, options) {
   }
   return { successData, errorCode, error };
 }
-async function execNpm(commandArguments, environment = {}, logger2) {
+async function execNpm(commandArguments, environment, logger2) {
   var _a;
   (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${NPM} ${commandArguments.join(" ")}`);
   return new Promise((resolve) => {
