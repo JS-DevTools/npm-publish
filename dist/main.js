@@ -11285,12 +11285,12 @@ async function compareAndPublish(manifest, options, environment) {
   const viewArguments = getViewArguments(name, options);
   const publishArguments = getPublishArguments(packageSpec, options);
   let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
-  if (viewCall.error && viewCall.errorCode !== E404) {
-    throw viewCall.error;
-  }
   if (!viewCall.successData && !viewCall.error) {
     const viewWithTagArguments = getViewArguments(name, options, true);
     viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
+  }
+  if (viewCall.error && viewCall.errorCode !== E404) {
+    throw viewCall.error;
   }
   const comparison = compareVersions(version2, viewCall.successData, options);
   const publishCall = comparison.type ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : { successData: void 0, errorCode: void 0, error: void 0 };
