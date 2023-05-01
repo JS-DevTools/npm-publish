@@ -29,6 +29,10 @@ inputs:
       or restricted to members of your NPM organization.
     required: false
 
+  provenance:
+    description: Attach provenance statements when publishing.
+    required: false
+
   strategy:
     description: >
       Version check and release strategy.

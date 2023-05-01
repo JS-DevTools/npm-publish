@@ -22,6 +22,7 @@ export interface NormalizedOptions {
   token: string;
   tag: ConfigValue<string>;
   access: ConfigValue<Access | undefined>;
+  provenance: ConfigValue<boolean>;
   dryRun: ConfigValue<boolean>;
   strategy: ConfigValue<Strategy>;
   logger: Logger | undefined;
@@ -53,12 +54,15 @@ export function normalizeOptions(
     manifest.publishConfig?.access ??
     (manifest.scope === undefined ? ACCESS_PUBLIC : undefined);
 
+  const defaultProvenance = manifest.publishConfig?.provenance ?? false;
+
   return {
     token: validateToken(options.token),
     registry: validateRegistry(options.registry ?? defaultRegistry),
     tag: setValue(options.tag, defaultTag, validateTag),
     access: setValue(options.access, defaultAccess, validateAccess),
-    dryRun: setValue(options.dryRun, false, validateDryRun),
+    provenance: setValue(options.provenance, defaultProvenance, Boolean),
+    dryRun: setValue(options.dryRun, false, Boolean),
     strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
     logger: options.logger,
     temporaryDirectory: options.temporaryDirectory ?? os.tmpdir(),
@@ -91,11 +95,11 @@ const validateRegistry = (value: unknown): URL => {
 };
 
 const validateTag = (value: unknown): string => {
-  return value as string;
-};
+  if (typeof value === "string" && value.length > 0) {
+    return value;
+  }
 
-const validateDryRun = (value: unknown): boolean => {
-  return value as boolean;
+  throw new errors.InvalidTagError(value);
 };
 
 const validateAccess = (value: unknown): Access | undefined => {

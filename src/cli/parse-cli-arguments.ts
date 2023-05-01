@@ -9,6 +9,7 @@ const ARGUMENTS_OPTIONS = [
   { name: "registry", type: String },
   { name: "tag", type: String },
   { name: "access", type: String },
+  { name: "provenance", type: Boolean },
   { name: "strategy", type: String },
   { name: "dry-run", type: Boolean },
   { name: "quiet", type: Boolean },

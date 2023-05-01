@@ -39,7 +39,7 @@ export interface Options {
    *
    * Defaults to "https://registry.npmjs.org/".
    *
-   * Can be overridden by the package.json's `publishConfig` field.
+   * Can be set by the package.json's `publishConfig` field.
    */
   registry?: string | URL | undefined;
 
@@ -48,7 +48,7 @@ export interface Options {
    *
    * Defaults to "latest".
    *
-   * Can be overridden by the package.json's `publishConfig` field.
+   * Can be set by the package.json's `publishConfig` field.
    */
   tag?: string | undefined;
 
@@ -62,9 +62,21 @@ export interface Options {
    * Defaults to "restricted" for scoped packages, unless that package has been
    * previously published as `public`
    *
-   * Can be overridden by the package.json's `publishConfig` field.
+   * Can be set by the package.json's `publishConfig` field.
    */
   access?: Access | undefined;
+
+  /**
+   * Generate provenance statements.
+   *
+   * Publish must be run from a supported CI provider to succeed. When run from
+   * GitHub Actions, requires `id-token: write` permission.
+   *
+   * Defaults to `false`.
+   *
+   * Can be set by the package.json's `publishConfig` field.
+   */
+  provenance?: boolean | undefined;
 
   /**
    * Version check strategy.

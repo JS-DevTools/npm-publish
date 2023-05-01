@@ -19,6 +19,7 @@ export interface PackagePublishConfig {
   tag?: string;
   access?: string;
   registry?: string;
+  provenance?: boolean;
 }
 
 const SCOPE_RE = /^(@.+)\/.+$/u;

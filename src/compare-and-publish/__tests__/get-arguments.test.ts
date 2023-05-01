@@ -31,6 +31,7 @@ describe("get command arguments", () => {
       const result = subject.getPublishArguments("./cool-package", {
         tag: { value: "next", isDefault: false },
         access: { value: "restricted", isDefault: false },
+        provenance: { value: true, isDefault: false },
         dryRun: { value: true, isDefault: false },
         strategy: { value: "upgrade", isDefault: true },
       } as NormalizedOptions);
@@ -41,6 +42,7 @@ describe("get command arguments", () => {
         "next",
         "--access",
         "restricted",
+        "--provenance",
         "--dry-run",
       ]);
     });
@@ -49,7 +51,8 @@ describe("get command arguments", () => {
       const result = subject.getPublishArguments("./cool-package", {
         tag: { value: "next", isDefault: true },
         access: { value: "restricted", isDefault: true },
-        dryRun: { value: false, isDefault: true },
+        provenance: { value: true, isDefault: true },
+        dryRun: { value: true, isDefault: true },
         strategy: { value: "upgrade", isDefault: true },
       } as NormalizedOptions);
 
@@ -60,6 +63,7 @@ describe("get command arguments", () => {
       const result = subject.getPublishArguments("./cool-package", {
         tag: { value: "next", isDefault: false },
         access: { value: undefined, isDefault: false },
+        provenance: { value: false, isDefault: false },
         dryRun: { value: false, isDefault: false },
         strategy: { value: "upgrade", isDefault: true },
       } as NormalizedOptions);

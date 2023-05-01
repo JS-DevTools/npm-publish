@@ -95,6 +95,13 @@ export class InvalidTokenError extends TypeError {
   }
 }
 
+export class InvalidTagError extends TypeError {
+  public constructor(value: unknown) {
+    super(`Tag must be a non-empty string, got "${String(value)}".`);
+    this.name = "InvalidTagError";
+  }
+}
+
 export class InvalidAccessError extends TypeError {
   public constructor(value: unknown) {
     super(
@@ -114,6 +121,13 @@ export class InvalidStrategyError extends TypeError {
       )}".`
     );
     this.name = "InvalidStrategyError";
+  }
+}
+
+export class InvalidProvenanceError extends TypeError {
+  public constructor(value: unknown) {
+    super(`Provenance must be a boolean, got "${String(value)}".`);
+    this.name = "InvalidProvenanceError";
   }
 }
 

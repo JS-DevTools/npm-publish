@@ -46,6 +46,10 @@
   "engines": {
     "node": ">=16"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "devDependencies": {
     "@actions/core": "^1.10.0",
     "@types/command-line-args": "^5.0.0",

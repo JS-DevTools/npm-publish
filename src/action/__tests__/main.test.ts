@@ -25,6 +25,7 @@ describe("run", () => {
     td.when(core.getInput("registry")).thenReturn("https://example.com");
     td.when(core.getInput("tag")).thenReturn("next");
     td.when(core.getInput("access")).thenReturn("restricted");
+    td.when(core.getBooleanInput("provenance")).thenReturn(true);
     td.when(core.getInput("strategy")).thenReturn("all");
     td.when(core.getBooleanInput("dry-run")).thenReturn(true);
 
@@ -35,6 +36,7 @@ describe("run", () => {
         registry: "https://example.com",
         tag: "next",
         access: "restricted",
+        provenance: true,
         strategy: "all",
         dryRun: true,
         logger: core.logger,
@@ -75,6 +77,7 @@ describe("run", () => {
     td.when(core.getInput("registry")).thenReturn("https://example.com");
     td.when(core.getInput("tag")).thenReturn("next");
     td.when(core.getInput("access")).thenReturn("restricted");
+    td.when(core.getBooleanInput("provenance")).thenReturn(true);
     td.when(core.getInput("strategy")).thenReturn("all");
     td.when(core.getBooleanInput("dry-run")).thenReturn(true);
 
@@ -85,6 +88,7 @@ describe("run", () => {
         registry: "https://example.com",
         tag: "next",
         access: "restricted",
+        provenance: true,
         strategy: "all",
         dryRun: true,
         logger: core.logger,
