@@ -5,14 +5,9 @@ import { list as tarList, type ReadEntry } from "tar";
 
 import * as errors from "./errors.js";
 
-/** The result of reading a package manifest */
-export interface ManifestReadResult {
-  packageSpec: string;
-  manifest: PackageManifest;
-}
-
-/** A package manifest (package.json) */
+/** A package manifest (package.json) and associated details. */
 export interface PackageManifest {
+  packageSpec: string;
   name: string;
   version: string;
   scope: string | undefined;
@@ -86,7 +81,7 @@ const readTarballPackageJson = async (file: string): Promise<string> => {
  */
 export async function readManifest(
   packagePath: unknown
-): Promise<ManifestReadResult> {
+): Promise<PackageManifest> {
   let packageSpec: string | undefined;
   let manifestContents: string;
 
@@ -138,6 +133,9 @@ export async function readManifest(
 
   return {
     packageSpec,
-    manifest: { name, version, publishConfig, scope: SCOPE_RE.exec(name)?.[1] },
+    name,
+    version,
+    publishConfig,
+    scope: SCOPE_RE.exec(name)?.[1],
   };
 }

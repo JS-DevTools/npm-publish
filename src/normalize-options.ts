@@ -13,8 +13,8 @@ import {
   type Logger,
 } from "./options.js";
 
-const DEFAULT_REGISTRY = "https://registry.npmjs.org/";
-const DEFAULT_TAG = "latest";
+const REGISTRY_NPM = "https://registry.npmjs.org/";
+export const TAG_LATEST = "latest";
 
 /** Normalized and sanitized auth, publish, and runtime configurations. */
 export interface NormalizedOptions {
@@ -37,17 +37,17 @@ export interface ConfigValue<TValue> {
 /**
  * Normalizes and sanitizes options, and fills-in any default values.
  *
- * @param options User-input options.
  * @param manifest Package metadata from package.json.
+ * @param options User-input options.
  * @returns Validated auth and publish configuration.
  */
 export function normalizeOptions(
-  options: Options,
-  manifest: PackageManifest
+  manifest: PackageManifest,
+  options: Options
 ): NormalizedOptions {
-  const defaultTag = manifest.publishConfig?.tag ?? DEFAULT_TAG;
+  const defaultTag = manifest.publishConfig?.tag ?? TAG_LATEST;
 
-  const defaultRegistry = manifest.publishConfig?.registry ?? DEFAULT_REGISTRY;
+  const defaultRegistry = manifest.publishConfig?.registry ?? REGISTRY_NPM;
 
   const defaultAccess =
     manifest.publishConfig?.access ??

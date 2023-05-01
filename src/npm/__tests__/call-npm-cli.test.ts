@@ -1,52 +1,48 @@
-import os from "node:os";
-import path from "node:path";
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
 import * as errors from "../../errors.js";
 import * as subject from "../call-npm-cli.js";
 
-describe("callNpmCli", () => {
-  it("should call the NPM CLI in JSON mode", async () => {
-    const result = await subject.callNpmCli("config", ["list"]);
-
-    expect(result).toMatchObject({ json: true });
-  });
-
-  it("should call the NPM CLI in JSON mode", async () => {
-    const result = await subject.callNpmCli("config", ["list"]);
-
-    expect(result).toMatchObject({ json: true, "ignore-scripts": true });
-  });
-
-  it("should raise if error", async () => {
-    const result = subject.callNpmCli("explain", ["not-a-real-package"]);
-
-    await expect(result).rejects.toThrow(errors.NpmCallError);
-  });
-
-  it("should map an error code to a return value", async () => {
-    const result = await subject.callNpmCli("config", [], {
-      ifError: { eusage: 42 },
-    });
-
-    expect(result).toEqual(42);
-  });
-
-  it("should return plain strings", async () => {
-    const result = await subject.callNpmCli("config", ["get", "userconfig"]);
-
-    expect(result).toMatch(/^.+\.npmrc$/);
-  });
-
-  it("should allow the environment to be overriden", async () => {
-    const customPath = path.join(os.homedir(), "foo", ".npmrc");
-
-    const result = await subject.callNpmCli("config", ["get", "userconfig"], {
+describe.concurrent("callNpmCli", () => {
+  it("should call npm CLI", async ({ expect }) => {
+    const result = await subject.callNpmCli("config", ["list"], {
       environment: {
-        npm_config_userconfig: customPath,
+        npm_config_scope: "@cool-scope",
       },
     });
 
-    expect(result).toEqual(customPath);
+    expect(result).toEqual({
+      successData: expect.objectContaining({
+        json: true,
+        "ignore-scripts": true,
+        scope: "@cool-scope",
+      }),
+      errorCode: undefined,
+      error: undefined,
+    });
+  });
+
+  it("should return undefined if no JSON in output", async ({ expect }) => {
+    const result = await subject.callNpmCli("config", ["get", "scope"], {
+      environment: {
+        npm_config_scope: "",
+      },
+    });
+
+    expect(result).toEqual({
+      successData: undefined,
+      errorCode: undefined,
+      error: undefined,
+    });
+  });
+
+  it("should return error details if error", async ({ expect }) => {
+    const result = await subject.callNpmCli("config", [], { environment: {} });
+
+    expect(result).toEqual({
+      successData: undefined,
+      errorCode: "EUSAGE",
+      error: expect.any(errors.NpmCallError),
+    });
   });
 });

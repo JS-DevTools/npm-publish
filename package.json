@@ -31,7 +31,7 @@
     "!__tests__"
   ],
   "scripts": {
-    "all": "npm run clean && npm run build && npm run lint && npm run coverage",
+    "all": "npm run clean && npm run build && npm run format && npm run coverage",
     "clean": "rimraf coverage lib dist e2e/fixture *.tgz",
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
