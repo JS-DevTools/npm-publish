@@ -124,13 +124,6 @@ export class InvalidStrategyError extends TypeError {
   }
 }
 
-export class InvalidProvenanceError extends TypeError {
-  public constructor(value: unknown) {
-    super(`Provenance must be a boolean, got "${String(value)}".`);
-    this.name = "InvalidProvenanceError";
-  }
-}
-
 export class NpmCallError extends Error {
   public constructor(command: string, exitCode: number, stderr: string) {
     super(
