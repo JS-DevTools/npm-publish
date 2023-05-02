@@ -46,10 +46,10 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
+        uses: coverallsapp/github-action@f350da2c033043742f89e8c0b7b5145a1616da6d
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
+          flag-name: Node.js ${{ matrix.node-version }} / ${{ matrix.os }}
 
   coverage:
     name: Code Coverage
@@ -58,9 +58,8 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@045a25193560dc194e405657f552faeb6b9433aa
+        uses: coverallsapp/github-action@f350da2c033043742f89e8c0b7b5145a1616da6d
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
 
   build:
