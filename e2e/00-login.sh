@@ -7,7 +7,14 @@ set -euo pipefail
 REGISTRY_URL="http://localhost:4873"
 
 token_matcher='"token": ?"(.+)"'
-create_user_response=$(curl -s -X PUT -H 'content-type: application/json' -d '{"name": "test", "password": "test"}' ${REGISTRY_URL}/-/user/org.couchdb.user:test)
+retry_count=3
+create_user_response=""
+
+until [[ ${create_user_response} || ${retry_count} -le 0 ]]; do
+  sleep 1
+  create_user_response=$(curl -v -s -X PUT -H 'content-type: application/json' -d '{"name": "test", "password": "test"}' ${REGISTRY_URL}/-/user/org.couchdb.user:test || true)
+  retry_count=$((retry_count - 1))
+done
 
 echo "DEBUG: Create user response - ${create_user_response}" 1>&2
 
