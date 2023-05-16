@@ -99,16 +99,16 @@ jobs:
 
 You can set any or all of the following input parameters using `with`:
 
-| Name          | Type                   | Default                        | Description                                                                      |
-| ------------- | ---------------------- | ------------------------------ | -------------------------------------------------------------------------------- |
-| `token`       | string                 | **required**                   | Authentication token to use with the configured registry.                        |
-| `registry`    | string                 | `https://registry.npmjs.org/`¹ | Registry URL to use.                                                             |
-| `package`     | string                 | Current working directory      | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
-| `tag`         | string                 | `latest`¹                      | [Distribution tag][npm-tag] to publish to.                                       |
-| `access`      | `public`, `restricted` | [npm defaults][npm-access]¹    | Whether the package should be publicly visible or restricted.                    |
-| `provenance`² | boolean                | `false`¹                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
-| `strategy`    | `all`, `upgrade`       | `all`                          | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
-| `dry-run`     | boolean                | `false`                        | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
+| Name           | Type                   | Default                       | Description                                                                      |
+| -------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `token`        | string                 | **required**                  | Authentication token to use with the configured registry.                        |
+| `registry`¹    | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
+| `package`      | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
+| `tag`¹         | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
+| `access`¹      | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                    |
+| `provenance`¹² | boolean                | `false`                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
+| `strategy`     | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
+| `dry-run`      | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
 
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
@@ -174,18 +174,18 @@ As shown in the example above, you should pass an options object to the `npmPubl
 import type { Options } from "@jsdevtools/npm-publish";
 ```
 
-| Name                 | Type                   | Default                        | Description                                                                      |
-| -------------------- | ---------------------- | ------------------------------ | -------------------------------------------------------------------------------- |
-| `token`              | string                 | **required**                   | Authentication token to use with the configured registry.                        |
-| `registry`           | string, `URL`          | `https://registry.npmjs.org/`¹ | Registry URL to use.                                                             |
-| `package`            | string                 | Current working directory      | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
-| `tag`                | string                 | `latest`¹                      | [Distribution tag][npm-tag] to publish to.                                       |
-| `access`             | `public`, `restricted` | [npm defaults][npm-access]¹    | Whether the package should be publicly visible or restricted.                    |
-| `provenance`²        | boolean                | `false`¹                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
-| `strategy`           | `all`, `upgrade`       | `all`                          | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
-| `dryRun`             | boolean                | `false`                        | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
-| `logger`             | object                 | `undefined`                    | Logging interface with `debug`, `info`, and `error` log methods.                 |
-| `temporaryDirectory` | string                 | `os.tmpdir()`                  | Temporary directory to hold a generated `.npmrc` file                            |
+| Name                 | Type                   | Default                       | Description                                                                      |
+| -------------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `token`              | string                 | **required**                  | Authentication token to use with the configured registry.                        |
+| `registry`¹          | string, `URL`          | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
+| `package`            | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
+| `tag`¹               | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
+| `access`¹            | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                    |
+| `provenance`¹²       | boolean                | `false`                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
+| `strategy`           | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
+| `dryRun`             | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
+| `logger`             | object                 | `undefined`                   | Logging interface with `debug`, `info`, and `error` log methods.                 |
+| `temporaryDirectory` | string                 | `os.tmpdir()`                 | Temporary directory to hold a generated `.npmrc` file                            |
 
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
@@ -269,7 +269,7 @@ Options:
   --debug                 Print debug logs.
 
   -v, --version           Print the version number.
-  -h, --help               Show usage text.
+  -h, --help              Show usage text.
 
 Examples:
 
