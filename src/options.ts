@@ -60,7 +60,7 @@ export interface Options {
    * packages.
    *
    * Defaults to "restricted" for scoped packages, unless that package has been
-   * previously published as `public`
+   * previously published as `public`.
    *
    * Can be set by the package.json's `publishConfig` field.
    */
@@ -81,13 +81,22 @@ export interface Options {
   /**
    * Version check strategy.
    *
-   * If "upgrade" (default), the package will only be published if its version
-   * is higher than the existing version on the configured tag. If "always", the
-   * package will be published if its version is simply not yet published.
-   *
-   * Defaults to `upgrade`.
+   * - `always` (default): the package will be published if its version is simply
+   *   not yet published.
+   * - `upgrade`: the package will only be published if its version is higher than
+   *   the existing version on the configured tag.
    */
   strategy?: Strategy | undefined;
+
+  /**
+   * Ignore lifecycle scripts.
+   *
+   * If `true` (default), `--ignore-scripts` will be passed to `npm`. If you
+   * rely on publish lifecycle scripts - i.e. `prepublishOnly`, `prepack`,
+   * `prepare`, `postpack`, `publish`, `postpublish` - you should set this to
+   * `false` or rework your build and publish workflow.
+   */
+  ignoreScripts?: boolean | undefined;
 
   /**
    * Pretend to publish, but don't actually upload to the registry.

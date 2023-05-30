@@ -11,6 +11,7 @@ const ARGUMENTS_OPTIONS = [
   { name: "access", type: String },
   { name: "provenance", type: Boolean },
   { name: "strategy", type: String },
+  { name: "ignore-scripts", type: Boolean },
   { name: "dry-run", type: Boolean },
   { name: "quiet", type: Boolean },
   { name: "debug", type: Boolean },

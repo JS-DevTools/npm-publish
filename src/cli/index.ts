@@ -31,6 +31,9 @@ Options:
   --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
                           Defaults to "all", see documentation for details.
 
+  --ignore-scripts        Ignore lifecycle scripts as a security precaution.
+                          Defaults to true.
+
   --dry-run               Do not actually publish anything.
   --quiet                 Only print errors.
   --debug                 Print debug logs.
