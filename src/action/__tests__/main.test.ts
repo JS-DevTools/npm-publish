@@ -11,6 +11,16 @@ vi.mock("../core", () => imitateEsm("../core"));
 describe("run", () => {
   beforeEach(() => {
     vi.stubEnv("RUNNER_TEMP", "/path/to/temp");
+
+    td.when(core.getRequiredSecretInput("token")).thenReturn("abc123");
+    td.when(core.getInput("package")).thenReturn("./package.json");
+    td.when(core.getInput("registry")).thenReturn("https://example.com");
+    td.when(core.getInput("tag")).thenReturn("next");
+    td.when(core.getInput("access")).thenReturn("restricted");
+    td.when(core.getBooleanInput("provenance")).thenReturn(true);
+    td.when(core.getInput("strategy")).thenReturn("all");
+    td.when(core.getBooleanInput("ignore-scripts")).thenReturn(false);
+    td.when(core.getBooleanInput("dry-run")).thenReturn(true);
   });
 
   afterEach(() => {
@@ -20,15 +30,6 @@ describe("run", () => {
   });
 
   it("should pass input to options", async () => {
-    td.when(core.getRequiredSecretInput("token")).thenReturn("abc123");
-    td.when(core.getInput("package")).thenReturn("./package.json");
-    td.when(core.getInput("registry")).thenReturn("https://example.com");
-    td.when(core.getInput("tag")).thenReturn("next");
-    td.when(core.getInput("access")).thenReturn("restricted");
-    td.when(core.getBooleanInput("provenance")).thenReturn(true);
-    td.when(core.getInput("strategy")).thenReturn("all");
-    td.when(core.getBooleanInput("dry-run")).thenReturn(true);
-
     td.when(
       npmPublish({
         token: "abc123",
@@ -38,6 +39,7 @@ describe("run", () => {
         access: "restricted",
         provenance: true,
         strategy: "all",
+        ignoreScripts: false,
         dryRun: true,
         logger: core.logger,
         temporaryDirectory: "/path/to/temp",
@@ -72,15 +74,6 @@ describe("run", () => {
   it("should fail the action if something raises", async () => {
     const error = new Error("oh no");
 
-    td.when(core.getRequiredSecretInput("token")).thenReturn("abc123");
-    td.when(core.getInput("package")).thenReturn("./package.json");
-    td.when(core.getInput("registry")).thenReturn("https://example.com");
-    td.when(core.getInput("tag")).thenReturn("next");
-    td.when(core.getInput("access")).thenReturn("restricted");
-    td.when(core.getBooleanInput("provenance")).thenReturn(true);
-    td.when(core.getInput("strategy")).thenReturn("all");
-    td.when(core.getBooleanInput("dry-run")).thenReturn(true);
-
     td.when(
       npmPublish({
         token: "abc123",
@@ -90,6 +83,7 @@ describe("run", () => {
         access: "restricted",
         provenance: true,
         strategy: "all",
+        ignoreScripts: false,
         dryRun: true,
         logger: core.logger,
         temporaryDirectory: "/path/to/temp",

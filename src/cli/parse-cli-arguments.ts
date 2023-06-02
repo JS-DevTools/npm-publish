@@ -11,6 +11,7 @@ const ARGUMENTS_OPTIONS = [
   { name: "access", type: String },
   { name: "provenance", type: Boolean },
   { name: "strategy", type: String },
+  { name: "no-ignore-scripts", type: Boolean },
   { name: "dry-run", type: Boolean },
   { name: "quiet", type: Boolean },
   { name: "debug", type: Boolean },
@@ -34,9 +35,17 @@ export interface ParsedArguments {
  * @returns A parsed object of options.
  */
 export function parseCliArguments(argv: string[]): ParsedArguments {
-  const { help, version, quiet, debug, ...options } = commandLineArgs(
+  const { help, version, quiet, debug, ...optionFlags } = commandLineArgs(
     ARGUMENTS_OPTIONS,
     { argv, camelCase: true }
+  );
+
+  const options = Object.fromEntries(
+    Object.entries(optionFlags).map(([key, value]) => {
+      return key === "noIgnoreScripts"
+        ? ["ignoreScripts", !value]
+        : [key, value];
+    })
   );
 
   return {

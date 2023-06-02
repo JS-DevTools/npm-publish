@@ -31,7 +31,7 @@ This package can be used three different ways:
 
 - 🤖 A [**GitHub Action**](#github-action) as part of your CI/CD process
 
-- 🧩 A [**function**](#javascript-function) that you call in your JavaScript code
+- 🧩 A [**function**](#javascript-api) that you call in your JavaScript code
 
 - 🖥 A [**CLI**](#command-line-interface) that you run in your terminal
 
@@ -39,12 +39,37 @@ This package can be used three different ways:
 
 The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, make the following updates:
 
-- The `type` output is now an empty string instead of `none` when no release occurs
+- The `type` output is now an empty string instead of `'none'` when no release occurs
   ```diff
     - run: echo "Version changed!"
   -   if: ${{ steps.publish.outputs.type != 'none' }}
   +   if: ${{ steps.publish.outputs.type }}
   ```
+- The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - run them explicitly or set the `ignore-scripts` input to `false`.
+  ```diff
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+  +   ignore-scripts: false
+  ```
+- The workflow's `.npmrc` file is not longer modified. If you have any workarounds to adjust for this misbehavior - for example, if you're using `actions/setup-node` to configure `.npmrc` - you should remove them.
+
+  ```diff
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        registry-url: https://registry.npmjs.org/
+
+    - uses: JS-DevTools/npm-publish@v1
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+
+    - name: Do some more stuff with npm
+      run: npm whoami
+      env:
+  -     INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
+  +     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  ```
+
 - The `check-version` and `greater-version-only` options have been removed and replaced with `strategy`.
   - Use `strategy: all` (default) to publish all versions that do not yet exist in the registry.
     ```diff
@@ -62,10 +87,24 @@ The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, mak
     -   greater-version-only: true
     +   strategy: upgrade
     ```
-  - `check-version: false` has been removed. You don't need this action if you're not checking already published versions; use `npm` directly, instead.
+  - `check-version: false` has been removed. You may not need this action if you're not checking already published versions; [you can `npm` directly][publishing-nodejs-packages], instead.
+    ```diff
+    - - uses: JS-DevTools/npm-publish@v1
+    -   with:
+    -     token: ${{ secrets.NPM_TOKEN }}
+    -     check-version: false
+    + - uses: actions/setup-node@v3
+    +   with:
+    +     node-version: '18'
+    +     registry-url: https://registry.npmjs.org/
+    + - run: npm publish
+    +   env:
+    +     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    ```
 
 See the [change log][] for more details and other changes in the v2 release.
 
+[publishing-nodejs-packages]: https://docs.github.com/actions/publishing-packages/publishing-nodejs-packages
 [change log]: https://github.com/JS-DevTools/npm-publish/releases
 
 ## GitHub Action
@@ -99,16 +138,17 @@ jobs:
 
 You can set any or all of the following input parameters using `with`:
 
-| Name            | Type                   | Default                       | Description                                                                      |
-| --------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `token`         | string                 | **required**                  | Authentication token to use with the configured registry.                        |
-| `registry`¹     | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
-| `package`       | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
-| `tag`¹          | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
-| `access`¹       | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                    |
-| `provenance`¹ ² | boolean                | `false`                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
-| `strategy`      | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
-| `dry-run`       | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
+| Name             | Type                   | Default                       | Description                                                                      |
+| ---------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `token`          | string                 | **required**                  | Authentication token to use with the configured registry.                        |
+| `registry`¹      | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
+| `package`        | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
+| `tag`¹           | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
+| `access`¹        | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                    |
+| `provenance`¹ ²  | boolean                | `false`                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
+| `strategy`       | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
+| `ignore-scripts` | boolean                | `true`                        | Run `npm publish` with the `--ignore-scripts` flag as a security precaution.     |
+| `dry-run`        | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
 
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
@@ -147,7 +187,7 @@ steps:
 
 [semver release type]: https://github.com/npm/node-semver#release_types
 
-## JavaScript Function
+## JavaScript API
 
 To use npm-package in your JavaScript code, you'll need to install it using [npm][] or other package manager of choice:
 
@@ -183,6 +223,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 | `access`¹            | `public`, `restricted` | [npm defaults][npm-access]    | Whether the package should be publicly visible or restricted.                    |
 | `provenance`¹ ²      | boolean                | `false`                       | Run `npm publish` with the `--provenance` flag to add [provenance][] statements. |
 | `strategy`           | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
+| `ignoreScripts`      | boolean                | `true`                        | Run `npm publish` with the `--ignore-scripts` flag as a security precaution.     |
 | `dryRun`             | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
 | `logger`             | object                 | `undefined`                   | Logging interface with `debug`, `info`, and `error` log methods.                 |
 | `temporaryDirectory` | string                 | `os.tmpdir()`                 | Temporary directory to hold a generated `.npmrc` file                            |
@@ -263,6 +304,9 @@ Options:
 
   --strategy <strategy>   Publish strategy, may be "all" or "upgrade".
                           Defaults to "all", see documentation for details.
+
+  --no-ignore-scripts     Allow lifecycle scripts, which are disabled by default
+                          as a security precaution. Defaults to false.
 
   --dry-run               Do not actually publish anything.
   --quiet                 Only print errors.

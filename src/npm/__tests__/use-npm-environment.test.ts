@@ -54,6 +54,7 @@ describe("useNpmEnvironment", () => {
     expect(npmrcContents).toContain(
       "registry=http://example.com/cool-registry/"
     );
+
     await expect(fs.access(npmrcPath!)).rejects.toThrow(/ENOENT/);
   });
 });

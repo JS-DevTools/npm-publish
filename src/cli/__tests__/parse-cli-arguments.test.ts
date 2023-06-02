@@ -28,6 +28,7 @@ describe("parseCliArguments", () => {
         access: undefined,
         provenance: undefined,
         strategy: undefined,
+        ignoreScripts: undefined,
         dryRun: undefined,
       },
     });
@@ -46,6 +47,7 @@ describe("parseCliArguments", () => {
         tag: undefined,
         access: undefined,
         strategy: undefined,
+        ignoreScripts: undefined,
         dryRun: undefined,
       },
     });
@@ -62,6 +64,7 @@ describe("parseCliArguments", () => {
           ["--access", "restricted"],
           ["--strategy", "upgrade"],
           ["--provenance"],
+          ["--no-ignore-scripts"],
           ["--dry-run"],
           ["--quiet"],
           ["--debug"],
@@ -80,6 +83,7 @@ describe("parseCliArguments", () => {
         access: "restricted",
         provenance: true,
         strategy: "upgrade",
+        ignoreScripts: false,
         dryRun: true,
       },
     });

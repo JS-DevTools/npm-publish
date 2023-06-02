@@ -11100,6 +11100,7 @@ function normalizeOptions(manifest, options) {
     tag: setValue(options.tag, defaultTag, validateTag),
     access: setValue(options.access, defaultAccess, validateAccess),
     provenance: setValue(options.provenance, defaultProvenance, Boolean),
+    ignoreScripts: setValue(options.ignoreScripts, true, Boolean),
     dryRun: setValue(options.dryRun, false, Boolean),
     strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
     logger: options.logger,
@@ -11151,10 +11152,11 @@ var E404 = "E404";
 var EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 var NPM = import_node_os3.default.platform() === "win32" ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
+var baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
 async function callNpmCli(command, cliArguments, options) {
   var _a, _b;
   const { stdout, stderr, exitCode } = await execNpm(
-    [command, "--ignore-scripts", "--json", ...cliArguments],
+    [command, ...baseArguments(options), ...cliArguments],
     options.environment,
     options.logger
   );
@@ -11292,7 +11294,11 @@ function getPublishArguments(packageSpec, options) {
 // src/compare-and-publish/compare-and-publish.ts
 async function compareAndPublish(manifest, options, environment) {
   const { name, version: version2, packageSpec } = manifest;
-  const cliOptions = { environment, logger: options.logger };
+  const cliOptions = {
+    environment,
+    ignoreScripts: options.ignoreScripts.value,
+    logger: options.logger
+  };
   const viewArguments = getViewArguments(name, options);
   const publishArguments = getPublishArguments(packageSpec, options);
   let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
@@ -11384,7 +11390,12 @@ function getRequiredSecretInput(name) {
   return inputString;
 }
 function getBooleanInput(name) {
-  return (0, import_core.getInput)(name) === "true";
+  const inputString = (0, import_core.getInput)(name).toLowerCase();
+  if (inputString === "true")
+    return true;
+  if (inputString === "false")
+    return false;
+  return void 0;
 }
 function setFailed(error) {
   (0, import_core.setFailed)(error);
@@ -11403,6 +11414,7 @@ async function run() {
     access: getInput("access"),
     provenance: getBooleanInput("provenance"),
     strategy: getInput("strategy"),
+    ignoreScripts: getBooleanInput("ignore-scripts"),
     dryRun: getBooleanInput("dry-run"),
     logger,
     temporaryDirectory: process.env["RUNNER_TEMP"]
