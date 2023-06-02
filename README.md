@@ -51,7 +51,7 @@ The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, mak
       token: ${{ secrets.NPM_TOKEN }}
   +   ignore-scripts: false
   ```
-- The workflow's `.npmrc` file is not longer modified. If you have any workarounds to adjust for this misbehavior - for example, if you're using `actions/setup-node` to configure `.npmrc` - you should remove them.
+- The workflow's `.npmrc` file is no longer modified. If you have any workarounds to adjust for this misbehavior - for example, if you're using `actions/setup-node` to configure `.npmrc` - you should remove them.
 
   ```diff
     - uses: actions/setup-node@v3
