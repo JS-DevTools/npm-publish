@@ -42,6 +42,12 @@ inputs:
 
     required: false
 
+  ignore-scripts:
+    description: >
+      Run npm with the --ignore-scripts flag as a security precaution.
+      Enabled by default.
+    required: false
+
   dry-run:
     description: Run npm with the --dry-run flag to avoid actually publishing anything.
     required: false

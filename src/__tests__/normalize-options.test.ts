@@ -75,6 +75,7 @@ describe("normalizeOptions", () => {
         tag: { value: "latest", isDefault: true },
         access: { value: "public", isDefault: true },
         provenance: { value: false, isDefault: true },
+        ignoreScripts: { value: true, isDefault: true },
         dryRun: { value: false, isDefault: true },
         strategy: { value: "all", isDefault: true },
       });
@@ -100,6 +101,7 @@ describe("normalizeOptions", () => {
           tag: "next",
           access: "public",
           provenance: true,
+          ignoreScripts: false,
           dryRun: true,
           strategy: "all",
         }
@@ -109,6 +111,7 @@ describe("normalizeOptions", () => {
         tag: { value: "next", isDefault: false },
         access: { value: "public", isDefault: false },
         provenance: { value: true, isDefault: false },
+        ignoreScripts: { value: false, isDefault: false },
         dryRun: { value: true, isDefault: false },
         strategy: { value: "all", isDefault: false },
       });

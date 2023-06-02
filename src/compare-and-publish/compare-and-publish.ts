@@ -35,7 +35,11 @@ export async function compareAndPublish(
   environment: NpmCliEnvironment
 ): Promise<PublishResult> {
   const { name, version, packageSpec } = manifest;
-  const cliOptions = { environment, logger: options.logger };
+  const cliOptions = {
+    environment,
+    ignoreScripts: options.ignoreScripts.value,
+    logger: options.logger,
+  };
 
   const viewArguments = getViewArguments(name, options);
   const publishArguments = getPublishArguments(packageSpec, options);

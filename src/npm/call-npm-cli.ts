@@ -7,6 +7,7 @@ import type { NpmCliEnvironment } from "./use-npm-environment.js";
 
 export interface NpmCliOptions {
   environment: NpmCliEnvironment;
+  ignoreScripts: boolean;
   logger?: Logger | undefined;
 }
 
@@ -41,6 +42,9 @@ export const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 const NPM = os.platform() === "win32" ? "npm.cmd" : "npm";
 const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
+const baseArguments = (options: NpmCliOptions) =>
+  options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
+
 /**
  * Call the NPM CLI in JSON mode.
  *
@@ -55,7 +59,7 @@ export async function callNpmCli<CommandT extends Command>(
   options: NpmCliOptions
 ): Promise<NpmCallResult<CommandT>> {
   const { stdout, stderr, exitCode } = await execNpm(
-    [command, "--ignore-scripts", "--json", ...cliArguments],
+    [command, ...baseArguments(options), ...cliArguments],
     options.environment,
     options.logger
   );

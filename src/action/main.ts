@@ -12,6 +12,7 @@ async function run(): Promise<void> {
     access: core.getInput("access"),
     provenance: core.getBooleanInput("provenance"),
     strategy: core.getInput("strategy"),
+    ignoreScripts: core.getBooleanInput("ignore-scripts"),
     dryRun: core.getBooleanInput("dry-run"),
     logger: core.logger,
     temporaryDirectory: process.env["RUNNER_TEMP"],

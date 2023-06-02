@@ -64,7 +64,7 @@ describe("parseCliArguments", () => {
           ["--access", "restricted"],
           ["--strategy", "upgrade"],
           ["--provenance"],
-          ["--ignore-scripts=false"],
+          ["--no-ignore-scripts"],
           ["--dry-run"],
           ["--quiet"],
           ["--debug"],

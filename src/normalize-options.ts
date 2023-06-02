@@ -23,6 +23,7 @@ export interface NormalizedOptions {
   tag: ConfigValue<string>;
   access: ConfigValue<Access | undefined>;
   provenance: ConfigValue<boolean>;
+  ignoreScripts: ConfigValue<boolean>;
   dryRun: ConfigValue<boolean>;
   strategy: ConfigValue<Strategy>;
   logger: Logger | undefined;
@@ -62,6 +63,7 @@ export function normalizeOptions(
     tag: setValue(options.tag, defaultTag, validateTag),
     access: setValue(options.access, defaultAccess, validateAccess),
     provenance: setValue(options.provenance, defaultProvenance, Boolean),
+    ignoreScripts: setValue(options.ignoreScripts, true, Boolean),
     dryRun: setValue(options.dryRun, false, Boolean),
     strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
     logger: options.logger,

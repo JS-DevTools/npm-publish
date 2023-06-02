@@ -24,7 +24,11 @@ describe("compareAndPublish", () => {
   } as PackageManifest;
 
   const logger = { debug: (message: string) => void message } as Logger;
-  const normalizedOptions = { token: "abc123", logger } as NormalizedOptions;
+  const normalizedOptions = {
+    token: "abc123",
+    ignoreScripts: { value: false },
+    logger,
+  } as NormalizedOptions;
   const environment = { foo: "bar" };
   const npmViewResult = { versions: ["0.0.1"], "dist-tags": {} };
   const npmPublishResult = { id: "fizzbuzz@1.2.3", files: [] };
@@ -36,14 +40,24 @@ describe("compareAndPublish", () => {
     td.when(getPublishArguments(".", normalizedOptions)).thenReturn(["."]);
 
     td.when(
-      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: npmViewResult,
       errorCode: undefined,
       error: undefined,
     });
 
-    td.when(callNpmCli("publish", ["."], { logger, environment })).thenResolve({
+    td.when(
+      callNpmCli("publish", ["."], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
+    ).thenResolve({
       successData: npmPublishResult,
       errorCode: undefined,
       error: undefined,
@@ -107,7 +121,11 @@ describe("compareAndPublish", () => {
 
   it("should handle an E404 from npm view", async () => {
     td.when(
-      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: undefined,
       errorCode: "E404",
@@ -135,7 +153,11 @@ describe("compareAndPublish", () => {
 
   it("should raise a non-E404 from npm view", async () => {
     td.when(
-      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: undefined,
       errorCode: "E500",
@@ -152,7 +174,13 @@ describe("compareAndPublish", () => {
   });
 
   it("should allow an EPUBLISHCONFLICT from npm publish", async () => {
-    td.when(callNpmCli("publish", ["."], { logger, environment })).thenResolve({
+    td.when(
+      callNpmCli("publish", ["."], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
+    ).thenResolve({
       successData: undefined,
       errorCode: "EPUBLISHCONFLICT",
       error: new errors.NpmCallError("publish", 1, "oh no"),
@@ -173,7 +201,13 @@ describe("compareAndPublish", () => {
   });
 
   it("should raise a non-EPUBLISHCONFLIG from npm publish", async () => {
-    td.when(callNpmCli("publish", ["."], { logger, environment })).thenResolve({
+    td.when(
+      callNpmCli("publish", ["."], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
+    ).thenResolve({
       successData: undefined,
       errorCode: "E500",
       error: new errors.NpmCallError("publish", 1, "oh no"),
@@ -194,7 +228,11 @@ describe("compareAndPublish", () => {
     ]);
 
     td.when(
-      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: undefined,
       errorCode: undefined,
@@ -202,7 +240,11 @@ describe("compareAndPublish", () => {
     });
 
     td.when(
-      callNpmCli("view", ["fizzbuzz@cool-tag"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz@cool-tag"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: npmViewResult,
       errorCode: undefined,
@@ -229,7 +271,11 @@ describe("compareAndPublish", () => {
     ]);
 
     td.when(
-      callNpmCli("view", ["fizzbuzz"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: undefined,
       errorCode: undefined,
@@ -237,7 +283,11 @@ describe("compareAndPublish", () => {
     });
 
     td.when(
-      callNpmCli("view", ["fizzbuzz@cool-tag"], { logger, environment })
+      callNpmCli("view", ["fizzbuzz@cool-tag"], {
+        logger,
+        environment,
+        ignoreScripts: false,
+      })
     ).thenResolve({
       successData: undefined,
       errorCode: "E500",

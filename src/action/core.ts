@@ -45,10 +45,14 @@ export function getRequiredSecretInput(name: string): string {
  * Get a boolean input by name.
  *
  * @param name Input name
- * @returns True if value is "true", false if not
+ * @returns True if value is "true", false if "false", undefined if unset
  */
-export function getBooleanInput(name: string): boolean {
-  return ghGetInput(name) === "true";
+export function getBooleanInput(name: string): boolean | undefined {
+  const inputString = ghGetInput(name).toLowerCase();
+
+  if (inputString === "true") return true;
+  if (inputString === "false") return false;
+  return undefined;
 }
 
 /**
