@@ -191,7 +191,7 @@ var require_semver = __commonJS({
             version2 = version2.version;
           }
         } else if (typeof version2 !== "string") {
-          throw new TypeError(`Invalid Version: ${require("util").inspect(version2)}`);
+          throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version2}".`);
         }
         if (version2.length > MAX_LENGTH) {
           throw new TypeError(
@@ -2473,9 +2473,9 @@ var require_high_level_opt = __commonJS({
   }
 });
 
-// node_modules/tar/node_modules/minipass/index.js
+// node_modules/minipass/index.js
 var require_minipass = __commonJS({
-  "node_modules/tar/node_modules/minipass/index.js"(exports, module2) {
+  "node_modules/minipass/index.js"(exports) {
     "use strict";
     var proc = typeof process === "object" && process ? process : {
       stdout: null,
@@ -3076,7 +3076,7 @@ var require_minipass = __commonJS({
         typeof s.write === "function" && typeof s.end === "function"));
       }
     };
-    module2.exports = Minipass;
+    exports.Minipass = Minipass;
   }
 });
 
@@ -3996,10 +3996,10 @@ var require_normalize_windows_path = __commonJS({
 var require_read_entry = __commonJS({
   "node_modules/tar/lib/read-entry.js"(exports, module2) {
     "use strict";
-    var MiniPass = require_minipass();
+    var { Minipass } = require_minipass();
     var normPath = require_normalize_windows_path();
     var SLURP = Symbol("slurp");
-    module2.exports = class ReadEntry extends MiniPass {
+    module2.exports = class ReadEntry extends Minipass {
       constructor(header, ex, gex) {
         super();
         this.pause();
@@ -4657,7 +4657,7 @@ var require_mode_fix = __commonJS({
 var require_write_entry = __commonJS({
   "node_modules/tar/lib/write-entry.js"(exports, module2) {
     "use strict";
-    var MiniPass = require_minipass();
+    var { Minipass } = require_minipass();
     var Pax = require_pax();
     var Header = require_header();
     var fs3 = require("fs");
@@ -4695,7 +4695,7 @@ var require_write_entry = __commonJS({
     var winchars = require_winchars();
     var stripAbsolutePath = require_strip_absolute_path();
     var modeFix = require_mode_fix();
-    var WriteEntry = warner(class WriteEntry extends MiniPass {
+    var WriteEntry = warner(class WriteEntry extends Minipass {
       constructor(p, opt) {
         opt = opt || {};
         super(opt);
@@ -5011,7 +5011,7 @@ var require_write_entry = __commonJS({
         cb();
       }
     };
-    var WriteEntryTar = warner(class WriteEntryTar extends MiniPass {
+    var WriteEntryTar = warner(class WriteEntryTar extends Minipass {
       constructor(readEntry, opt) {
         opt = opt || {};
         super(opt);
@@ -5134,7 +5134,7 @@ var require_pack = __commonJS({
         this.piped = false;
       }
     };
-    var MiniPass = require_minipass();
+    var { Minipass } = require_minipass();
     var zlib = require_minizlib();
     var ReadEntry = require_read_entry();
     var WriteEntry = require_write_entry();
@@ -5166,7 +5166,7 @@ var require_pack = __commonJS({
     var path3 = require("path");
     var warner = require_warn_mixin();
     var normPath = require_normalize_windows_path();
-    var Pack = warner(class Pack extends MiniPass {
+    var Pack = warner(class Pack extends Minipass {
       constructor(opt) {
         super(opt);
         opt = opt || /* @__PURE__ */ Object.create(null);
@@ -7786,7 +7786,7 @@ var require_normalize_unicode = __commonJS({
     var { hasOwnProperty } = Object.prototype;
     module2.exports = (s) => {
       if (!hasOwnProperty.call(normalizeCache, s)) {
-        normalizeCache[s] = s.normalize("NFKD");
+        normalizeCache[s] = s.normalize("NFD");
       }
       return normalizeCache[s];
     };
@@ -7876,7 +7876,7 @@ var require_path_reservations = __commonJS({
       };
       const reserve = (paths, fn) => {
         paths = isWindows ? ["win32 parallelization disabled"] : paths.map((p) => {
-          return normalize(stripSlashes(join(p))).toLowerCase();
+          return stripSlashes(join(normalize(p))).toLowerCase();
         });
         const dirs = new Set(
           paths.map((path3) => getDirs(path3)).reduce((a, b) => a.concat(b))
@@ -7987,7 +7987,7 @@ var require_unpack = __commonJS({
       fs3.unlinkSync(name);
     };
     var uint32 = (a, b, c) => a === a >>> 0 ? a : b === b >>> 0 ? b : c;
-    var cacheKeyNormalize = (path4) => normalize(stripSlash(normPath(path4))).toLowerCase();
+    var cacheKeyNormalize = (path4) => stripSlash(normPath(normalize(path4))).toLowerCase();
     var pruneCache = (cache, abs) => {
       abs = cacheKeyNormalize(abs);
       for (const path4 of cache.keys()) {
