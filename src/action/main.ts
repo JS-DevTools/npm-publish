@@ -30,4 +30,11 @@ async function run(): Promise<void> {
   core.setOutput("dry-run", results.dryRun);
 }
 
-run().catch((error: Error) => core.setFailed(error));
+/** Main action entry point. */
+export async function main(): Promise<void> {
+  try {
+    await run();
+  } catch (error) {
+    core.setFailed(error);
+  }
+}

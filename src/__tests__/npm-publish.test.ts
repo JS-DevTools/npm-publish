@@ -1,6 +1,5 @@
-import { vi, describe, it, afterEach, expect } from "vitest";
-import { imitateEsm, reset } from "testdouble-vitest";
-import * as td from "testdouble";
+import { vi, describe, it, expect } from "vitest";
+import { when } from "vitest-when";
 
 import * as subject from "../npm-publish.js";
 import { readManifest, type PackageManifest } from "../read-manifest.js";
@@ -15,16 +14,12 @@ import {
 } from "../compare-and-publish/index.js";
 import type { Logger, Options } from "../options.js";
 
-vi.mock("../read-manifest", () => imitateEsm("../read-manifest"));
-vi.mock("../normalize-options", () => imitateEsm("../normalize-options"));
-vi.mock("../npm", () => imitateEsm("../npm"));
-vi.mock("../compare-and-publish", () => imitateEsm("../compare-and-publish"));
+vi.mock("../read-manifest");
+vi.mock("../normalize-options");
+vi.mock("../npm");
+vi.mock("../compare-and-publish");
 
 describe("npmPublish", () => {
-  afterEach(() => {
-    reset();
-  });
-
   it("should read the manifest, get publish config, compare, and publish", async () => {
     const options: Options = { package: "./cool-package", token: "abc123" };
 
@@ -46,11 +41,13 @@ describe("npmPublish", () => {
       oldVersion: "0.1.2",
     };
 
-    td.when(readManifest("./cool-package")).thenResolve(manifest);
-    td.when(normalizeOptions(manifest, options)).thenReturn(normalizedOptions);
-    td.when(
-      useNpmEnvironment(manifest, normalizedOptions, compareAndPublish)
-    ).thenResolve(publishResult);
+    when(readManifest).calledWith("./cool-package").thenResolve(manifest);
+    when(normalizeOptions)
+      .calledWith(manifest, options)
+      .thenReturn(normalizedOptions);
+    when(useNpmEnvironment<PublishResult>)
+      .calledWith(manifest, normalizedOptions, compareAndPublish)
+      .thenResolve(publishResult);
 
     const result = await subject.npmPublish(options);
 
