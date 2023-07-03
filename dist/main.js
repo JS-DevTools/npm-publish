@@ -10894,6 +10894,13 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
+// src/action/main.ts
+var main_exports = {};
+__export(main_exports, {
+  main: () => main
+});
+module.exports = __toCommonJS(main_exports);
+
 // src/options.ts
 var ACCESS_PUBLIC = "public";
 var ACCESS_RESTRICTED = "restricted";
@@ -11450,5 +11457,15 @@ async function run() {
   setOutput("strategy", results.strategy);
   setOutput("dry-run", results.dryRun);
 }
-run().catch((error) => setFailed(error));
+async function main() {
+  try {
+    await run();
+  } catch (error) {
+    setFailed(error);
+  }
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  main
+});
 //# sourceMappingURL=main.js.map

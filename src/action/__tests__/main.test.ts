@@ -1,37 +1,41 @@
-import { vi, describe, it, beforeEach, afterEach } from "vitest";
-import { imitateEsm, reset } from "testdouble-vitest";
-import * as td from "testdouble";
+import { vi, describe, it, beforeEach, expect } from "vitest";
+import { when } from "vitest-when";
 
 import { npmPublish } from "../../index.js";
 import * as core from "../core.js";
+import * as subject from "../main.js";
 
-vi.mock("../../index", () => imitateEsm("../../index"));
-vi.mock("../core", () => imitateEsm("../core"));
+vi.mock("../../index");
+vi.mock("../core");
 
 describe("run", () => {
   beforeEach(() => {
     vi.stubEnv("RUNNER_TEMP", "/path/to/temp");
 
-    td.when(core.getRequiredSecretInput("token")).thenReturn("abc123");
-    td.when(core.getInput("package")).thenReturn("./package.json");
-    td.when(core.getInput("registry")).thenReturn("https://example.com");
-    td.when(core.getInput("tag")).thenReturn("next");
-    td.when(core.getInput("access")).thenReturn("restricted");
-    td.when(core.getBooleanInput("provenance")).thenReturn(true);
-    td.when(core.getInput("strategy")).thenReturn("all");
-    td.when(core.getBooleanInput("ignore-scripts")).thenReturn(false);
-    td.when(core.getBooleanInput("dry-run")).thenReturn(true);
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    vi.resetModules();
-    reset();
+    when(core.getRequiredSecretInput).calledWith("token").thenReturn("abc123");
+    when(core.getInput<string>)
+      .calledWith("package")
+      .thenReturn("./package.json");
+    when(core.getInput<string>)
+      .calledWith("registry")
+      .thenReturn("https://example.com");
+    when(core.getInput<string>)
+      .calledWith("tag")
+      .thenReturn("next");
+    when(core.getInput<string>)
+      .calledWith("access")
+      .thenReturn("restricted");
+    when(core.getBooleanInput).calledWith("provenance").thenReturn(true);
+    when(core.getInput<string>)
+      .calledWith("strategy")
+      .thenReturn("all");
+    when(core.getBooleanInput).calledWith("ignore-scripts").thenReturn(false);
+    when(core.getBooleanInput).calledWith("dry-run").thenReturn(true);
   });
 
   it("should pass input to options", async () => {
-    td.when(
-      npmPublish({
+    when(npmPublish)
+      .calledWith({
         token: "abc123",
         package: "./package.json",
         registry: "https://example.com",
@@ -44,38 +48,41 @@ describe("run", () => {
         logger: core.logger,
         temporaryDirectory: "/path/to/temp",
       })
-    ).thenResolve({
-      id: "cool-package@1.2.3",
-      name: "cool-package",
-      version: "1.2.3",
-      type: "major",
-      oldVersion: "0.1.2",
-      registry: new URL("https://example.com/registry"),
-      tag: "latest",
-      access: "public",
-      strategy: "upgrade",
-      dryRun: false,
-    });
+      .thenResolve({
+        id: "cool-package@1.2.3",
+        name: "cool-package",
+        version: "1.2.3",
+        type: "major",
+        oldVersion: "0.1.2",
+        registry: new URL("https://example.com/registry"),
+        tag: "latest",
+        access: "public",
+        strategy: "upgrade",
+        dryRun: false,
+      });
 
-    await import("../main.js");
+    await subject.main();
 
-    td.verify(core.setOutput("id", "cool-package@1.2.3", ""));
-    td.verify(core.setOutput("name", "cool-package"));
-    td.verify(core.setOutput("version", "1.2.3"));
-    td.verify(core.setOutput("type", "major", ""));
-    td.verify(core.setOutput("old-version", "0.1.2", ""));
-    td.verify(core.setOutput("registry", "https://example.com/registry"));
-    td.verify(core.setOutput("tag", "latest"));
-    td.verify(core.setOutput("access", "public", "default"));
-    td.verify(core.setOutput("strategy", "upgrade"));
-    td.verify(core.setOutput("dry-run", false));
+    expect(core.setOutput).toHaveBeenCalledWith("id", "cool-package@1.2.3", "");
+    expect(core.setOutput).toHaveBeenCalledWith("name", "cool-package");
+    expect(core.setOutput).toHaveBeenCalledWith("version", "1.2.3");
+    expect(core.setOutput).toHaveBeenCalledWith("type", "major", "");
+    expect(core.setOutput).toHaveBeenCalledWith("old-version", "0.1.2", "");
+    expect(core.setOutput).toHaveBeenCalledWith(
+      "registry",
+      "https://example.com/registry"
+    );
+    expect(core.setOutput).toHaveBeenCalledWith("tag", "latest");
+    expect(core.setOutput).toHaveBeenCalledWith("access", "public", "default");
+    expect(core.setOutput).toHaveBeenCalledWith("strategy", "upgrade");
+    expect(core.setOutput).toHaveBeenCalledWith("dry-run", false);
   });
 
   it("should fail the action if something raises", async () => {
     const error = new Error("oh no");
 
-    td.when(
-      npmPublish({
+    when(npmPublish)
+      .calledWith({
         token: "abc123",
         package: "./package.json",
         registry: "https://example.com",
@@ -88,10 +95,10 @@ describe("run", () => {
         logger: core.logger,
         temporaryDirectory: "/path/to/temp",
       })
-    ).thenReject(error);
+      .thenReject(error);
 
-    await import("../main.js");
+    await subject.main();
 
-    td.verify(core.setFailed(error), { times: 1 });
+    expect(core.setFailed).toHaveBeenCalledWith(error);
   });
 });
