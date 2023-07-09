@@ -131,8 +131,35 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
 ```
 
+You can also publish to third-party registries. For example, to publish to the [GitHub Package Registry][], set `token` to `secrets.GITHUB_TOKEN` and `registry` to `https://npm.pkg.github.com`:
+
+```yaml
+on:
+  push:
+    branches: main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # allow GITHUB_TOKEN to publish packages
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - run: npm ci
+      - run: npm test
+      - uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: "https://npm.pkg.github.com"
+```
+
 [workflow file]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions
 [npm authentication token]: https://docs.npmjs.com/creating-and-viewing-authentication-tokens
+[GitHub Package Registry]: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry
 
 ### Usage
 
@@ -169,8 +196,7 @@ steps:
       token: ${{ secrets.NPM_TOKEN }}
 
   - if: ${{ steps.publish.outputs.type }}
-    run: |
-      echo "Version changed!"
+    run: echo "Version changed!"
 ```
 
 | Name          | Type    | Description                                                                                                   |
