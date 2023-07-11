@@ -11181,7 +11181,7 @@ var NPM = import_node_os3.default.platform() === "win32" ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
 async function callNpmCli(command, cliArguments, options) {
-  var _a, _b;
+  var _a;
   const { stdout, stderr, exitCode } = await execNpm(
     [command, ...baseArguments(options), ...cliArguments],
     options.environment,
@@ -11197,7 +11197,9 @@ async function callNpmCli(command, cliArguments, options) {
       stdout,
       stderr
     );
-    errorCode = (_b = (_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) == null ? void 0 : _b.toUpperCase();
+    if ((_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) {
+      errorCode = String(errorPayload.error.code).toUpperCase();
+    }
     error = new NpmCallError(command, exitCode, stderr);
   }
   return { successData, errorCode, error };

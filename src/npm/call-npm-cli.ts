@@ -71,12 +71,15 @@ export async function callNpmCli<CommandT extends Command>(
   if (exitCode === 0) {
     successData = parseJson<SuccessData<CommandT>>(stdout);
   } else {
-    const errorPayload = parseJson<{ error?: { code?: string | null } }>(
+    const errorPayload = parseJson<{ error?: { code?: unknown } }>(
       stdout,
       stderr
     );
 
-    errorCode = errorPayload?.error?.code?.toUpperCase();
+    if (errorPayload?.error?.code) {
+      errorCode = String(errorPayload.error.code).toUpperCase();
+    }
+
     error = new errors.NpmCallError(command, exitCode, stderr);
   }
 
