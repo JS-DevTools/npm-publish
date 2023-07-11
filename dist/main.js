@@ -11216,6 +11216,9 @@ async function execNpm(commandArguments, environment, logger2) {
     npm.stdout.on("data", (data) => stdout += data);
     npm.stderr.on("data", (data) => stderr += data);
     npm.on("close", (code) => {
+      var _a2, _b;
+      (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `Received stdout: ${stdout}`);
+      (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `Received stderr: ${stderr}`);
       resolve({
         stdout: stdout.trim(),
         stderr: stderr.trim(),
