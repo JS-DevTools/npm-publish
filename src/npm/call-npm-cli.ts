@@ -112,6 +112,9 @@ async function execNpm(
     npm.stdout.on("data", (data) => (stdout += data));
     npm.stderr.on("data", (data) => (stderr += data));
     npm.on("close", (code) => {
+      logger?.debug?.(`Received stdout: ${stdout}`);
+      logger?.debug?.(`Received stderr: ${stderr}`);
+
       resolve({
         stdout: stdout.trim(),
         stderr: stderr.trim(),
