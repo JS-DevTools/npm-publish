@@ -11181,7 +11181,7 @@ var NPM = import_node_os3.default.platform() === "win32" ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
 async function callNpmCli(command, cliArguments, options) {
-  var _a, _b;
+  var _a;
   const { stdout, stderr, exitCode } = await execNpm(
     [command, ...baseArguments(options), ...cliArguments],
     options.environment,
@@ -11197,7 +11197,9 @@ async function callNpmCli(command, cliArguments, options) {
       stdout,
       stderr
     );
-    errorCode = (_b = (_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) == null ? void 0 : _b.toUpperCase();
+    if ((_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) {
+      errorCode = String(errorPayload.error.code).toUpperCase();
+    }
     error = new NpmCallError(command, exitCode, stderr);
   }
   return { successData, errorCode, error };
@@ -11214,6 +11216,9 @@ async function execNpm(commandArguments, environment, logger2) {
     npm.stdout.on("data", (data) => stdout += data);
     npm.stderr.on("data", (data) => stderr += data);
     npm.on("close", (code) => {
+      var _a2, _b;
+      (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `Received stdout: ${stdout}`);
+      (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `Received stderr: ${stderr}`);
       resolve({
         stdout: stdout.trim(),
         stderr: stderr.trim(),
