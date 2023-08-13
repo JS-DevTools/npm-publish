@@ -76,7 +76,11 @@ var require_debug = __commonJS({
 // node_modules/semver/internal/re.js
 var require_re = __commonJS({
   "node_modules/semver/internal/re.js"(exports, module2) {
-    var { MAX_SAFE_COMPONENT_LENGTH, MAX_SAFE_BUILD_LENGTH } = require_constants();
+    var {
+      MAX_SAFE_COMPONENT_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      MAX_LENGTH
+    } = require_constants();
     var debug = require_debug();
     exports = module2.exports = {};
     var re = exports.re = [];
@@ -87,7 +91,7 @@ var require_re = __commonJS({
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
       ["\\s", 1],
-      ["\\d", MAX_SAFE_COMPONENT_LENGTH],
+      ["\\d", MAX_LENGTH],
       [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH]
     ];
     var makeSafeRegex = (value) => {
@@ -1459,7 +1463,7 @@ var require_range = __commonJS({
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
         this.raw = range.trim().split(/\s+/).join(" ");
-        this.set = this.raw.split("||").map((r) => this.parseRange(r)).filter((c) => c.length);
+        this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
         if (!this.set.length) {
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
         }
