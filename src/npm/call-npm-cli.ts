@@ -11,13 +11,13 @@ export interface NpmCliOptions {
   logger?: Logger | undefined;
 }
 
-export interface NpmCallResult<CommandT extends Command> {
+export interface NpmCallResult<CommandT extends string> {
   successData: SuccessData<CommandT> | undefined;
   errorCode: string | undefined;
   error: Error | undefined;
 }
 
-type SuccessData<T extends Command> = T extends typeof VIEW
+type SuccessData<T extends string> = T extends typeof VIEW
   ? NpmViewData
   : T extends typeof PUBLISH
   ? NpmPublishData
@@ -32,7 +32,6 @@ export interface NpmPublishData {
   files: { path: string; size: number }[];
 }
 
-export type Command = typeof VIEW | typeof PUBLISH | string;
 export const VIEW = "view";
 export const PUBLISH = "publish";
 
@@ -53,7 +52,7 @@ const baseArguments = (options: NpmCliOptions) =>
  * @param options Customize environment variables or add an error handler.
  * @returns The parsed JSON, or stdout if unparsable.
  */
-export async function callNpmCli<CommandT extends Command>(
+export async function callNpmCli<CommandT extends string>(
   command: CommandT,
   cliArguments: string[],
   options: NpmCliOptions
