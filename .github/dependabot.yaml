@@ -8,6 +8,11 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      lint:
+        patterns:
+          - "*eslint*"
+          - "*prettier*"
 
   # Update GitHub Actions dependencies
   - package-ecosystem: "github-actions"
