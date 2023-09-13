@@ -38,6 +38,20 @@ describe("readManifest", () => {
     });
   });
 
+  it("should normalize the version field", async () => {
+    await fs.writeFile(
+      path.join(directory, "package.json"),
+      JSON.stringify({ name: "cool-name", version: "v1.2.3" }),
+      "utf8"
+    );
+
+    const result = await subject.readManifest(
+      path.join(directory, "package.json")
+    );
+
+    expect(result).toMatchObject({ version: "1.2.3" });
+  });
+
   it("should read a package.json file in a directory", async () => {
     await fs.writeFile(
       path.join(directory, "package.json"),

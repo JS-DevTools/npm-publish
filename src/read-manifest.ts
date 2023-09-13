@@ -39,8 +39,8 @@ const isTarball = (file: unknown): file is string => {
   return typeof file === "string" && path.extname(file) === TARBALL_EXTNAME;
 };
 
-const isVersion = (version: unknown): version is string => {
-  return semverValid(version as string) !== null;
+const validateVersion = (version: unknown): string | undefined => {
+  return semverValid(version as string) ?? undefined;
 };
 
 const readPackageJson = async (...pathSegments: string[]): Promise<string> => {
@@ -110,7 +110,7 @@ export async function readManifest(
   try {
     manifestJson = JSON.parse(manifestContents) as Record<string, unknown>;
     name = manifestJson["name"];
-    version = manifestJson["version"];
+    version = validateVersion(manifestJson["version"]);
     publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
     throw new errors.PackageJsonParseError(packageSpec, error);
@@ -120,7 +120,7 @@ export async function readManifest(
     throw new errors.InvalidPackageNameError(name);
   }
 
-  if (!isVersion(version)) {
+  if (typeof version !== "string") {
     throw new errors.InvalidPackageVersionError(version);
   }
 
