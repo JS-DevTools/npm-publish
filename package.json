@@ -60,7 +60,7 @@
     "@typescript-eslint/parser": "^6.7.0",
     "@vitest/coverage-istanbul": "^0.32.4",
     "concurrently": "^8.0.1",
-    "esbuild": "^0.18.11",
+    "esbuild": "^0.19.2",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-import-resolver-typescript": "^3.6.0",
