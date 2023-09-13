@@ -11038,8 +11038,8 @@ var isDirectory = (file) => {
 var isTarball = (file) => {
   return typeof file === "string" && import_node_path.default.extname(file) === TARBALL_EXTNAME;
 };
-var isVersion = (version2) => {
-  return (0, import_semver.valid)(version2) !== null;
+var validateVersion = (version2) => {
+  return (0, import_semver.valid)(version2) ?? void 0;
 };
 var readPackageJson = async (...pathSegments) => {
   const file = import_node_path.default.resolve(...pathSegments);
@@ -11092,7 +11092,7 @@ async function readManifest(packagePath) {
   try {
     manifestJson = JSON.parse(manifestContents);
     name = manifestJson["name"];
-    version2 = manifestJson["version"];
+    version2 = validateVersion(manifestJson["version"]);
     publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
     throw new PackageJsonParseError(packageSpec, error);
@@ -11100,7 +11100,7 @@ async function readManifest(packagePath) {
   if (typeof name !== "string" || name.length === 0) {
     throw new InvalidPackageNameError(name);
   }
-  if (!isVersion(version2)) {
+  if (typeof version2 !== "string") {
     throw new InvalidPackageVersionError(version2);
   }
   if (typeof publishConfig !== "object" || Array.isArray(publishConfig) || !publishConfig) {
