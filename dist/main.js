@@ -5211,14 +5211,25 @@ var require_pack = __commonJS({
         }
         this.portable = !!opt.portable;
         this.zip = null;
-        if (opt.gzip) {
-          if (typeof opt.gzip !== "object") {
-            opt.gzip = {};
+        if (opt.gzip || opt.brotli) {
+          if (opt.gzip && opt.brotli) {
+            throw new TypeError("gzip and brotli are mutually exclusive");
           }
-          if (this.portable) {
-            opt.gzip.portable = true;
+          if (opt.gzip) {
+            if (typeof opt.gzip !== "object") {
+              opt.gzip = {};
+            }
+            if (this.portable) {
+              opt.gzip.portable = true;
+            }
+            this.zip = new zlib.Gzip(opt.gzip);
           }
-          this.zip = new zlib.Gzip(opt.gzip);
+          if (opt.brotli) {
+            if (typeof opt.brotli !== "object") {
+              opt.brotli = {};
+            }
+            this.zip = new zlib.BrotliCompress(opt.brotli);
+          }
           this.zip.on("data", (chunk) => super.write(chunk));
           this.zip.on("end", (_) => super.end());
           this.zip.on("drain", (_) => this[ONDRAIN]());
@@ -6467,6 +6478,8 @@ var require_parse2 = __commonJS({
         this.strict = !!opt.strict;
         this.maxMetaEntrySize = opt.maxMetaEntrySize || maxMetaEntrySize;
         this.filter = typeof opt.filter === "function" ? opt.filter : noop;
+        const isTBR = opt.file && (opt.file.endsWith(".tar.br") || opt.file.endsWith(".tbr"));
+        this.brotli = !opt.gzip && opt.brotli !== void 0 ? opt.brotli : isTBR ? void 0 : false;
         this.writable = true;
         this.readable = false;
         this[QUEUE] = new Yallist();
@@ -6668,7 +6681,8 @@ var require_parse2 = __commonJS({
         if (this[ABORTED]) {
           return;
         }
-        if (this[UNZIP] === null && chunk) {
+        const needSniff = this[UNZIP] === null || this.brotli === void 0 && this[UNZIP] === false;
+        if (needSniff && chunk) {
           if (this[BUFFER]) {
             chunk = Buffer.concat([this[BUFFER], chunk]);
             this[BUFFER] = null;
@@ -6682,10 +6696,28 @@ var require_parse2 = __commonJS({
               this[UNZIP] = false;
             }
           }
-          if (this[UNZIP] === null) {
+          const maybeBrotli = this.brotli === void 0;
+          if (this[UNZIP] === false && maybeBrotli) {
+            if (chunk.length < 512) {
+              if (this[ENDED]) {
+                this.brotli = true;
+              } else {
+                this[BUFFER] = chunk;
+                return true;
+              }
+            } else {
+              try {
+                new Header(chunk.slice(0, 512));
+                this.brotli = false;
+              } catch (_) {
+                this.brotli = true;
+              }
+            }
+          }
+          if (this[UNZIP] === null || this[UNZIP] === false && this.brotli) {
             const ended = this[ENDED];
             this[ENDED] = false;
-            this[UNZIP] = new zlib.Unzip();
+            this[UNZIP] = this[UNZIP] === null ? new zlib.Unzip() : new zlib.BrotliDecompress();
             this[UNZIP].on("data", (chunk2) => this[CONSUMECHUNK](chunk2));
             this[UNZIP].on("error", (er) => this.abort(er));
             this[UNZIP].on("end", (_) => {
@@ -6792,6 +6824,8 @@ var require_parse2 = __commonJS({
             this[UNZIP].end(chunk);
           } else {
             this[ENDED] = true;
+            if (this.brotli === void 0)
+              chunk = chunk || Buffer.alloc(0);
             this.write(chunk);
           }
         }
@@ -7024,7 +7058,7 @@ var require_replace = __commonJS({
       if (!opt.file) {
         throw new TypeError("file is required");
       }
-      if (opt.gzip) {
+      if (opt.gzip || opt.brotli || opt.file.endsWith(".br") || opt.file.endsWith(".tbr")) {
         throw new TypeError("cannot append to compressed archives");
       }
       if (!files || !Array.isArray(files) || !files.length) {
@@ -7235,7 +7269,7 @@ var require_update = __commonJS({
       if (!opt.file) {
         throw new TypeError("file is required");
       }
-      if (opt.gzip) {
+      if (opt.gzip || opt.brotli || opt.file.endsWith(".br") || opt.file.endsWith(".tbr")) {
         throw new TypeError("cannot append to compressed archives");
       }
       if (!files || !Array.isArray(files) || !files.length) {
@@ -10294,7 +10328,7 @@ var require_oidc_utils = __commonJS({
  
         Error Code : ${error.statusCode}
  
-        Error Message: ${error.result.message}`);
+        Error Message: ${error.message}`);
           });
           const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
