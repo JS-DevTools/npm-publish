@@ -316,7 +316,7 @@ The `check-version` and `greater-version-only` boolean options have been replace
 +   strategy: upgrade
 ```
 
-`check-version: false` has been removed, because the version checking is the primary reason you would use this action - to facilitate continuous deployment from a branch. If you were using `check-version: false`, and/or you're deploying from a tag or other mechanism to ensure release uniqueness, [you can use `npm` directly][publishing-nodejs-packages]:
+`check-version: false` has been removed, because version checking is the primary reason you would use this action - to facilitate continuous deployment from a branch, where any commit may bump the version. If you were using `check-version: false` and/or deploying from a tag or other mechanism to ensure release uniqueness, [use `npm` directly][publishing-nodejs-packages] instead:
 
 ```diff
   - uses: actions/setup-node@v3
