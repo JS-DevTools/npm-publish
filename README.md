@@ -6,7 +6,13 @@
 [![License](https://img.shields.io/npm/l/@jsdevtools/npm-publish.svg)](LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/JS-DevTools/npm-publish)
 
-Publish your packages to npm automatically in GitHub Actions by updating the version number.
+Publish packages to npm automatically in GitHub Actions by updating the version number.
+
+- [Change log][releases]
+- [v2 to v3 migration guide](#v2-to-v3)
+- [v1 to v2 migration guide](#v1-to-v2)
+
+[releases]: https://github.com/JS-DevTools/npm-publis/releases
 
 ## Features
 
@@ -17,7 +23,7 @@ Publish your packages to npm automatically in GitHub Actions by updating the ver
   Customize the version-checking behavior, the registry URL, and path of your package.
 
 - 🔐 **Secure**<br>
-  Keeps your npm authentication token secret. Doesn't read from or write to `~/.npmrc`.
+  Keeps your npm authentication token secret. Doesn't read nor write to `~/.npmrc`.
 
 - ⚡ **Fast**<br>
   100% JavaScript (which is faster than Docker) and bundled to optimize loading time.
@@ -35,78 +41,6 @@ This package can be used three different ways:
 
 - 🖥 A [**CLI**](#command-line-interface) that you run in your terminal
 
-## v2 Migration Guide
-
-The v1 to v2 upgrade brought a few notable **breaking changes**. To migrate, make the following updates:
-
-- The `type` output is now an empty string instead of `'none'` when no release occurs
-  ```diff
-    - run: echo "Version changed!"
-  -   if: ${{ steps.publish.outputs.type != 'none' }}
-  +   if: ${{ steps.publish.outputs.type }}
-  ```
-- The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - run them explicitly or set the `ignore-scripts` input to `false`.
-  ```diff
-    with:
-      token: ${{ secrets.NPM_TOKEN }}
-  +   ignore-scripts: false
-  ```
-- The workflow's `.npmrc` file is no longer modified. If you have any workarounds to adjust for this misbehavior - for example, if you're using `actions/setup-node` to configure `.npmrc` - you should remove them.
-
-  ```diff
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        registry-url: https://registry.npmjs.org/
-
-    - uses: JS-DevTools/npm-publish@v1
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-
-    - name: Do some more stuff with npm
-      run: npm whoami
-      env:
-  -     INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
-  +     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  ```
-
-- The `check-version` and `greater-version-only` options have been removed and replaced with `strategy`.
-  - Use `strategy: all` (default) to publish all versions that do not yet exist in the registry.
-    ```diff
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-    -   check-version: true
-    -   greater-version-only: false
-    +   strategy: all
-    ```
-  - Use `strategy: upgrade` to only publish versions that upgrade the selected tag.
-    ```diff
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-    -   check-version: true
-    -   greater-version-only: true
-    +   strategy: upgrade
-    ```
-  - `check-version: false` has been removed. You may not need this action if you're not checking already published versions; [you can `npm` directly][publishing-nodejs-packages], instead.
-    ```diff
-    - - uses: JS-DevTools/npm-publish@v1
-    -   with:
-    -     token: ${{ secrets.NPM_TOKEN }}
-    -     check-version: false
-    + - uses: actions/setup-node@v3
-    +   with:
-    +     node-version: '18'
-    +     registry-url: https://registry.npmjs.org/
-    + - run: npm publish
-    +   env:
-    +     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    ```
-
-See the [change log][] for more details and other changes in the v2 release.
-
-[publishing-nodejs-packages]: https://docs.github.com/actions/publishing-packages/publishing-nodejs-packages
-[change log]: https://github.com/JS-DevTools/npm-publish/releases
-
 ## GitHub Action
 
 To use the GitHub Action, you'll need to add it as a step in your [workflow file][]. By default, the only thing you need to do is set the `token` parameter to your [npm authentication token][].
@@ -120,13 +54,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
       - run: npm ci
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v2
+      - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -145,13 +79,13 @@ jobs:
       contents: read
       packages: write # allow GITHUB_TOKEN to publish packages
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
       - run: npm ci
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v2
+      - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: "https://npm.pkg.github.com"
@@ -161,7 +95,7 @@ jobs:
 [npm authentication token]: https://docs.npmjs.com/creating-and-viewing-authentication-tokens
 [GitHub Package Registry]: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry
 
-### Usage
+### Action usage
 
 You can set any or all of the following input parameters using `with`:
 
@@ -184,19 +118,19 @@ You can set any or all of the following input parameters using `with`:
 [npm-access]: https://docs.npmjs.com/cli/v9/commands/npm-publish#access
 [provenance]: https://docs.npmjs.com/generating-provenance-statements
 
-### Output
+### Action output
 
-npm-publish exposes some output variables, which you can use in later steps of your workflow. To access the output variables, you'll need to set an `id` for the npm-publish step.
+npm-publish exposes several output variables, which you can use in later steps of your workflow if you provide an `id` for the npm-publish step.
 
-```yaml
-steps:
-  - id: publish
-    uses: JS-DevTools/npm-publish@v2
-    with:
-      token: ${{ secrets.NPM_TOKEN }}
+```diff
+  steps:
+    - uses: JS-DevTools/npm-publish@v3
++     id: publish
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
 
-  - if: ${{ steps.publish.outputs.type }}
-    run: echo "Version changed!"
++   - if: ${{ steps.publish.outputs.type }}
++     run: echo "Version changed!"
 ```
 
 | Name          | Type    | Description                                                                                                   |
@@ -232,7 +166,7 @@ await npmPublish({ token: "YOUR_NPM_AUTH_TOKEN_HERE" });
 
 [npm]: https://docs.npmjs.com/about-npm/
 
-### Usage
+### API usage
 
 As shown in the example above, you should pass an options object to the `npmPublish` function. In TypeScript, the `Options` interface is available as an import.
 
@@ -257,7 +191,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
 
-### Output
+### API output
 
 The `npmPublish()` function returns a promise of a `Results` object. In TypeScript, the `Results` interface is available as an import.
 
@@ -301,7 +235,7 @@ npx npm-publish --token YOUR_NPM_AUTH_TOKEN_HERE --registry http://example.com .
 
 Run `npm-publish --help` to see the full list of options available.
 
-```
+```text
 Usage:
 
   npm-publish <options> [package]
@@ -346,6 +280,105 @@ Examples:
   $ npm-publish --token abc123 ./my-package
 ```
 
+## Migration guides
+
+Major releases of the action and libraries may contain breaking changes, documented here.
+For more detailed change logs, see [releases][].
+
+### v2 to v3
+
+The v3 release does not require any changes to how you use `npm-publish`. The version of Node.js used by the action was updated to v20 due to GitHub Action's [deprecation of Node.js v16][node16-deprecation]. The minimum required version of Node.js for the library and CLI remains v16.
+
+[node16-deprecation]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
+
+### v1 to v2
+
+The v2 release made several breaking changes to inputs, outputs, and behaviors. The examples below focus on the action, but the same updates are applicable to the library and CLI, too.
+
+#### v2 option changes
+
+The `check-version` and `greater-version-only` boolean options have been replaced with the single `strategy` option:
+
+- `strategy: all` (default) will release any unpublished version
+- `strategy: upgrade` will release only if package version is a semver upgrade of the `dist-tag` (e.g. `latest`)
+
+```diff
+  with:
+    token: ${{ secrets.NPM_TOKEN }}
+-   check-version: true
+-   greater-version-only: false
++   strategy: all
+
+  with:
+    token: ${{ secrets.NPM_TOKEN }}
+-   check-version: true
+-   greater-version-only: true
++   strategy: upgrade
+```
+
+`check-version: false` has been removed, because the version checking is the primary reason you would use this action - to facilitate continuous deployment from a branch. If you were using `check-version: false`, and/or you're deploying from a tag or other mechanism to ensure release uniqueness, [you can use `npm` directly][publishing-nodejs-packages]:
+
+```diff
+  - uses: actions/setup-node@v3
+    with:
+      node-version: '18'
++     registry-url: https://registry.npmjs.org/
+
+- - uses: JS-DevTools/npm-publish@v1
+-   with:
+-     token: ${{ secrets.NPM_TOKEN }}
+-     check-version: false
++ - run: npm publish
++   env:
++     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+[publishing-nodejs-packages]: https://docs.github.com/actions/publishing-packages/publishing-nodejs-packages
+
+#### v2 output changes
+
+The `type` output is now an empty string instead of `'none'` when no release occurs
+
+```diff
+  - run: echo "Version changed!"
+-   if: ${{ steps.publish.outputs.type != 'none' }}
++   if: ${{ steps.publish.outputs.type }}
+```
+
+#### v2 behavior changes
+
+The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - we recommend you run them explicitly as a separate, explicit build step.
+
+If you can't change your build, you can set the `ignore-scripts` input to `false` as a workaround. Be aware that failures during a lifecycle script can be difficult to debug, and any `stdout`/`stderr` output from your build script could interfere with how `npm-publish` interprets results from the `npm` CLI.
+
+```diff
+  with:
+    token: ${{ secrets.NPM_TOKEN }}
++   ignore-scripts: false
+```
+
+The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously persisted][#15] in `.npmrc`. These workarounds should be removed.
+
+```diff
+  - uses: actions/setup-node@v3
+    with:
+      node-version: '18'
+      registry-url: https://registry.npmjs.org/
+
+- - uses: JS-DevTools/npm-publish@v1
++ - uses: JS-DevTools/npm-publish@v2
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+
+  - name: Do some more stuff with npm
+    run: npm whoami
+    env:
+-     INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
++     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+[#15]: https://github.com/JS-DevTools/npm-publish/issues/15
+
 ## License
 
 npm-publish is 100% free and open-source, under the [MIT license](LICENSE). Use it however you want.
@@ -359,5 +392,3 @@ Thanks to these awesome companies for their support of Open Source developers �
 [![GitHub](https://jstools.dev/img/badges/github.svg)](https://github.com/open-source)
 [![NPM](https://jstools.dev/img/badges/npm.svg)](https://www.npmjs.com/)
 [![Coveralls](https://jstools.dev/img/badges/coveralls.svg)](https://coveralls.io)
-[![Travis CI](https://jstools.dev/img/badges/travis-ci.svg)](https://travis-ci.com)
-[![SauceLabs](https://jstools.dev/img/badges/sauce-labs.svg)](https://saucelabs.com)
