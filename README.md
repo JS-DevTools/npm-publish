@@ -16,19 +16,19 @@ Publish packages to npm automatically in GitHub Actions by updating the version 
 
 ## Features
 
-- 🧠 **Smart**<br>
+- 🧠 **Smart**  
   Only publishes if the version number in `package.json` differs from the latest on npm.
 
-- 🛠 **Configurable**<br>
+- 🛠 **Configurable**  
   Customize the version-checking behavior, the registry URL, and path of your package.
 
-- 🔐 **Secure**<br>
+- 🔐 **Secure**  
   Keeps your npm authentication token secret. Doesn't read nor write to `~/.npmrc`.
 
-- ⚡ **Fast**<br>
+- ⚡ **Fast**  
   100% JavaScript (which is faster than Docker) and bundled to optimize loading time.
 
-- 📤 **Outputs**<br>
+- 📤 **Outputs**  
   Exposes the old and new version numbers, and the type of change (major, minor, patch, etc.) as variables that you can use in your workflow.
 
 ## Usage
@@ -299,8 +299,8 @@ The v2 release made several breaking changes to inputs, outputs, and behaviors. 
 
 The `check-version` and `greater-version-only` boolean options have been replaced with the single `strategy` option:
 
-- `strategy: all` (default) will release any unpublished version
-- `strategy: upgrade` will release only if package version is a semver upgrade of the `dist-tag` (e.g. `latest`)
+- `strategy: all` (default) will publish any version that does not yet exist in the registry
+- `strategy: upgrade` will publish only if the version is a semver upgrade of the requested `dist-tag`
 
 ```diff
   with:
@@ -316,7 +316,7 @@ The `check-version` and `greater-version-only` boolean options have been replace
 +   strategy: upgrade
 ```
 
-`check-version: false` has been removed, because version checking is the primary reason you would use this action - to facilitate continuous deployment from a branch, where any commit may bump the version. If you were using `check-version: false` and/or deploying from a tag or other mechanism to ensure release uniqueness, [use `npm` directly][publishing-nodejs-packages] instead:
+`check-version: false` has been removed. If you only need to publish, without first checking whether the version exists in the registry, you can [use `npm` directly][publishing-nodejs-packages] instead:
 
 ```diff
   - uses: actions/setup-node@v3
@@ -347,7 +347,16 @@ The `type` output is now an empty string instead of `'none'` when no release occ
 
 #### v2 behavior changes
 
-The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - we recommend you run them explicitly as a separate, explicit build step.
+The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - we recommend you run that logic as a separate explicit build step.
+
+```diff
++ - run: npm run build
+
+- - uses: JS-DevTools/npm-publish@v1
++ - uses: JS-DevTools/npm-publish@v2
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
+```
 
 If you can't change your build, you can set the `ignore-scripts` input to `false` as a workaround. Be aware that failures during a lifecycle script can be difficult to debug, and any `stdout`/`stderr` output from your build script could interfere with how `npm-publish` interprets results from the `npm` CLI.
 
@@ -357,7 +366,7 @@ If you can't change your build, you can set the `ignore-scripts` input to `false
 +   ignore-scripts: false
 ```
 
-The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously persisted][#15] in `.npmrc`. These workarounds should be removed.
+The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously wrote][#15] to `.npmrc`. These workarounds should be removed.
 
 ```diff
   - uses: actions/setup-node@v3
