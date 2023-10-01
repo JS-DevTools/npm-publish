@@ -13,6 +13,11 @@ updates:
         patterns:
           - "*eslint*"
           - "*prettier*"
+          - "*types*"
+      production:
+        dependency-type: "production"
+      development:
+        dependency-type: "development"
 
   # Update GitHub Actions dependencies
   - package-ecosystem: "github-actions"
