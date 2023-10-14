@@ -10,25 +10,25 @@ Publish packages to npm automatically in GitHub Actions by updating the version 
 
 - [Change log][releases]
 - [v2 to v3 migration guide](#v2-to-v3)
-- [v1 to v2 migration guide](#v1-to-v2)
+- [v1 to v3 migration guide](#v1-to-v3)
 
 [releases]: https://github.com/JS-DevTools/npm-publis/releases
 
 ## Features
 
-- 🧠 **Smart**  
+- 🧠 **Smart**
   Only publishes if the version number in `package.json` differs from the latest on npm.
 
-- 🛠 **Configurable**  
+- 🛠 **Configurable**
   Customize the version-checking behavior, the registry URL, and path of your package.
 
-- 🔐 **Secure**  
+- 🔐 **Secure**
   Keeps your npm authentication token secret. Doesn't read nor write to `~/.npmrc`.
 
-- ⚡ **Fast**  
+- ⚡ **Fast**
   100% JavaScript (which is faster than Docker) and bundled to optimize loading time.
 
-- 📤 **Outputs**  
+- 📤 **Outputs**
   Exposes the old and new version numbers, and the type of change (major, minor, patch, etc.) as variables that you can use in your workflow.
 
 ## Usage
@@ -287,17 +287,17 @@ For more detailed change logs, see [releases][].
 
 ### v2 to v3
 
-The v3 release does not require any changes to how you use `npm-publish`. The version of Node.js used by the action was updated to v20 due to GitHub Action's [deprecation of Node.js v16][node16-deprecation]. The minimum required version of Node.js for the library and CLI remains v16.
+The v3 release does not require any changes to how you use `npm-publish` from `v2`. The version of Node.js used by the action was updated to v20 due to GitHub Action's [deprecation of Node.js v16][node16-deprecation]. The minimum required version of Node.js for the library and CLI remains v16.
 
 [node16-deprecation]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
 
-### v1 to v2
+### v1 to v3
 
-The v2 release made several breaking changes to inputs, outputs, and behaviors. The examples below focus on the action, but the same updates are applicable to the library and CLI, too.
+The v2 release made several breaking changes to inputs, outputs, and behaviors that were present in `v1`. The examples below focus on the action, but the same changes are applicable to the library and CLI, too.
 
 #### v2 option changes
 
-The `check-version` and `greater-version-only` boolean options have been replaced with the single `strategy` option:
+The `check-version` and `greater-version-only` boolean options were replaced with the `strategy` option:
 
 - `strategy: all` (default) will publish any version that does not yet exist in the registry
 - `strategy: upgrade` will publish only if the version is a semver upgrade of the requested `dist-tag`
@@ -353,7 +353,7 @@ The `--ignore-scripts` option is now passed to `npm publish` as a security preca
 + - run: npm run build
 
 - - uses: JS-DevTools/npm-publish@v1
-+ - uses: JS-DevTools/npm-publish@v2
++ - uses: JS-DevTools/npm-publish@v3
     with:
       token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -361,9 +361,11 @@ The `--ignore-scripts` option is now passed to `npm publish` as a security preca
 If you can't change your build, you can set the `ignore-scripts` input to `false` as a workaround. Be aware that failures during a lifecycle script can be difficult to debug, and any `stdout`/`stderr` output from your build script could interfere with how `npm-publish` interprets results from the `npm` CLI.
 
 ```diff
-  with:
-    token: ${{ secrets.NPM_TOKEN }}
-+   ignore-scripts: false
+- - uses: JS-DevTools/npm-publish@v1
++ - uses: JS-DevTools/npm-publish@v3
+    with:
+      token: ${{ secrets.NPM_TOKEN }}
++     ignore-scripts: false
 ```
 
 The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously wrote][#15] to `.npmrc`. These workarounds should be removed.
@@ -375,7 +377,7 @@ The global `.npmrc` file is no longer read nor modified. This means the `token` 
       registry-url: https://registry.npmjs.org/
 
 - - uses: JS-DevTools/npm-publish@v1
-+ - uses: JS-DevTools/npm-publish@v2
++ - uses: JS-DevTools/npm-publish@v3
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
