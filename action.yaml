@@ -92,5 +92,5 @@ outputs:
       If not configured for a scoped package, will be "default".
 
 runs:
-  using: node16
+  using: node20
   main: action.js
