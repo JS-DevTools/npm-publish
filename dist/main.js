@@ -10995,7 +10995,9 @@ var InvalidPackageNameError = class extends TypeError {
 };
 var InvalidPackageVersionError = class extends TypeError {
   constructor(value) {
-    super(`Package version must be a string, got "${String(value)}"`);
+    super(
+      `Package version must be a valid semantic version, got "${String(value)}"`
+    );
     this.name = "InvalidPackageVersionError";
   }
 };
@@ -11135,7 +11137,7 @@ async function readManifest(packagePath) {
     throw new InvalidPackageNameError(name);
   }
   if (typeof version2 !== "string") {
-    throw new InvalidPackageVersionError(version2);
+    throw new InvalidPackageVersionError(manifestJson["version"]);
   }
   if (typeof publishConfig !== "object" || Array.isArray(publishConfig) || !publishConfig) {
     throw new InvalidPackagePublishConfigError(publishConfig);

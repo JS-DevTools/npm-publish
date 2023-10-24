@@ -121,7 +121,7 @@ export async function readManifest(
   }
 
   if (typeof version !== "string") {
-    throw new errors.InvalidPackageVersionError(version);
+    throw new errors.InvalidPackageVersionError(manifestJson["version"]);
   }
 
   if (
