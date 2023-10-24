@@ -217,6 +217,7 @@ describe("readManifest", () => {
     const result = subject.readManifest(directory);
 
     await expect(result).rejects.toThrow(errors.InvalidPackageVersionError);
+    await expect(result).rejects.toThrow(/42/iu);
   });
 
   it("should error if publishConfig is invalid", async () => {

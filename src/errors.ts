@@ -69,7 +69,9 @@ export class InvalidPackageNameError extends TypeError {
 
 export class InvalidPackageVersionError extends TypeError {
   public constructor(value: unknown) {
-    super(`Package version must be a string, got "${String(value)}"`);
+    super(
+      `Package version must be a valid semantic version, got "${String(value)}"`
+    );
     this.name = "InvalidPackageVersionError";
   }
 }
