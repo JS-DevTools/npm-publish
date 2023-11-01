@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { valid as semverValid } from "semver";
-import { list as tarList, type ReadEntry } from "tar";
-
+import semverValid from "semver/functions/valid.js";
+import tarList from "tar/lib/list.js";
+import type { ReadEntry } from "tar";
 import * as errors from "./errors.js";
 
 /** A package manifest (package.json) and associated details. */
