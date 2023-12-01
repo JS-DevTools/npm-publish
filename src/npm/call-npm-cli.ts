@@ -20,8 +20,8 @@ export interface NpmCallResult<CommandT extends string> {
 type SuccessData<T extends string> = T extends typeof VIEW
   ? NpmViewData
   : T extends typeof PUBLISH
-  ? NpmPublishData
-  : unknown;
+    ? NpmPublishData
+    : unknown;
 
 export interface NpmViewData {
   "dist-tags": Record<string, string>;
