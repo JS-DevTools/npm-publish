@@ -92,7 +92,7 @@ jobs:
         run: npm run lint
 
       - name: Upload publish artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: publish-artifact
           path: lib
