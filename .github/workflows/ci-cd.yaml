@@ -130,7 +130,7 @@ jobs:
         run: npm install --production
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: publish-artifact
           path: lib
@@ -212,7 +212,7 @@ jobs:
           node-version: "20"
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: publish-artifact
           path: lib
