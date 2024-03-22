@@ -4,6 +4,11 @@ import type { PublishResult } from "./compare-and-publish/index.js";
 import type { PackageManifest } from "./read-manifest.js";
 import type { NormalizedOptions } from "./normalize-options.js";
 
+const DRY_RUN_BANNER =
+  "=== DRY RUN === DRY RUN === DRY RUN === DRY RUN === DRY RUN ===";
+
+const CONTENTS_BANNER = "=== Contents ===";
+
 /**
  * Format publish results into a string.
  *
@@ -17,15 +22,27 @@ export function formatPublishResult(
   options: NormalizedOptions,
   result: PublishResult
 ): string {
-  if (result.id === undefined) {
-    return `🙅‍♀️ ${manifest.name}@${manifest.version} publish skipped.`;
+  const lines = [];
+
+  lines.push(
+    result.id === undefined
+      ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.`
+      : `📦 ${result.id}`
+  );
+
+  if (result.files.length > 0) {
+    lines.push("", CONTENTS_BANNER);
   }
 
-  return [
-    `📦 ${result.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
-    "=== Contents ===",
-    ...result.files.map(({ path, size }) => `${formatSize(size)}\t${path}`),
-  ].join(os.EOL);
+  for (const { path, size } of result.files) {
+    lines.push(`${formatSize(size)}\t${path}`);
+  }
+
+  return (
+    options.dryRun.value
+      ? [DRY_RUN_BANNER, "", ...lines, "", DRY_RUN_BANNER]
+      : lines
+  ).join(os.EOL);
 }
 
 const formatSize = (size: number): string => {

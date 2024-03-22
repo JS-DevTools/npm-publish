@@ -4,16 +4,13 @@ import semverValid from "semver/functions/valid.js";
 
 import { STRATEGY_ALL } from "../options.js";
 import type { NormalizedOptions } from "../normalize-options.js";
-import type { ReleaseType } from "../results.js";
+import { INITIAL, DIFFERENT, type ReleaseType } from "../results.js";
 import type { NpmViewData } from "../npm/index.js";
 
 export interface VersionComparison {
   type: ReleaseType | undefined;
   oldVersion: string | undefined;
 }
-
-const INITIAL = "initial";
-const DIFFERENT = "different";
 
 /**
  * Compare previously published versions with the package's current version.

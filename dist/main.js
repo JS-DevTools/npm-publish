@@ -6681,6 +6681,10 @@ var ACCESS_RESTRICTED = "restricted";
 var STRATEGY_UPGRADE = "upgrade";
 var STRATEGY_ALL = "all";
 
+// src/results.ts
+var INITIAL = "initial";
+var DIFFERENT = "different";
+
 // src/errors.ts
 var import_node_os = __toESM(require("node:os"));
 var InvalidPackageError = class extends TypeError {
@@ -7053,8 +7057,6 @@ ${config}`);
 var import_diff = __toESM(require_diff());
 var import_gt = __toESM(require_gt());
 var import_valid2 = __toESM(require_valid());
-var INITIAL = "initial";
-var DIFFERENT = "different";
 function compareVersions(currentVersion, publishedVersions, options) {
   const { versions, "dist-tags": tags } = publishedVersions ?? {};
   const { strategy, tag: publishTag } = options;
@@ -7117,14 +7119,15 @@ async function compareAndPublish(manifest, options, environment) {
   if (viewCall.error && viewCall.errorCode !== E404) {
     throw viewCall.error;
   }
+  const isDryRun = options.dryRun.value;
   const comparison = compareVersions(version2, viewCall.successData, options);
-  const publishCall = comparison.type ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : { successData: void 0, errorCode: void 0, error: void 0 };
+  const publishCall = comparison.type ?? isDryRun ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : { successData: void 0, errorCode: void 0, error: void 0 };
   if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) {
     throw publishCall.error;
   }
   const { successData: publishData } = publishCall;
   return {
-    id: publishData == null ? void 0 : publishData.id,
+    id: isDryRun && !comparison.type ? void 0 : publishData == null ? void 0 : publishData.id,
     files: (publishData == null ? void 0 : publishData.files) ?? [],
     type: publishData ? comparison.type : void 0,
     oldVersion: comparison.oldVersion
@@ -7133,15 +7136,20 @@ async function compareAndPublish(manifest, options, environment) {
 
 // src/format-publish-result.ts
 var import_node_os5 = __toESM(require("node:os"));
+var DRY_RUN_BANNER = "=== DRY RUN === DRY RUN === DRY RUN === DRY RUN === DRY RUN ===";
+var CONTENTS_BANNER = "=== Contents ===";
 function formatPublishResult(manifest, options, result) {
-  if (result.id === void 0) {
-    return `\u{1F645}\u200D\u2640\uFE0F ${manifest.name}@${manifest.version} publish skipped.`;
+  const lines = [];
+  lines.push(
+    result.id === void 0 ? `\u{1F645}\u200D\u2640\uFE0F ${manifest.name}@${manifest.version} already published.` : `\u{1F4E6} ${result.id}`
+  );
+  if (result.files.length > 0) {
+    lines.push("", CONTENTS_BANNER);
   }
-  return [
-    `\u{1F4E6} ${result.id}${options.dryRun.value ? " (DRY RUN)" : ""}`,
-    "=== Contents ===",
-    ...result.files.map(({ path: path3, size }) => `${formatSize(size)}	${path3}`)
-  ].join(import_node_os5.default.EOL);
+  for (const { path: path3, size } of result.files) {
+    lines.push(`${formatSize(size)}	${path3}`);
+  }
+  return (options.dryRun.value ? [DRY_RUN_BANNER, "", ...lines, "", DRY_RUN_BANNER] : lines).join(import_node_os5.default.EOL);
 }
 var formatSize = (size) => {
   if (size < 1e3) {
