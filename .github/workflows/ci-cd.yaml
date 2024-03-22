@@ -187,6 +187,21 @@ jobs:
           echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
           exit 1
 
+      - id: action-publish-dry
+        name: Publish a dry run
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+          dry-run: true
+
+      - name: Check release output
+        if: ${{ steps.action-publish-dry.outputs.type }}
+        run: |
+          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry.outputs.type }}'"
+          exit 1
+
   deploy:
     if: ${{ github.ref == 'refs/heads/main' }}
     name: Publish

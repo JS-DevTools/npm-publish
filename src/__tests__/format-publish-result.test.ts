@@ -3,17 +3,20 @@ import { describe, it, expect } from "vitest";
 import * as subject from "../format-publish-result.js";
 import type { PackageManifest } from "../read-manifest.js";
 import type { NormalizedOptions } from "../normalize-options.js";
-import type { PublishResult } from "../compare-and-publish/index.js";
+import type {
+  PublishResult,
+  PublishFile,
+} from "../compare-and-publish/index.js";
 
 describe("formatPublishResult", () => {
   it("should say if a publish was skipped", () => {
     const result = subject.formatPublishResult(
       { name: "cool-package", version: "1.2.3" } as PackageManifest,
-      {} as NormalizedOptions,
-      { id: undefined } as PublishResult
+      { dryRun: { value: false } } as NormalizedOptions,
+      { id: undefined, files: [] as PublishFile[] } as PublishResult
     );
 
-    expect(result).toMatch(/cool-package@1\.2\.3.+skipped/);
+    expect(result).toMatch(/cool-package@1\.2\.3.+already published/);
   });
 
   it("should say if a publish was a dry run", () => {
@@ -26,7 +29,21 @@ describe("formatPublishResult", () => {
       } as PublishResult
     );
 
-    expect(result).toMatch(/cool-package@1\.2\.3.+DRY RUN/);
+    expect(result).toMatch(/DRY RUN/);
+  });
+
+  it("should say if a dry run would have skipped", () => {
+    const result = subject.formatPublishResult(
+      { name: "cool-package", version: "1.2.3" } as PackageManifest,
+      { dryRun: { value: true } } as NormalizedOptions,
+      {
+        id: undefined,
+        files: [{ path: "cool-file-1", size: 1 }],
+        type: undefined,
+      } as PublishResult
+    );
+
+    expect(result).toMatch(/cool-package@1\.2\.3.+already published/);
   });
 
   it("should print files", () => {

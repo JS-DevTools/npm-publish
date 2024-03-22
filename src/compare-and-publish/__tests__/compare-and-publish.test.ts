@@ -16,23 +16,31 @@ vi.mock("../compare-versions");
 vi.mock("../get-arguments");
 
 describe("compareAndPublish", () => {
-  const manifest = {
-    packageSpec: ".",
-    name: "fizzbuzz",
-    version: "1.2.3",
-  } as PackageManifest;
-
   const logger = { debug: (message: string) => void message } as Logger;
-  const normalizedOptions = {
-    token: "abc123",
-    ignoreScripts: { value: false },
-    logger,
-  } as NormalizedOptions;
   const environment: NpmCliEnvironment = { foo: "bar" };
   const npmViewResult = { versions: ["0.0.1"], "dist-tags": {} };
-  const npmPublishResult = { id: "fizzbuzz@1.2.3", files: [] };
+  const npmPublishResult = {
+    id: "fizzbuzz@1.2.3",
+    files: [{ path: "package.json", size: 42 }],
+  };
+
+  let manifest: PackageManifest;
+  let normalizedOptions: NormalizedOptions;
 
   beforeEach(() => {
+    manifest = {
+      packageSpec: ".",
+      name: "fizzbuzz",
+      version: "1.2.3",
+    } as PackageManifest;
+
+    normalizedOptions = {
+      token: "abc123",
+      ignoreScripts: { value: false },
+      dryRun: { value: false },
+      logger,
+    } as NormalizedOptions;
+
     when(getViewArguments)
       .calledWith("fizzbuzz", normalizedOptions)
       .thenReturn(["fizzbuzz"]);
@@ -83,7 +91,24 @@ describe("compareAndPublish", () => {
 
     expect(result).toEqual({
       id: "fizzbuzz@1.2.3",
-      files: [],
+      files: [{ path: "package.json", size: 42 }],
+      oldVersion: "0.0.1",
+      type: "major",
+    });
+  });
+
+  it("should get versions, compare, and publish in dry run", async () => {
+    normalizedOptions.dryRun.value = true;
+
+    const result = await subject.compareAndPublish(
+      manifest,
+      normalizedOptions,
+      environment
+    );
+
+    expect(result).toEqual({
+      id: "fizzbuzz@1.2.3",
+      files: [{ path: "package.json", size: 42 }],
       oldVersion: "0.0.1",
       type: "major",
     });
@@ -118,6 +143,31 @@ describe("compareAndPublish", () => {
     );
   });
 
+  it("should run publish if version exists but dry run", async () => {
+    normalizedOptions.dryRun.value = true;
+
+    when(compareVersions)
+      .calledWith(
+        "1.2.3",
+        { versions: ["0.0.1"], "dist-tags": {} },
+        normalizedOptions
+      )
+      .thenReturn({ type: undefined, oldVersion: "0.0.1" });
+
+    const result = await subject.compareAndPublish(
+      manifest,
+      normalizedOptions,
+      environment
+    );
+
+    expect(result).toEqual({
+      id: undefined,
+      files: [{ path: "package.json", size: 42 }],
+      oldVersion: "0.0.1",
+      type: undefined,
+    });
+  });
+
   it("should handle an E404 from npm view", async () => {
     when(callNpmCli<"view">)
       .calledWith("view", ["fizzbuzz"], {
@@ -146,7 +196,7 @@ describe("compareAndPublish", () => {
 
     expect(result).toEqual({
       id: "fizzbuzz@1.2.3",
-      files: [],
+      files: [{ path: "package.json", size: 42 }],
       oldVersion: "0.0.1",
       type: "major",
     });
@@ -260,7 +310,7 @@ describe("compareAndPublish", () => {
 
     expect(result).toEqual({
       id: "fizzbuzz@1.2.3",
-      files: [],
+      files: [{ path: "package.json", size: 42 }],
       oldVersion: "0.0.1",
       type: "major",
     });

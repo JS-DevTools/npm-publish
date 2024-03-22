@@ -3,6 +3,7 @@ import type { ReleaseType as SemverReleaseType } from "semver";
 
 /** Release type */
 export type ReleaseType = SemverReleaseType | typeof INITIAL | typeof DIFFERENT;
+
 export const INITIAL = "initial";
 export const DIFFERENT = "different";
 

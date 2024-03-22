@@ -59,10 +59,12 @@ export async function compareAndPublish(
     throw viewCall.error;
   }
 
+  const isDryRun = options.dryRun.value;
   const comparison = compareVersions(version, viewCall.successData, options);
-  const publishCall = comparison.type
-    ? await callNpmCli(PUBLISH, publishArguments, cliOptions)
-    : { successData: undefined, errorCode: undefined, error: undefined };
+  const publishCall =
+    comparison.type ?? isDryRun
+      ? await callNpmCli(PUBLISH, publishArguments, cliOptions)
+      : { successData: undefined, errorCode: undefined, error: undefined };
 
   if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) {
     throw publishCall.error;
@@ -71,7 +73,7 @@ export async function compareAndPublish(
   const { successData: publishData } = publishCall;
 
   return {
-    id: publishData?.id,
+    id: isDryRun && !comparison.type ? undefined : publishData?.id,
     files: publishData?.files ?? [],
     type: publishData ? comparison.type : undefined,
     oldVersion: comparison.oldVersion,
