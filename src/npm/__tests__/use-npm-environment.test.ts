@@ -49,7 +49,7 @@ describe("useNpmEnvironment", () => {
       },
     });
     expect(npmrcContents).toContain(
-      "//example.com/:_authToken=${NODE_AUTH_TOKEN}"
+      "//example.com/cool-registry/:_authToken=${NODE_AUTH_TOKEN}"
     );
     expect(npmrcContents).toContain(
       "registry=http://example.com/cool-registry/"
