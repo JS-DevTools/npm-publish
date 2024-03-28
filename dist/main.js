@@ -7039,7 +7039,7 @@ async function useNpmEnvironment(manifest, options, task) {
   };
   const config = [
     "; created by jsdevtools/npm-publish",
-    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
+    `//${registry.host}${registry.pathname}:_authToken=\${NODE_AUTH_TOKEN}`,
     `registry=${registry.href}`,
     ""
   ].join(import_node_os4.default.EOL);
