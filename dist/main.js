@@ -7029,20 +7029,19 @@ var import_node_path2 = __toESM(require("node:path"));
 async function useNpmEnvironment(manifest, options, task) {
   var _a;
   const { registry, token, logger: logger2, temporaryDirectory } = options;
+  const { host, origin, pathname } = registry;
+  const pathnameWithSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const config = [
+    "; created by jsdevtools/npm-publish",
+    `//${host}${pathnameWithSlash}:_authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${origin}${pathnameWithSlash}`,
+    ""
+  ].join(import_node_os4.default.EOL);
   const npmrcDirectory = await import_promises2.default.mkdtemp(
     import_node_path2.default.join(temporaryDirectory, "npm-publish-")
   );
   const npmrc = import_node_path2.default.join(npmrcDirectory, ".npmrc");
-  const environment = {
-    NODE_AUTH_TOKEN: token,
-    npm_config_userconfig: npmrc
-  };
-  const config = [
-    "; created by jsdevtools/npm-publish",
-    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
-    `registry=${registry.href}`,
-    ""
-  ].join(import_node_os4.default.EOL);
+  const environment = { NODE_AUTH_TOKEN: token, npm_config_userconfig: npmrc };
   await import_promises2.default.writeFile(npmrc, config, "utf8");
   (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Temporary .npmrc created at ${npmrc}
 ${config}`);

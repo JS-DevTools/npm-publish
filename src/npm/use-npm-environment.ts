@@ -29,21 +29,20 @@ export async function useNpmEnvironment<TReturn>(
   task: NpmCliTask<TReturn>
 ): Promise<TReturn> {
   const { registry, token, logger, temporaryDirectory } = options;
+  const { host, origin, pathname } = registry;
+  const pathnameWithSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const config = [
+    "; created by jsdevtools/npm-publish",
+    `//${host}${pathnameWithSlash}:_authToken=\${NODE_AUTH_TOKEN}`,
+    `registry=${origin}${pathnameWithSlash}`,
+    "",
+  ].join(os.EOL);
+
   const npmrcDirectory = await fs.mkdtemp(
     path.join(temporaryDirectory, "npm-publish-")
   );
   const npmrc = path.join(npmrcDirectory, ".npmrc");
-  const environment = {
-    NODE_AUTH_TOKEN: token,
-    npm_config_userconfig: npmrc,
-  };
-
-  const config = [
-    "; created by jsdevtools/npm-publish",
-    `//${registry.host}/:_authToken=\${NODE_AUTH_TOKEN}`,
-    `registry=${registry.href}`,
-    "",
-  ].join(os.EOL);
+  const environment = { NODE_AUTH_TOKEN: token, npm_config_userconfig: npmrc };
 
   await fs.writeFile(npmrc, config, "utf8");
 

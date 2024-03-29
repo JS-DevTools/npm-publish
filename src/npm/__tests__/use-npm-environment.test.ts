@@ -19,42 +19,62 @@ describe("useNpmEnvironment", () => {
     await fs.rm(directory, { recursive: true, force: true });
   });
 
-  it("create an npmrc file ", async () => {
-    const inputManifest = { name: "fizzbuzz" } as PackageManifest;
-    const inputOptions = {
-      token: "abc123",
-      registry: new URL("http://example.com/cool-registry/"),
-      temporaryDirectory: directory,
-    } as NormalizedOptions;
+  it.each([
+    {
+      registryUrl: "http://example.com/",
+      expectedAuthConfig: "//example.com/:_authToken=${NODE_AUTH_TOKEN}",
+      expectedRegistryConfig: "registry=http://example.com/",
+    },
+    {
+      registryUrl: "http://example.com",
+      expectedAuthConfig: "//example.com/:_authToken=${NODE_AUTH_TOKEN}",
+      expectedRegistryConfig: "registry=http://example.com/",
+    },
+    {
+      registryUrl: "http://example.com/hello/",
+      expectedAuthConfig: "//example.com/hello/:_authToken=${NODE_AUTH_TOKEN}",
+      expectedRegistryConfig: "registry=http://example.com/hello/",
+    },
+    {
+      registryUrl: "http://example.com/hello",
+      expectedAuthConfig: "//example.com/hello/:_authToken=${NODE_AUTH_TOKEN}",
+      expectedRegistryConfig: "registry=http://example.com/hello/",
+    },
+  ])(
+    "creates an npmrc file for $registryUrl",
+    async ({ registryUrl, expectedAuthConfig, expectedRegistryConfig }) => {
+      const inputManifest = { name: "fizzbuzz" } as PackageManifest;
+      const inputOptions = {
+        token: "abc123",
+        registry: new URL(registryUrl),
+        temporaryDirectory: directory,
+      } as NormalizedOptions;
 
-    let npmrcPath: string | undefined;
-    let npmrcContents: string | undefined;
+      let npmrcPath: string | undefined;
+      let npmrcContents: string | undefined;
 
-    const result = await subject.useNpmEnvironment(
-      inputManifest,
-      inputOptions,
-      async (manifest, options, environment) => {
-        npmrcPath = environment["npm_config_userconfig"]!;
-        npmrcContents = await fs.readFile(npmrcPath, "utf8");
-        return { manifest, options, environment };
-      }
-    );
+      const result = await subject.useNpmEnvironment(
+        inputManifest,
+        inputOptions,
+        async (manifest, options, environment) => {
+          npmrcPath = environment["npm_config_userconfig"]!;
+          npmrcContents = await fs.readFile(npmrcPath, "utf8");
+          return { manifest, options, environment };
+        }
+      );
 
-    expect(result).toEqual({
-      manifest: inputManifest,
-      options: inputOptions,
-      environment: {
-        NODE_AUTH_TOKEN: "abc123",
-        npm_config_userconfig: npmrcPath,
-      },
-    });
-    expect(npmrcContents).toContain(
-      "//example.com/:_authToken=${NODE_AUTH_TOKEN}"
-    );
-    expect(npmrcContents).toContain(
-      "registry=http://example.com/cool-registry/"
-    );
+      expect(result).toEqual({
+        manifest: inputManifest,
+        options: inputOptions,
+        environment: {
+          NODE_AUTH_TOKEN: "abc123",
+          npm_config_userconfig: npmrcPath,
+        },
+      });
+      expect(npmrcContents).toContain(expectedAuthConfig);
+      expect(npmrcContents).toContain(expectedRegistryConfig);
 
-    await expect(fs.access(npmrcPath!)).rejects.toThrow(/ENOENT/);
-  });
+      await expect(fs.access(npmrcPath!)).rejects.toThrow(/ENOENT/);
+    }
+  );
 });
