@@ -68,7 +68,7 @@
     "eslint-plugin-jsdoc": "^48.0.4",
     "eslint-plugin-n": "^16.2.0",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-sonarjs": "^0.24.0",
+    "eslint-plugin-sonarjs": "^0.25.0",
     "eslint-plugin-unicorn": "^51.0.1",
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.1.1",
