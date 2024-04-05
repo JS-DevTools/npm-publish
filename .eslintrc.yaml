@@ -29,6 +29,9 @@ env:
 rules:
   unicorn/prefer-top-level-await: "off"
   jsdoc/tag-lines: "off"
+  "@typescript-eslint/restrict-template-expressions":
+    - "error"
+    - allowNumber: true
 
 overrides:
   - files: ["**/*.js"]

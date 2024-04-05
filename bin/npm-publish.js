@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable unicorn/prefer-module, unicorn/prefer-top-level-await */
+/* eslint-disable @typescript-eslint/use-unknown-in-catch-callback-variable, unicorn/prefer-module, unicorn/prefer-top-level-await */
 "use strict";
 
 const process = require("node:process");

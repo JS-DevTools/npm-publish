@@ -108,8 +108,8 @@ async function execNpm(
       env: { ...process.env, ...environment },
     });
 
-    npm.stdout.on("data", (data) => (stdout += data));
-    npm.stderr.on("data", (data) => (stderr += data));
+    npm.stdout.on("data", (data: string) => (stdout += data));
+    npm.stderr.on("data", (data: string) => (stderr += data));
     npm.on("close", (code) => {
       logger?.debug?.(`Received stdout: ${stdout}`);
       logger?.debug?.(`Received stderr: ${stderr}`);
