@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import validatePackageName from "validate-npm-package-name";
 import semverValid from "semver/functions/valid.js";
 import tarList from "tar/lib/list.js";
 import type { ReadEntry } from "tar";
@@ -39,8 +40,12 @@ const isTarball = (file: unknown): file is string => {
   return typeof file === "string" && path.extname(file) === TARBALL_EXTNAME;
 };
 
-const validateVersion = (version: unknown): string | undefined => {
+const normalizeVersion = (version: unknown): string | undefined => {
   return semverValid(version as string) ?? undefined;
+};
+
+const validateName = (name: unknown): name is string => {
+  return validatePackageName(name as string).validForNewPackages;
 };
 
 const readPackageJson = async (...pathSegments: string[]): Promise<string> => {
@@ -110,13 +115,13 @@ export async function readManifest(
   try {
     manifestJson = JSON.parse(manifestContents) as Record<string, unknown>;
     name = manifestJson["name"];
-    version = validateVersion(manifestJson["version"]);
+    version = normalizeVersion(manifestJson["version"]);
     publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
     throw new errors.PackageJsonParseError(packageSpec, error);
   }
 
-  if (typeof name !== "string" || name.length === 0) {
+  if (!validateName(name)) {
     throw new errors.InvalidPackageNameError(name);
   }
 

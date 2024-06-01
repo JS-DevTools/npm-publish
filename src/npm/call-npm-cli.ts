@@ -38,7 +38,8 @@ export const PUBLISH = "publish";
 export const E404 = "E404";
 export const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 
-const NPM = os.platform() === "win32" ? "npm.cmd" : "npm";
+const IS_WINDOWS = os.platform() === "win32";
+const NPM = IS_WINDOWS ? "npm.cmd" : "npm";
 const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
 const baseArguments = (options: NpmCliOptions) =>
@@ -106,6 +107,7 @@ async function execNpm(
 
     const npm = childProcess.spawn(NPM, commandArguments, {
       env: { ...process.env, ...environment },
+      shell: IS_WINDOWS,
     });
 
     npm.stdout.on("data", (data: string) => (stdout += data));
