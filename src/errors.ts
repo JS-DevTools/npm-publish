@@ -62,7 +62,7 @@ export class PackageJsonParseError extends SyntaxError {
 
 export class InvalidPackageNameError extends TypeError {
   public constructor(value: unknown) {
-    super(`Package name must be a string, got "${String(value)}"`);
+    super(`Package name is not valid, got "${String(value)}"`);
     this.name = "InvalidPackageNameError";
   }
 }

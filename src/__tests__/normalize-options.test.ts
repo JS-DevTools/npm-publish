@@ -134,12 +134,22 @@ describe("normalizeOptions", () => {
       });
     });
 
-    it("should validate tag value", () => {
+    it("should validate tag type", () => {
       expect(() => {
         subject.normalizeOptions(manifest, {
           token: "abc123",
           // @ts-expect-error: intentionally mistyped for validation testing
           tag: 42,
+        });
+      }).toThrow(errors.InvalidTagError);
+    });
+
+    it("should validate tag value", () => {
+      expect(() => {
+        subject.normalizeOptions(manifest, {
+          token: "abc123",
+          // tag must not require contain characters encoded by encodeUriComponent
+          tag: "fresh&clean",
         });
       }).toThrow(errors.InvalidTagError);
     });

@@ -33,6 +33,92 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// node_modules/validate-npm-package-name/lib/index.js
+var require_lib = __commonJS({
+  "node_modules/validate-npm-package-name/lib/index.js"(exports2, module2) {
+    "use strict";
+    var { builtinModules: builtins } = require("module");
+    var scopedPackagePattern = new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
+    var blacklist = [
+      "node_modules",
+      "favicon.ico"
+    ];
+    function validate2(name) {
+      var warnings = [];
+      var errors = [];
+      if (name === null) {
+        errors.push("name cannot be null");
+        return done(warnings, errors);
+      }
+      if (name === void 0) {
+        errors.push("name cannot be undefined");
+        return done(warnings, errors);
+      }
+      if (typeof name !== "string") {
+        errors.push("name must be a string");
+        return done(warnings, errors);
+      }
+      if (!name.length) {
+        errors.push("name length must be greater than zero");
+      }
+      if (name.match(/^\./)) {
+        errors.push("name cannot start with a period");
+      }
+      if (name.match(/^_/)) {
+        errors.push("name cannot start with an underscore");
+      }
+      if (name.trim() !== name) {
+        errors.push("name cannot contain leading or trailing spaces");
+      }
+      blacklist.forEach(function(blacklistedName) {
+        if (name.toLowerCase() === blacklistedName) {
+          errors.push(blacklistedName + " is a blacklisted name");
+        }
+      });
+      if (builtins.includes(name.toLowerCase())) {
+        warnings.push(name + " is a core module name");
+      }
+      if (name.length > 214) {
+        warnings.push("name can no longer contain more than 214 characters");
+      }
+      if (name.toLowerCase() !== name) {
+        warnings.push("name can no longer contain capital letters");
+      }
+      if (/[~'!()*]/.test(name.split("/").slice(-1)[0])) {
+        warnings.push(`name can no longer contain special characters ("~'!()*")`);
+      }
+      if (encodeURIComponent(name) !== name) {
+        var nameMatch = name.match(scopedPackagePattern);
+        if (nameMatch) {
+          var user = nameMatch[1];
+          var pkg = nameMatch[2];
+          if (encodeURIComponent(user) === user && encodeURIComponent(pkg) === pkg) {
+            return done(warnings, errors);
+          }
+        }
+        errors.push("name can only contain URL-friendly characters");
+      }
+      return done(warnings, errors);
+    }
+    var done = function(warnings, errors) {
+      var result = {
+        validForNewPackages: errors.length === 0 && warnings.length === 0,
+        validForOldPackages: errors.length === 0,
+        warnings,
+        errors
+      };
+      if (!result.warnings.length) {
+        delete result.warnings;
+      }
+      if (!result.errors.length) {
+        delete result.errors;
+      }
+      return result;
+    };
+    module2.exports = validate2;
+  }
+});
+
 // node_modules/semver/internal/debug.js
 var require_debug = __commonJS({
   "node_modules/semver/internal/debug.js"(exports2, module2) {
@@ -5314,7 +5400,7 @@ var require_tunnel2 = __commonJS({
 });
 
 // node_modules/@actions/http-client/lib/index.js
-var require_lib = __commonJS({
+var require_lib2 = __commonJS({
   "node_modules/@actions/http-client/lib/index.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
@@ -6030,7 +6116,7 @@ var require_oidc_utils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.OidcClient = void 0;
-    var http_client_1 = require_lib();
+    var http_client_1 = require_lib2();
     var auth_1 = require_auth();
     var core_1 = require_core();
     var OidcClient = class _OidcClient {
@@ -6729,7 +6815,7 @@ var PackageJsonParseError = class extends SyntaxError {
 };
 var InvalidPackageNameError = class extends TypeError {
   constructor(value) {
-    super(`Package name must be a string, got "${String(value)}"`);
+    super(`Package name is not valid, got "${String(value)}"`);
     this.name = "InvalidPackageNameError";
   }
 };
@@ -6800,6 +6886,7 @@ var NpmCallError = class extends Error {
 // src/read-manifest.ts
 var import_promises = __toESM(require("node:fs/promises"));
 var import_node_path = __toESM(require("node:path"));
+var import_validate_npm_package_name = __toESM(require_lib());
 var import_valid = __toESM(require_valid());
 var import_list = __toESM(require_list());
 var SCOPE_RE = /^(@.+)\/.+$/u;
@@ -6814,8 +6901,11 @@ var isDirectory = (file) => {
 var isTarball = (file) => {
   return typeof file === "string" && import_node_path.default.extname(file) === TARBALL_EXTNAME;
 };
-var validateVersion = (version2) => {
+var normalizeVersion = (version2) => {
   return (0, import_valid.default)(version2) ?? void 0;
+};
+var validateName = (name) => {
+  return (0, import_validate_npm_package_name.default)(name).validForNewPackages;
 };
 var readPackageJson = async (...pathSegments) => {
   const file = import_node_path.default.resolve(...pathSegments);
@@ -6868,12 +6958,12 @@ async function readManifest(packagePath) {
   try {
     manifestJson = JSON.parse(manifestContents);
     name = manifestJson["name"];
-    version2 = validateVersion(manifestJson["version"]);
+    version2 = normalizeVersion(manifestJson["version"]);
     publishConfig = manifestJson["publishConfig"] ?? {};
   } catch (error) {
     throw new PackageJsonParseError(packageSpec, error);
   }
-  if (typeof name !== "string" || name.length === 0) {
+  if (!validateName(name)) {
     throw new InvalidPackageNameError(name);
   }
   if (typeof version2 !== "string") {
@@ -6932,8 +7022,12 @@ var validateRegistry = (value) => {
   }
 };
 var validateTag = (value) => {
-  if (typeof value === "string" && value.length > 0) {
-    return value;
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+    const encodedValue = encodeURIComponent(trimmedValue);
+    if (trimmedValue.length > 0 && trimmedValue === encodedValue) {
+      return value;
+    }
   }
   throw new InvalidTagError(value);
 };
@@ -6957,7 +7051,8 @@ var VIEW = "view";
 var PUBLISH = "publish";
 var E404 = "E404";
 var EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
-var NPM = import_node_os3.default.platform() === "win32" ? "npm.cmd" : "npm";
+var IS_WINDOWS = import_node_os3.default.platform() === "win32";
+var NPM = IS_WINDOWS ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
 async function callNpmCli(command, cliArguments, options) {
@@ -6991,7 +7086,8 @@ async function execNpm(commandArguments, environment, logger2) {
     let stdout = "";
     let stderr = "";
     const npm = import_node_child_process.default.spawn(NPM, commandArguments, {
-      env: { ...process.env, ...environment }
+      env: { ...process.env, ...environment },
+      shell: IS_WINDOWS
     });
     npm.stdout.on("data", (data) => stdout += data);
     npm.stderr.on("data", (data) => stderr += data);

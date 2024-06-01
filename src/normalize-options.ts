@@ -97,8 +97,13 @@ const validateRegistry = (value: unknown): URL => {
 };
 
 const validateTag = (value: unknown): string => {
-  if (typeof value === "string" && value.length > 0) {
-    return value;
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+    const encodedValue = encodeURIComponent(trimmedValue);
+
+    if (trimmedValue.length > 0 && trimmedValue === encodedValue) {
+      return value;
+    }
   }
 
   throw new errors.InvalidTagError(value);
