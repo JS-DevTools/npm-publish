@@ -1,3 +1,3 @@
-declare module "tar/lib/list.js" {
-  export { list as default } from "tar";
+declare module "tar/list" {
+  export { list } from "tar";
 }
