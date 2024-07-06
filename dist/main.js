@@ -4184,7 +4184,8 @@ var argmap = /* @__PURE__ */ new Map([
   ["no-mtime", "noMtime"],
   ["p", "preserveOwner"],
   ["L", "follow"],
-  ["h", "follow"]
+  ["h", "follow"],
+  ["onentry", "onReadEntry"]
 ]);
 var isSyncFile = (o) => !!o.sync && !!o.file;
 var isAsyncFile = (o) => !o.sync && !!o.file;
@@ -5663,8 +5664,8 @@ var Parser = class extends import_events2.EventEmitter {
     if (typeof opt.onwarn === "function") {
       this.on("warn", opt.onwarn);
     }
-    if (typeof opt.onentry === "function") {
-      this.on("entry", opt.onentry);
+    if (typeof opt.onReadEntry === "function") {
+      this.on("entry", opt.onReadEntry);
     }
   }
   warn(code2, message, data = {}) {
@@ -6063,10 +6064,10 @@ var stripTrailingSlashes = (str) => {
 };
 
 // node_modules/tar/dist/esm/list.js
-var onentryFunction = (opt) => {
-  const onentry = opt.onentry;
-  opt.onentry = onentry ? (e) => {
-    onentry(e);
+var onReadEntryFunction = (opt) => {
+  const onReadEntry = opt.onReadEntry;
+  opt.onReadEntry = onReadEntry ? (e) => {
+    onReadEntry(e);
     e.resume();
   } : (e) => e.resume();
 };
@@ -6146,7 +6147,7 @@ var list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt) =
   if (files == null ? void 0 : files.length)
     filesFilter(opt, files);
   if (!opt.noResume)
-    onentryFunction(opt);
+    onReadEntryFunction(opt);
 });
 
 // src/read-manifest.ts
@@ -6178,13 +6179,13 @@ var readPackageJson = async (...pathSegments) => {
 };
 var readTarballPackageJson = async (file) => {
   const data = [];
-  const onentry = (entry) => {
+  const onReadEntry = (entry) => {
     if (entry.path === "package/package.json") {
       entry.on("data", (chunk) => data.push(chunk));
     }
   };
   try {
-    await list({ file, onentry });
+    await list({ file, onReadEntry });
     if (data.length === 0) {
       throw new Error("package.json not found inside archive");
     }

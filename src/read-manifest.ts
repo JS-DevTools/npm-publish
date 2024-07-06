@@ -60,14 +60,14 @@ const readPackageJson = async (...pathSegments: string[]): Promise<string> => {
 
 const readTarballPackageJson = async (file: string): Promise<string> => {
   const data: Buffer[] = [];
-  const onentry = (entry: ReadEntry) => {
+  const onReadEntry = (entry: ReadEntry) => {
     if (entry.path === "package/package.json") {
       entry.on("data", (chunk) => data.push(chunk));
     }
   };
 
   try {
-    await tarList({ file, onentry });
+    await tarList({ file, onReadEntry });
 
     if (data.length === 0) {
       throw new Error("package.json not found inside archive");
