@@ -1,6 +1,6 @@
-import semverDifference from "semver/functions/diff.js";
-import semverGreaterThan from "semver/functions/gt.js";
-import semverValid from "semver/functions/valid.js";
+import semverDifference from "semver/functions/diff";
+import semverGreaterThan from "semver/functions/gt";
+import semverValid from "semver/functions/valid";
 
 import { STRATEGY_ALL } from "../options.js";
 import type { NormalizedOptions } from "../normalize-options.js";

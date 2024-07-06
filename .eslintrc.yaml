@@ -9,7 +9,7 @@ extends:
   - "plugin:jsdoc/recommended-typescript-error"
   - "plugin:n/recommended"
   - "plugin:promise/recommended"
-  - "plugin:sonarjs/recommended"
+  - "plugin:sonarjs/recommended-legacy"
   - "plugin:unicorn/recommended"
   - "prettier"
 
