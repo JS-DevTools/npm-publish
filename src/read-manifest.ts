@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import validatePackageName from "validate-npm-package-name";
-import semverValid from "semver/functions/valid.js";
+import semverValid from "semver/functions/valid";
 import { list as tarList } from "tar/list";
 import type { ReadEntry } from "tar";
 import * as errors from "./errors.js";

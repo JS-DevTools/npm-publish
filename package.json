@@ -61,7 +61,7 @@
     "@vitest/coverage-istanbul": "^1.0.1",
     "concurrently": "^8.2.1",
     "esbuild": "^0.20.0",
-    "eslint": "^9.6.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "npm:eslint-plugin-i@^2.29.0",
