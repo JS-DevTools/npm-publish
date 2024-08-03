@@ -31,7 +31,13 @@ rules:
   jsdoc/tag-lines: "off"
   "@typescript-eslint/restrict-template-expressions":
     - "error"
-    - allowNumber: true
+    - allowAny: false
+      allowBoolean: false
+      allowNullish: false
+      allowNumber: true
+      allowRegExp: false
+      allowNever: false
+  "@typescript-eslint/no-unnecessary-type-parameters": "off"
 
 overrides:
   - files: ["**/*.js"]

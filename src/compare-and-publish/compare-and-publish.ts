@@ -62,7 +62,7 @@ export async function compareAndPublish(
   const isDryRun = options.dryRun.value;
   const comparison = compareVersions(version, viewCall.successData, options);
   const publishCall =
-    comparison.type ?? isDryRun
+    (comparison.type ?? isDryRun)
       ? await callNpmCli(PUBLISH, publishArguments, cliOptions)
       : { successData: undefined, errorCode: undefined, error: undefined };
 
