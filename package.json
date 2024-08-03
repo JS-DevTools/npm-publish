@@ -72,7 +72,7 @@
     "eslint-plugin-unicorn": "^55.0.0",
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.1.1",
-    "rimraf": "^6.0.1",
+    "rimraf": "^5.0.9",
     "typescript": "^5.2.2",
     "vitest": "^2.0.5",
     "vitest-when": "^0.4.0"
