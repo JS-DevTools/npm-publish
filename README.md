@@ -12,7 +12,7 @@ Publish packages to npm automatically in GitHub Actions by updating the version 
 - [v2 to v3 migration guide](#v2-to-v3)
 - [v1 to v3 migration guide](#v1-to-v3)
 
-[releases]: https://github.com/JS-DevTools/npm-publis/releases
+[releases]: https://github.com/JS-DevTools/npm-publish/releases
 
 ## Features
 
