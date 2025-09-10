@@ -31,10 +31,10 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -46,7 +46,7 @@ jobs:
         run: npm run coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@643bc377ffa44ace6394b2b5d0d3950076de9f63
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
         with:
           parallel: true
           flag-name: Node.js ${{ matrix.node-version }} / ${{ matrix.os }}
@@ -58,7 +58,7 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@643bc377ffa44ace6394b2b5d0d3950076de9f63
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
         with:
           parallel-finished: true
 
@@ -69,10 +69,10 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
@@ -119,10 +119,10 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -130,7 +130,7 @@ jobs:
         run: npm install --production
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: publish-artifact
           path: lib
@@ -219,15 +219,15 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: publish-artifact
           path: lib
