@@ -23,3 +23,4 @@
 *.yaml text eol=lf
 *.xml text eol=lf
 *.svg text eol=lf
+dist/** linguist-generated=true
