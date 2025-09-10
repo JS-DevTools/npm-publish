@@ -40,7 +40,6 @@ export const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 
 const IS_WINDOWS = os.platform() === "win32";
 const NPM = IS_WINDOWS ? "npm.cmd" : "npm";
-const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 
 const baseArguments = (options: NpmCliOptions) =>
   options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
@@ -76,8 +75,8 @@ export async function callNpmCli<CommandT extends string>(
       stderr
     );
 
-    if (errorPayload?.error?.code) {
-      errorCode = String(errorPayload.error.code).toUpperCase();
+    if (typeof errorPayload?.error?.code === "string") {
+      errorCode = errorPayload.error.code.toUpperCase();
     }
 
     error = new errors.NpmCallError(command, exitCode, stderr);
@@ -136,14 +135,10 @@ async function execNpm(
  */
 function parseJson<TParsed>(...values: string[]): TParsed | undefined {
   for (const value of values) {
-    const jsonValue = JSON_MATCH_RE.exec(value)?.[1];
-
-    if (jsonValue) {
-      try {
-        return JSON.parse(jsonValue) as TParsed;
-      } catch {
-        return undefined;
-      }
+    try {
+      return JSON.parse(value) as TParsed;
+    } catch {
+      return undefined;
     }
   }
 

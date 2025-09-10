@@ -51,6 +51,7 @@ overrides:
       "@typescript-eslint/no-unsafe-argument": "off"
       "@typescript-eslint/no-unsafe-assignment": "off"
       sonarjs/no-duplicate-string: "off"
+      sonarjs/void-use: "off"
       unicorn/no-useless-undefined: "off"
 
   - files: ["src/action/**/*"]
