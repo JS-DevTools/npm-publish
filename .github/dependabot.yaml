@@ -23,7 +23,9 @@ updates:
       # TODO(mcous, 2024-07-06): update to ESLint v9 + flat config
       - dependency-name: "eslint"
         versions: [">=9"]
-      # rimraf dropped support for ESLint v18
+      - dependency-name: "eslint-plugin-uniciorn"
+        versions: [">=57"]
+      # rimraf dropped support for Node <20
       - dependency-name: "rimraf"
         versions: [">=6"]
 
