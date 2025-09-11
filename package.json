@@ -58,7 +58,7 @@
     "@types/validate-npm-package-name": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "@vitest/coverage-istanbul": "^3.2.4",
+    "@vitest/coverage-istanbul": "^2.1.9",
     "concurrently": "^9.2.1",
     "esbuild": "^0.25.9",
     "eslint": "^8.57.0",
@@ -74,7 +74,7 @@
     "prettier-plugin-jsdoc": "^1.1.1",
     "rimraf": "^5.0.9",
     "typescript": "^5.2.2",
-    "vitest": "^3.2.4",
+    "vitest": "^2.1.9",
     "vitest-when": "^0.8.0"
   },
   "dependencies": {

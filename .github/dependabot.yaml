@@ -25,9 +25,12 @@ updates:
         versions: [">=9"]
       - dependency-name: "eslint-plugin-uniciorn"
         versions: [">=57"]
-      # rimraf dropped support for Node <20
+
+      # dependencies that do not support Node <20
       - dependency-name: "rimraf"
         versions: [">=6"]
+      - dependency-name: "vitest"
+        versions: [">=3"]
 
   # Update GitHub Actions dependencies
   - package-ecosystem: "github-actions"
