@@ -23,7 +23,7 @@ export interface PackagePublishConfig {
   provenance?: boolean;
 }
 
-const SCOPE_RE = /^(@.+)\/.+$/u;
+const SCOPE_RE = /^(@.+)\//u;
 
 const MANIFEST_BASENAME = "package.json";
 const TARBALL_EXTNAME = ".tgz";

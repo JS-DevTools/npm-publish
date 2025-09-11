@@ -89,7 +89,7 @@ export function setOutput(
 export function setOutput(
   name: string,
   value: string | boolean | undefined,
-  defaultValue?: string | boolean | undefined
+  defaultValue?: string | boolean
 ): void {
   ghSetOutput(name, value ?? defaultValue);
 }
