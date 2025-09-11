@@ -19,7 +19,7 @@
     "type": "git",
     "url": "https://github.com/JS-DevTools/npm-publish.git"
   },
-  "type": "commonjs",
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
@@ -37,7 +37,7 @@
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "concurrently -g npm:build:*",
-    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node16",
+    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --format=esm --target=node24",
     "build:lib": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage",
@@ -45,7 +45,7 @@
     "_prettier": "prettier \"**/*.@(js|ts|json|md|yaml)\""
   },
   "engines": {
-    "node": ">=16"
+    "node": "^20.18.3 || ^22.12.0 || >=24"
   },
   "publishConfig": {
     "access": "public",
@@ -78,10 +78,10 @@
     "vitest-when": "^0.4.0"
   },
   "dependencies": {
-    "@types/semver": "^7.5.2",
+    "@types/semver": "^7.7.1",
     "command-line-args": "6.0.0",
     "semver": "7.6.2",
     "tar": "7.4.0",
-    "validate-npm-package-name": "^5.0.1"
+    "validate-npm-package-name": "^6.0.2"
   }
 }

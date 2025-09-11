@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/use-unknown-in-catch-callback-variable, unicorn/prefer-module, unicorn/prefer-top-level-await */
-"use strict";
+import process from "node:process";
 
-const process = require("node:process");
-const { version } = require("../package.json");
-const { main } = require("../lib/cli/index.js");
+import { main } from "../lib/cli/index.js";
+import manifest from "../package.json" with { type: "json" };
 
-main(process.argv.slice(2), version).catch((error) => {
+try {
+  await main(process.argv.slice(2), manifest.version);
+} catch (error) {
   console.error(error);
   process.exitCode = 1;
-});
+}

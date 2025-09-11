@@ -76,8 +76,8 @@ export async function callNpmCli<CommandT extends string>(
       stderr
     );
 
-    if (errorPayload?.error?.code) {
-      errorCode = String(errorPayload.error.code).toUpperCase();
+    if (typeof errorPayload?.error?.code === "string") {
+      errorCode = errorPayload.error.code.toUpperCase();
     }
 
     error = new errors.NpmCallError(command, exitCode, stderr);
