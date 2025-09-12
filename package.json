@@ -37,7 +37,7 @@
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "concurrently -g npm:build:*",
-    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --format=esm --target=node24",
+    "build:dist": "rolldown -c rolldown.config.ts",
     "build:lib": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage",
@@ -73,6 +73,7 @@
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.1.1",
     "rimraf": "^5.0.9",
+    "rolldown": "^1.0.0-beta.37",
     "typescript": "^5.2.2",
     "vitest": "^2.0.5",
     "vitest-when": "^0.4.0"
