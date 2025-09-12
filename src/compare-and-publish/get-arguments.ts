@@ -37,10 +37,6 @@ export function getPublishArguments(
   const { tag, access, dryRun, provenance } = options;
   const publishArguments = [];
 
-  if (packageSpec.length > 0) {
-    publishArguments.push(packageSpec);
-  }
-
   if (!tag.isDefault) {
     publishArguments.push("--tag", tag.value);
   }
@@ -55,6 +51,10 @@ export function getPublishArguments(
 
   if (!dryRun.isDefault && dryRun.value) {
     publishArguments.push("--dry-run");
+  }
+
+  if (packageSpec.length > 0) {
+    publishArguments.push(packageSpec);
   }
 
   return publishArguments;

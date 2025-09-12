@@ -37,13 +37,13 @@ describe("get command arguments", () => {
       } as NormalizedOptions);
 
       expect(result).toEqual([
-        "./cool-package",
         "--tag",
         "next",
         "--access",
         "restricted",
         "--provenance",
         "--dry-run",
+        "./cool-package",
       ]);
     });
 
@@ -68,7 +68,7 @@ describe("get command arguments", () => {
         strategy: { value: "upgrade", isDefault: true },
       } as NormalizedOptions);
 
-      expect(result).toEqual(["./cool-package", "--tag", "next"]);
+      expect(result).toEqual(["--tag", "next", "./cool-package"]);
     });
   });
 });

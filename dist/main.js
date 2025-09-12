@@ -3730,11 +3730,11 @@ function getViewArguments(packageName, options, retryWithTag = false) {
 function getPublishArguments(packageSpec, options) {
 	const { tag, access: access$1, dryRun, provenance } = options;
 	const publishArguments = [];
-	if (packageSpec.length > 0) publishArguments.push(packageSpec);
 	if (!tag.isDefault) publishArguments.push("--tag", tag.value);
 	if (!access$1.isDefault && access$1.value) publishArguments.push("--access", access$1.value);
 	if (!provenance.isDefault && provenance.value) publishArguments.push("--provenance");
 	if (!dryRun.isDefault && dryRun.value) publishArguments.push("--dry-run");
+	if (packageSpec.length > 0) publishArguments.push(packageSpec);
 	return publishArguments;
 }
 
