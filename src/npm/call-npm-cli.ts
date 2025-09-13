@@ -36,6 +36,7 @@ export const VIEW = "view";
 export const PUBLISH = "publish";
 
 export const E404 = "E404";
+export const E409 = "E409";
 export const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 
 const IS_WINDOWS = os.platform() === "win32";

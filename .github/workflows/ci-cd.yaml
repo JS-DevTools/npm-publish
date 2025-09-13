@@ -25,9 +25,11 @@ jobs:
           - macos-latest
           - windows-latest
         node-version:
-          - 16
-          - 18
-          - 20
+          - "16"
+          - "18"
+          - "20"
+          - "22"
+          - "24"
 
     steps:
       - name: Checkout source
@@ -107,9 +109,11 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - 16
-          - 18
-          - 20
+          - "16"
+          - "18"
+          - "20"
+          - "22"
+          - "24"
 
     services:
       verdaccio:
