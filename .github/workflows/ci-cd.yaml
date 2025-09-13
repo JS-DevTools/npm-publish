@@ -189,7 +189,7 @@ jobs:
       - name: Check release output
         if: ${{ steps.action-publish-dry-before.outputs.type }}
         run: |
-          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry.outputs.type }}'"
+          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry-before.outputs.type }}'"
           exit 1
 
       - id: action-publish
@@ -218,7 +218,7 @@ jobs:
       - name: Check release output
         if: ${{ steps.action-publish-dry-after.outputs.type }}
         run: |
-          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry.outputs.type }}'"
+          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry-after.outputs.type }}'"
           exit 1
 
   deploy:
