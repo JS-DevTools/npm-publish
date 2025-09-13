@@ -37,7 +37,7 @@
     "lint": "npm run _eslint && npm run _prettier -- --check",
     "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
     "build": "concurrently -g npm:build:*",
-    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node16",
+    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node20",
     "build:lib": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage",
@@ -45,7 +45,7 @@
     "_prettier": "prettier \"**/*.@(js|ts|json|md|yaml)\""
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "publishConfig": {
     "access": "public",

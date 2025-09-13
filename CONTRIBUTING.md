@@ -4,7 +4,7 @@ Contributions, enhancements, and bug-fixes are welcome! [Open an issue](https://
 
 ## Building Locally
 
-You should be using Node.js v16 or later to build this project locally
+You should be using Node.js v24 or later to build this project locally
 
 ```shell
 # Clone this repository
