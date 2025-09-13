@@ -6312,6 +6312,7 @@ var import_node_os3 = __toESM(require("node:os"));
 var VIEW = "view";
 var PUBLISH = "publish";
 var E404 = "E404";
+var E409 = "E409";
 var EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 var IS_WINDOWS = import_node_os3.default.platform() === "win32";
 var NPM = IS_WINDOWS ? "npm.cmd" : "npm";
@@ -6453,7 +6454,7 @@ function getPublishArguments(packageSpec, options) {
     publishArguments.push("--provenance");
   }
   if (!dryRun.isDefault && dryRun.value) {
-    publishArguments.push("--dry-run");
+    publishArguments.push("--dry-run", "--force");
   }
   return publishArguments;
 }
@@ -6479,7 +6480,7 @@ async function compareAndPublish(manifest, options, environment) {
   const isDryRun = options.dryRun.value;
   const comparison = compareVersions(version2, viewCall.successData, options);
   const publishCall = comparison.type ?? isDryRun ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : { successData: void 0, errorCode: void 0, error: void 0 };
-  if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) {
+  if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT && publishCall.errorCode !== E409) {
     throw publishCall.error;
   }
   const { successData: publishData } = publishCall;
