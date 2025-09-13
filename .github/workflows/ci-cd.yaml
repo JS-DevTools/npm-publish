@@ -177,6 +177,21 @@ jobs:
         shell: bash
         run: ./e2e/01-setup-package.sh "${{ steps.setup.outputs.package }}" 0.0.3
 
+      - id: action-publish-dry-before
+        name: Publish a dry run before publish
+        uses: ./
+        with:
+          registry: http://localhost:4873
+          package: ${{ steps.setup.outputs.package }}/package.json
+          token: ${{ steps.setup.outputs.token }}
+          dry-run: true
+
+      - name: Check release output
+        if: ${{ steps.action-publish-dry-before.outputs.type }}
+        run: |
+          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry.outputs.type }}'"
+          exit 1
+
       - id: action-publish
         name: Publish a new version
         uses: ./
@@ -191,8 +206,8 @@ jobs:
           echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish.outputs.type }}'"
           exit 1
 
-      - id: action-publish-dry
-        name: Publish a dry run
+      - id: action-publish-dry-after
+        name: Publish a dry run after publish
         uses: ./
         with:
           registry: http://localhost:4873
@@ -201,7 +216,7 @@ jobs:
           dry-run: true
 
       - name: Check release output
-        if: ${{ steps.action-publish-dry.outputs.type }}
+        if: ${{ steps.action-publish-dry-after.outputs.type }}
         run: |
           echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry.outputs.type }}'"
           exit 1

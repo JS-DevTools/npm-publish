@@ -54,8 +54,9 @@ export function getPublishArguments(
   }
 
   if (!dryRun.isDefault && dryRun.value) {
-    // NOTE: additional `--force` bypasses package existence check in npm >=11
-    // because we do our own existence check separately
+    // NOTE: `--force` does not override `--dry-run`,
+    // but does bypass package existence check in npm >=11
+    // because we do our own existence checks separately
     publishArguments.push("--dry-run", "--force");
   }
 
