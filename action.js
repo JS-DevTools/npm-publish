@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises, @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
-"use strict";
+import { main } from "./dist/main.js";
 
-const { main } = require("./dist/main.js");
-
-main();
+await main();

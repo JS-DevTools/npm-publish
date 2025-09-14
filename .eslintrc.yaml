@@ -38,6 +38,7 @@ rules:
       allowRegExp: false
       allowNever: false
   "@typescript-eslint/no-unnecessary-type-parameters": "off"
+  n/no-missing-import: "off"
 
 overrides:
   - files: ["**/*.js"]

@@ -19,9 +19,11 @@
     "type": "git",
     "url": "https://github.com/JS-DevTools/npm-publish.git"
   },
-  "type": "commonjs",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "type": "module",
+  "exports": {
+    "types": "./lib/index.d.ts",
+    "default": "./lib/index.js"
+  },
   "bin": {
     "npm-publish": "bin/npm-publish.js"
   },
@@ -37,7 +39,7 @@
     "lint": "eslint . && prettier . --check",
     "format": "eslint . --fix && prettier . --write",
     "build": "concurrently -g pnpm:build:*",
-    "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node20",
+    "build:dist": "rolldown src/action/main.ts --dir=dist --platform=node --sourcemap",
     "build:lib": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage"
@@ -71,6 +73,7 @@
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.1.1",
     "rimraf": "^5.0.9",
+    "rolldown": "1.0.0-beta.37",
     "typescript": "^5.2.2",
     "vitest": "^2.0.5",
     "vitest-when": "^0.4.0"
