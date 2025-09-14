@@ -7,7 +7,7 @@ export default defineConfig({
     unstubEnvs: true,
     unstubGlobals: true,
     coverage: {
-      provider: "istanbul",
+      provider: "v8",
       all: true,
       include: ["src"],
       reporter: ["text", "lcov"],
