@@ -2,10 +2,10 @@ import semverDifference from "semver/functions/diff.js";
 import semverGreaterThan from "semver/functions/gt.js";
 import semverValid from "semver/functions/valid.js";
 
-import { STRATEGY_ALL } from "../options.js";
 import type { NormalizedOptions } from "../normalize-options.js";
-import { INITIAL, DIFFERENT, type ReleaseType } from "../results.js";
 import type { NpmViewData } from "../npm/index.js";
+import { STRATEGY_ALL } from "../options.js";
+import { DIFFERENT, INITIAL, type ReleaseType } from "../results.js";
 
 export interface VersionComparison {
   type: ReleaseType | undefined;

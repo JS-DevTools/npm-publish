@@ -1,12 +1,12 @@
 /** Wrapper module for @actions/core */
 import {
+  debug as ghLogDebug,
+  error as ghLogError,
   getInput as ghGetInput,
+  info as ghLogInfo,
+  setFailed as ghSetFailed,
   setOutput as ghSetOutput,
   setSecret as ghSetSecret,
-  setFailed as ghSetFailed,
-  debug as ghLogDebug,
-  info as ghLogInfo,
-  error as ghLogError,
 } from "@actions/core";
 
 import type { Logger } from "../options.js";
@@ -24,9 +24,9 @@ export const logger: Logger = {
  * @param name Input name
  * @returns The input string value, or undefined if not set
  */
-export function getInput<T extends string>(name: string): T | undefined {
+export function getInput(name: string): string | undefined {
   const inputString = ghGetInput(name);
-  return inputString.length > 0 ? (inputString as T) : undefined;
+  return inputString.length > 0 ? inputString : undefined;
 }
 
 /**
@@ -85,11 +85,10 @@ export function setOutput(
   defaultValue: string | boolean
 ): void;
 
-// eslint-disable-next-line jsdoc/require-jsdoc
 export function setOutput(
   name: string,
   value: string | boolean | undefined,
-  defaultValue?: string | boolean | undefined
+  defaultValue?: string | boolean
 ): void {
   ghSetOutput(name, value ?? defaultValue);
 }

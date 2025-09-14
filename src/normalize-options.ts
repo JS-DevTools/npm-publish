@@ -1,17 +1,17 @@
 import os from "node:os";
 
 import * as errors from "./errors.js";
-import type { PackageManifest } from "./read-manifest.js";
 import {
+  type Access,
   ACCESS_PUBLIC,
   ACCESS_RESTRICTED,
-  STRATEGY_UPGRADE,
-  STRATEGY_ALL,
-  type Access,
-  type Strategy,
-  type Options,
   type Logger,
+  type Options,
+  type Strategy,
+  STRATEGY_ALL,
+  STRATEGY_UPGRADE,
 } from "./options.js";
+import type { PackageManifest } from "./read-manifest.js";
 
 const REGISTRY_NPM = "https://registry.npmjs.org/";
 export const TAG_LATEST = "latest";

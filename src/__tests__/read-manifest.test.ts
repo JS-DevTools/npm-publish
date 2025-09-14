@@ -1,11 +1,12 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import os from "node:os";
-import { create as tarCreate } from "tar";
-import { describe, it, beforeEach, afterEach, expect } from "vitest";
+import path from "node:path";
 
-import * as subject from "../read-manifest.js";
+import { create as tarCreate } from "tar";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import * as errors from "../errors.js";
+import * as subject from "../read-manifest.js";
 
 describe("readManifest", () => {
   let directory: string;

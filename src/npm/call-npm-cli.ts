@@ -70,15 +70,14 @@ export async function callNpmCli<CommandT extends string>(
   let error;
 
   if (exitCode === 0) {
-    successData = parseJson<SuccessData<CommandT>>(stdout);
+    successData = parseJson(stdout) as SuccessData<CommandT> | undefined;
   } else {
-    const errorPayload = parseJson<{ error?: { code?: unknown } }>(
-      stdout,
-      stderr
-    );
+    const errorPayload = parseJson(stdout, stderr) as
+      | { error?: { code?: unknown } }
+      | undefined;
 
-    if (errorPayload?.error?.code) {
-      errorCode = String(errorPayload.error.code).toUpperCase();
+    if (typeof errorPayload?.error?.code === "string") {
+      errorCode = errorPayload.error.code.toUpperCase();
     }
 
     error = new errors.NpmCallError(command, exitCode, stderr);
@@ -135,13 +134,13 @@ async function execNpm(
  * @param values CLI outputs to check
  * @returns Parsed JSON, if able to parse.
  */
-function parseJson<TParsed>(...values: string[]): TParsed | undefined {
+function parseJson(...values: string[]): unknown {
   for (const value of values) {
     const jsonValue = JSON_MATCH_RE.exec(value)?.[1];
 
     if (jsonValue) {
       try {
-        return JSON.parse(jsonValue) as TParsed;
+        return JSON.parse(jsonValue);
       } catch {
         return undefined;
       }

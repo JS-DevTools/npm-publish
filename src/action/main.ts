@@ -1,5 +1,5 @@
 /** Action entry point */
-import { npmPublish } from "../index.js";
+import { type Access, npmPublish, type Strategy } from "../index.js";
 import * as core from "./core.js";
 
 /** Run the action. */
@@ -9,13 +9,13 @@ async function run(): Promise<void> {
     registry: core.getInput("registry"),
     package: core.getInput("package"),
     tag: core.getInput("tag"),
-    access: core.getInput("access"),
+    access: core.getInput("access") as Access | undefined,
     provenance: core.getBooleanInput("provenance"),
-    strategy: core.getInput("strategy"),
+    strategy: core.getInput("strategy") as Strategy | undefined,
     ignoreScripts: core.getBooleanInput("ignore-scripts"),
     dryRun: core.getBooleanInput("dry-run"),
     logger: core.logger,
-    temporaryDirectory: process.env["RUNNER_TEMP"],
+    temporaryDirectory: process.env.RUNNER_TEMP,
   });
 
   core.setOutput("id", results.id, "");

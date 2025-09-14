@@ -1,36 +1,15 @@
 {
+  "extends": ["@mcous/typescript-config/base.json"],
   "compilerOptions": {
     // target Node v20 / ES2023
     "target": "es2023",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "resolveJsonModule": true,
-
-    // Interoperability with CommonJS modules
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-
-    // Do not error out for errors in third-party modules
-    "skipLibCheck": true,
-
-    // Type-checking options
-    "strict": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-
-    // inputs and outputs
     "declaration": true,
     "sourceMap": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"]
 }

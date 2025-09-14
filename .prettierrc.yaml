@@ -1,4 +1,0 @@
-plugins:
-  - prettier-plugin-jsdoc
-tsdoc: true
-trailingComma: es5

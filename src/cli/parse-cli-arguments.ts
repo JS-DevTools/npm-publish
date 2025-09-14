@@ -1,6 +1,7 @@
 /** Wrapper module for command-line-args */
 
 import commandLineArgs from "command-line-args";
+
 import type { Options } from "../options.js";
 
 const ARGUMENTS_OPTIONS = [

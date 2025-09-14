@@ -1,4 +1,4 @@
-import { vi, describe, it, beforeEach, expect } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { when } from "vitest-when";
 
 import { npmPublish } from "../../index.js";
@@ -13,22 +13,14 @@ describe("run", () => {
     vi.stubEnv("RUNNER_TEMP", "/path/to/temp");
 
     when(core.getRequiredSecretInput).calledWith("token").thenReturn("abc123");
-    when(core.getInput<string>)
-      .calledWith("package")
-      .thenReturn("./package.json");
-    when(core.getInput<string>)
+    when(core.getInput).calledWith("package").thenReturn("./package.json");
+    when(core.getInput)
       .calledWith("registry")
       .thenReturn("https://example.com");
-    when(core.getInput<string>)
-      .calledWith("tag")
-      .thenReturn("next");
-    when(core.getInput<string>)
-      .calledWith("access")
-      .thenReturn("restricted");
+    when(core.getInput).calledWith("tag").thenReturn("next");
+    when(core.getInput).calledWith("access").thenReturn("restricted");
     when(core.getBooleanInput).calledWith("provenance").thenReturn(true);
-    when(core.getInput<string>)
-      .calledWith("strategy")
-      .thenReturn("all");
+    when(core.getInput).calledWith("strategy").thenReturn("all");
     when(core.getBooleanInput).calledWith("ignore-scripts").thenReturn(false);
     when(core.getBooleanInput).calledWith("dry-run").thenReturn(true);
   });
