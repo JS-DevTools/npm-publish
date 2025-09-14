@@ -32,17 +32,15 @@
     "!__tests__"
   ],
   "scripts": {
-    "all": "npm run clean && npm run build && npm run format && npm run coverage",
+    "all": "pnpm clean && pnpm build && pnpm format && pnpm coverage",
     "clean": "rimraf coverage lib dist e2e/fixture *.tgz",
-    "lint": "npm run _eslint && npm run _prettier -- --check",
-    "format": "npm run _eslint -- --fix && npm run _prettier -- --write",
-    "build": "concurrently -g npm:build:*",
+    "lint": "eslint . && prettier . --check",
+    "format": "eslint . --fix && prettier . --write",
+    "build": "concurrently -g pnpm:build:*",
     "build:dist": "esbuild src/action/main.ts --bundle --sourcemap --outdir=dist --platform=node --target=node20",
     "build:lib": "tsc",
     "test": "vitest",
-    "coverage": "vitest run --coverage",
-    "_eslint": "eslint \"**/*.@(js|ts)\"",
-    "_prettier": "prettier \"**/*.@(js|ts|json|md|yaml)\""
+    "coverage": "vitest run --coverage"
   },
   "engines": {
     "node": ">=20"
@@ -83,5 +81,6 @@
     "semver": "7.6.2",
     "tar": "7.4.0",
     "validate-npm-package-name": "^5.0.1"
-  }
+  },
+  "packageManager": "pnpm@10.16.1+sha256.b77e92ba0d59a6372b6c5041bbb3f866fb85e927df333827f0c7f577c5e1a713"
 }

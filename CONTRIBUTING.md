@@ -10,25 +10,25 @@ You should be using Node.js v24 or later to build this project locally
 # Clone this repository
 git clone https://github.com/JS-DevTools/npm-publish.git
 
-# Install dependencies*
-npm install
+# Install dependencies
+pnpm install
 
 # Run all checks, builds, and unit tests
-npm run all
+pnpm all
 ```
 
 There are also various code quality checks and tests you can run:
 
 ```shell
 # Run builds and typechecking
-npm run build
+pnpm build
 
 # Run the unit tests in watch mode
-npm run test
+pnpm test
 
 # Autoformat the code
-npm run format
+pnpm format
 
 # Lint the code
-npm run lint
+pnpm lint
 ```
