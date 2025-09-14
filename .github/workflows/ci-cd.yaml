@@ -40,7 +40,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
@@ -83,7 +82,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          cache: pnpm
 
       - name: Install development dependencies
         run: pnpm install
@@ -136,7 +134,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          cache: pnpm
 
       - name: Install production dependencies
         run: pnpm install --production
@@ -252,6 +249,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "24"
+          package-manager-cache: false
 
       - name: Download publish artifact
         uses: actions/download-artifact@v5

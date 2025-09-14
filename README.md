@@ -9,8 +9,9 @@
 Publish packages to npm automatically in GitHub Actions by updating the version number.
 
 - [Change log][releases]
-- [v2 to v3 migration guide](#v2-to-v3)
-- [v1 to v3 migration guide](#v1-to-v3)
+- [v3 to v4 migration guide](#v3-to-v4)
+- [v2 to v4 migration guide](#v2-to-v4)
+- [v1 to v4 migration guide](#v1-to-v4)
 
 [releases]: https://github.com/JS-DevTools/npm-publish/releases
 
@@ -54,13 +55,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "24"
       - run: npm ci
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v3
+      - uses: JS-DevTools/npm-publish@v4
         with:
           token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -79,13 +80,13 @@ jobs:
       contents: read
       packages: write # allow GITHUB_TOKEN to publish packages
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "24"
       - run: npm ci
       - run: npm test
-      - uses: JS-DevTools/npm-publish@v3
+      - uses: JS-DevTools/npm-publish@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: "https://npm.pkg.github.com"
@@ -94,6 +95,7 @@ jobs:
 [workflow file]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions
 [npm authentication token]: https://docs.npmjs.com/creating-and-viewing-authentication-tokens
 [GitHub Package Registry]: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry
+[good security practices]: https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions
 
 ### Action usage
 
@@ -124,7 +126,7 @@ npm-publish exposes several output variables, which you can use in later steps o
 
 ```diff
   steps:
-    - uses: JS-DevTools/npm-publish@v3
+    - uses: JS-DevTools/npm-publish@v4
 +     id: publish
       with:
         token: ${{ secrets.NPM_TOKEN }}
@@ -285,17 +287,29 @@ Examples:
 Major releases of the action and libraries may contain breaking changes, documented here.
 For more detailed change logs, see [releases][].
 
-### v2 to v3
+### v3 to v4
 
-The v3 release does not require any changes to how you use `npm-publish` from `v2`. The version of Node.js used by the action was updated to v20 due to GitHub Action's [deprecation of Node.js v16][node16-deprecation]. The minimum required version of Node.js for the library and CLI remains v16.
+The `v4` release does not require any changes to how you use the `npm-publish` action from `v3`. The action was updated to Node 24 / npm 11.
+
+In the library and CLI, support for Node 16 and Node 18 was dropped in `v4`, and the library API was switched to ESM-only. Library users should switch to ESM or update Node to a version with support for [loading ES modules using `require`][esm-require].
+
+[esm-require]: https://nodejs.org/api/modules.html#loading-ecmascript-modules-using-require
+
+### v2 to v4
+
+The `v4` release does not require any changes to how you use the `npm-publish` action from `v2`. The action was updated to Node 20 in `v3` due to GitHub Action's [deprecation of Node 16][node16-deprecation], and then updated to Node 24 in `v4`.
+
+In the library and CLI, support for Node 16 and Node 18 was dropped in `v4`, and the library API was switched to ESM-only. Library users should switch to ESM or update Node to a version with support for [loading ES modules using `require`][esm-require].
 
 [node16-deprecation]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
 
-### v1 to v3
+### v1 to v4
 
 The v2 release made several breaking changes to inputs, outputs, and behaviors that were present in `v1`. The examples below focus on the action, but the same changes are applicable to the library and CLI, too.
 
-#### v2 option changes
+In the library and CLI, support for Node 16 and Node 18 was dropped in `v4`, and the library API was switched to ESM-only. Library users should switch to ESM or update Node to a version with support for [loading ES modules using `require`][esm-require].
+
+#### option changes
 
 The `check-version` and `greater-version-only` boolean options were replaced with the `strategy` option:
 
@@ -319,9 +333,9 @@ The `check-version` and `greater-version-only` boolean options were replaced wit
 `check-version: false` has been removed. If you only need to publish, without first checking whether the version exists in the registry, you can [use `npm` directly][publishing-nodejs-packages] instead:
 
 ```diff
-  - uses: actions/setup-node@v3
+  - uses: actions/setup-node@v5
     with:
-      node-version: '18'
+      node-version: '24'
 +     registry-url: https://registry.npmjs.org/
 
 - - uses: JS-DevTools/npm-publish@v1
@@ -335,7 +349,7 @@ The `check-version` and `greater-version-only` boolean options were replaced wit
 
 [publishing-nodejs-packages]: https://docs.github.com/actions/publishing-packages/publishing-nodejs-packages
 
-#### v2 output changes
+#### output changes
 
 The `type` output is now an empty string instead of `'none'` when no release occurs
 
@@ -345,7 +359,7 @@ The `type` output is now an empty string instead of `'none'` when no release occ
 +   if: ${{ steps.publish.outputs.type }}
 ```
 
-#### v2 behavior changes
+#### behavior changes
 
 The `--ignore-scripts` option is now passed to `npm publish` as a security precaution. If you define any publish lifecycle scripts - `prepublishOnly`, `prepack`, `prepare`, `postpack`, `publish`, `postpublish` - we recommend you run that logic as a separate explicit build step.
 
@@ -353,7 +367,7 @@ The `--ignore-scripts` option is now passed to `npm publish` as a security preca
 + - run: npm run build
 
 - - uses: JS-DevTools/npm-publish@v1
-+ - uses: JS-DevTools/npm-publish@v3
++ - uses: JS-DevTools/npm-publish@v4
     with:
       token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -362,7 +376,7 @@ If you can't change your build, you can set the `ignore-scripts` input to `false
 
 ```diff
 - - uses: JS-DevTools/npm-publish@v1
-+ - uses: JS-DevTools/npm-publish@v3
++ - uses: JS-DevTools/npm-publish@v4
     with:
       token: ${{ secrets.NPM_TOKEN }}
 +     ignore-scripts: false
@@ -371,13 +385,13 @@ If you can't change your build, you can set the `ignore-scripts` input to `false
 The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously wrote][#15] to `.npmrc`. These workarounds should be removed.
 
 ```diff
-  - uses: actions/setup-node@v3
+  - uses: actions/setup-node@v5
     with:
-      node-version: '18'
+      node-version: '24'
       registry-url: https://registry.npmjs.org/
 
 - - uses: JS-DevTools/npm-publish@v1
-+ - uses: JS-DevTools/npm-publish@v3
++ - uses: JS-DevTools/npm-publish@v4
     with:
       token: ${{ secrets.NPM_TOKEN }}
 
