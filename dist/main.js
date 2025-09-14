@@ -3115,10 +3115,9 @@ var Minipass = class extends import_node_events.EventEmitter {
   }
   // drop everything and get out of the flow completely
   [ABORT]() {
-    var _a, _b;
     this[ABORTED] = true;
-    this.emit("abort", (_a = this[SIGNAL]) == null ? void 0 : _a.reason);
-    this.destroy((_b = this[SIGNAL]) == null ? void 0 : _b.reason);
+    this.emit("abort", this[SIGNAL]?.reason);
+    this.destroy(this[SIGNAL]?.reason);
   }
   /**
    * True if the stream has been aborted.
@@ -3133,7 +3132,6 @@ var Minipass = class extends import_node_events.EventEmitter {
   set aborted(_) {
   }
   write(chunk, encoding, cb) {
-    var _a;
     if (this[ABORTED])
       return false;
     if (this[EOF])
@@ -3179,7 +3177,7 @@ var Minipass = class extends import_node_events.EventEmitter {
       return this[FLOWING];
     }
     if (typeof chunk === "string" && // unless it is a string already ready for us to use
-    !(encoding === this[ENCODING] && !((_a = this[DECODER]) == null ? void 0 : _a.lastNeed))) {
+    !(encoding === this[ENCODING] && !this[DECODER]?.lastNeed)) {
       chunk = Buffer.from(chunk, encoding);
     }
     if (Buffer.isBuffer(chunk) && this[ENCODING]) {
@@ -4124,7 +4122,7 @@ var WriteStreamSync = class extends WriteStream {
       try {
         fd = import_fs.default.openSync(this[_path], this[_flags], this[_mode]);
       } catch (er) {
-        if ((er == null ? void 0 : er.code) === "ENOENT") {
+        if (er?.code === "ENOENT") {
           this[_flags] = "w";
           return this[_open]();
         } else {
@@ -4229,7 +4227,7 @@ var makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate2) => {
       entries = Array.from(entries);
     }
     const opt = dealias(opt_);
-    validate2 == null ? void 0 : validate2(opt, entries);
+    validate2?.(opt, entries);
     if (isSyncFile(opt)) {
       if (typeof cb === "function") {
         throw new TypeError("callback not supported for sync tar functions");
@@ -4421,7 +4419,6 @@ var ZlibBase = class extends Minipass {
   }
   /* c8 ignore stop */
   constructor(opts, mode) {
-    var _a;
     if (!opts || typeof opts !== "object")
       throw new TypeError("invalid options for ZlibBase constructor");
     super(opts);
@@ -4440,7 +4437,7 @@ var ZlibBase = class extends Minipass {
       this.close();
       this.emit("error", err);
     };
-    (_a = this.#handle) == null ? void 0 : _a.on("error", (er) => this.#onError(new ZlibError(er)));
+    this.#handle?.on("error", (er) => this.#onError(new ZlibError(er)));
     this.once("end", () => this.close);
   }
   close() {
@@ -4451,10 +4448,9 @@ var ZlibBase = class extends Minipass {
     }
   }
   reset() {
-    var _a, _b;
     if (!this.#sawError) {
       (0, import_assert.default)(this.#handle, "zlib binding closed");
-      return (_b = (_a = this.#handle).reset) == null ? void 0 : _b.call(_a);
+      return this.#handle.reset?.();
     }
   }
   flush(flushFlag) {
@@ -4572,7 +4568,7 @@ var Zlib = class extends ZlibBase {
           flushFlag = this.flushFlag;
         }
         this.flush(flushFlag);
-        cb == null ? void 0 : cb();
+        cb?.();
       };
       try {
         ;
@@ -5858,7 +5854,6 @@ var Parser = class extends import_events2.EventEmitter {
     this.warn("TAR_ABORT", error, { recoverable: false });
   }
   write(chunk, encoding, cb) {
-    var _a;
     if (typeof encoding === "function") {
       cb = encoding;
       encoding = void 0;
@@ -5871,7 +5866,7 @@ var Parser = class extends import_events2.EventEmitter {
       );
     }
     if (this[ABORTED2]) {
-      cb == null ? void 0 : cb();
+      cb?.();
       return false;
     }
     const needSniff = this[UNZIP] === void 0 || this.brotli === void 0 && this[UNZIP] === false;
@@ -5882,7 +5877,7 @@ var Parser = class extends import_events2.EventEmitter {
       }
       if (chunk.length < gzipHeader.length) {
         this[BUFFER2] = chunk;
-        cb == null ? void 0 : cb();
+        cb?.();
         return true;
       }
       for (let i = 0; this[UNZIP] === void 0 && i < gzipHeader.length; i++) {
@@ -5897,7 +5892,7 @@ var Parser = class extends import_events2.EventEmitter {
             this.brotli = true;
           } else {
             this[BUFFER2] = chunk;
-            cb == null ? void 0 : cb();
+            cb?.();
             return true;
           }
         } else {
@@ -5922,7 +5917,7 @@ var Parser = class extends import_events2.EventEmitter {
         this[WRITING] = true;
         const ret2 = !!this[UNZIP][ended ? "end" : "write"](chunk);
         this[WRITING] = false;
-        cb == null ? void 0 : cb();
+        cb?.();
         return ret2;
       }
     }
@@ -5935,9 +5930,9 @@ var Parser = class extends import_events2.EventEmitter {
     this[WRITING] = false;
     const ret = this[QUEUE].length ? false : this[READENTRY] ? this[READENTRY].flowing : true;
     if (!ret && !this[QUEUE].length) {
-      (_a = this[READENTRY]) == null ? void 0 : _a.once("drain", () => this.emit("drain"));
+      this[READENTRY]?.once("drain", () => this.emit("drain"));
     }
-    cb == null ? void 0 : cb();
+    cb?.();
     return ret;
   }
   [BUFFERCONCAT](c) {
@@ -5961,7 +5956,6 @@ var Parser = class extends import_events2.EventEmitter {
     }
   }
   [CONSUMECHUNK](chunk) {
-    var _a;
     if (this[CONSUMING] && chunk) {
       this[BUFFERCONCAT](chunk);
     } else if (!chunk && !this[BUFFER2]) {
@@ -5976,7 +5970,7 @@ var Parser = class extends import_events2.EventEmitter {
       } else {
         this[CONSUMECHUNKSUB](chunk);
       }
-      while (this[BUFFER2] && ((_a = this[BUFFER2]) == null ? void 0 : _a.length) >= 512 && !this[ABORTED2] && !this[SAW_EOF]) {
+      while (this[BUFFER2] && this[BUFFER2]?.length >= 512 && !this[ABORTED2] && !this[SAW_EOF]) {
         const c = this[BUFFER2];
         this[BUFFER2] = void 0;
         this[CONSUMECHUNKSUB](c);
@@ -6144,7 +6138,7 @@ var listFile = (opt, _files) => {
   return p;
 };
 var list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt) => new Parser(opt), (opt, files) => {
-  if (files == null ? void 0 : files.length)
+  if (files?.length)
     filesFilter(opt, files);
   if (!opt.noResume)
     onReadEntryFunction(opt);
@@ -6195,7 +6189,6 @@ var readTarballPackageJson = async (file) => {
   return Buffer.concat(data).toString();
 };
 async function readManifest(packagePath) {
-  var _a;
   let packageSpec;
   let manifestContents;
   if (!packagePath) {
@@ -6239,7 +6232,7 @@ async function readManifest(packagePath) {
     name: name2,
     version: version2,
     publishConfig,
-    scope: (_a = SCOPE_RE.exec(name2)) == null ? void 0 : _a[1]
+    scope: SCOPE_RE.exec(name2)?.[1]
   };
 }
 
@@ -6248,11 +6241,10 @@ var import_node_os2 = __toESM(require("node:os"));
 var REGISTRY_NPM = "https://registry.npmjs.org/";
 var TAG_LATEST = "latest";
 function normalizeOptions(manifest, options) {
-  var _a, _b, _c, _d;
-  const defaultTag = ((_a = manifest.publishConfig) == null ? void 0 : _a.tag) ?? TAG_LATEST;
-  const defaultRegistry = ((_b = manifest.publishConfig) == null ? void 0 : _b.registry) ?? REGISTRY_NPM;
-  const defaultAccess = ((_c = manifest.publishConfig) == null ? void 0 : _c.access) ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
-  const defaultProvenance = ((_d = manifest.publishConfig) == null ? void 0 : _d.provenance) ?? false;
+  const defaultTag = manifest.publishConfig?.tag ?? TAG_LATEST;
+  const defaultRegistry = manifest.publishConfig?.registry ?? REGISTRY_NPM;
+  const defaultAccess = manifest.publishConfig?.access ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
+  const defaultProvenance = manifest.publishConfig?.provenance ?? false;
   return {
     token: validateToken(options.token),
     registry: validateRegistry(options.registry ?? defaultRegistry),
@@ -6319,7 +6311,6 @@ var NPM = IS_WINDOWS ? "npm.cmd" : "npm";
 var JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
 var baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
 async function callNpmCli(command, cliArguments, options) {
-  var _a;
   const { stdout, stderr, exitCode } = await execNpm(
     [command, ...baseArguments(options), ...cliArguments],
     options.environment,
@@ -6335,7 +6326,7 @@ async function callNpmCli(command, cliArguments, options) {
       stdout,
       stderr
     );
-    if ((_a = errorPayload == null ? void 0 : errorPayload.error) == null ? void 0 : _a.code) {
+    if (errorPayload?.error?.code) {
       errorCode = String(errorPayload.error.code).toUpperCase();
     }
     error = new NpmCallError(command, exitCode, stderr);
@@ -6343,8 +6334,7 @@ async function callNpmCli(command, cliArguments, options) {
   return { successData, errorCode, error };
 }
 async function execNpm(commandArguments, environment, logger2) {
-  var _a;
-  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Running command: ${NPM} ${commandArguments.join(" ")}`);
+  logger2?.debug?.(`Running command: ${NPM} ${commandArguments.join(" ")}`);
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
@@ -6355,9 +6345,8 @@ async function execNpm(commandArguments, environment, logger2) {
     npm.stdout.on("data", (data) => stdout += data);
     npm.stderr.on("data", (data) => stderr += data);
     npm.on("close", (code2) => {
-      var _a2, _b;
-      (_a2 = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a2.call(logger2, `Received stdout: ${stdout}`);
-      (_b = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _b.call(logger2, `Received stderr: ${stderr}`);
+      logger2?.debug?.(`Received stdout: ${stdout}`);
+      logger2?.debug?.(`Received stderr: ${stderr}`);
       resolve({
         stdout: stdout.trim(),
         stderr: stderr.trim(),
@@ -6367,9 +6356,8 @@ async function execNpm(commandArguments, environment, logger2) {
   });
 }
 function parseJson(...values) {
-  var _a;
   for (const value of values) {
-    const jsonValue = (_a = JSON_MATCH_RE.exec(value)) == null ? void 0 : _a[1];
+    const jsonValue = JSON_MATCH_RE.exec(value)?.[1];
     if (jsonValue) {
       try {
         return JSON.parse(jsonValue);
@@ -6386,7 +6374,6 @@ var import_promises2 = __toESM(require("node:fs/promises"));
 var import_node_os4 = __toESM(require("node:os"));
 var import_node_path4 = __toESM(require("node:path"));
 async function useNpmEnvironment(manifest, options, task) {
-  var _a;
   const { registry, token, logger: logger2, temporaryDirectory } = options;
   const { host, origin, pathname } = registry;
   const pathnameWithSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
@@ -6402,7 +6389,7 @@ async function useNpmEnvironment(manifest, options, task) {
   const npmrc = import_node_path4.default.join(npmrcDirectory, ".npmrc");
   const environment = { NODE_AUTH_TOKEN: token, npm_config_userconfig: npmrc };
   await import_promises2.default.writeFile(npmrc, config, "utf8");
-  (_a = logger2 == null ? void 0 : logger2.debug) == null ? void 0 : _a.call(logger2, `Temporary .npmrc created at ${npmrc}
+  logger2?.debug?.(`Temporary .npmrc created at ${npmrc}
 ${config}`);
   try {
     return await task(manifest, options, environment);
@@ -6418,8 +6405,8 @@ var import_valid2 = __toESM(require_valid());
 function compareVersions(currentVersion, publishedVersions, options) {
   const { versions, "dist-tags": tags } = publishedVersions ?? {};
   const { strategy, tag: publishTag } = options;
-  const oldVersion = (0, import_valid2.default)(tags == null ? void 0 : tags[publishTag.value]) ?? void 0;
-  const isUnique = !(versions == null ? void 0 : versions.includes(currentVersion));
+  const oldVersion = (0, import_valid2.default)(tags?.[publishTag.value]) ?? void 0;
+  const isUnique = !versions?.includes(currentVersion);
   let type;
   if (isUnique) {
     if (!oldVersion) {
@@ -6485,8 +6472,8 @@ async function compareAndPublish(manifest, options, environment) {
   }
   const { successData: publishData } = publishCall;
   return {
-    id: isDryRun && !comparison.type ? void 0 : publishData == null ? void 0 : publishData.id,
-    files: (publishData == null ? void 0 : publishData.files) ?? [],
+    id: isDryRun && !comparison.type ? void 0 : publishData?.id,
+    files: publishData?.files ?? [],
     type: publishData ? comparison.type : void 0,
     oldVersion: comparison.oldVersion
   };
@@ -6521,7 +6508,6 @@ var formatSize = (size) => {
 
 // src/npm-publish.ts
 async function npmPublish(options) {
-  var _a, _b;
   const manifest = await readManifest(options.package);
   const normalizedOptions = normalizeOptions(manifest, options);
   const publishResult = await useNpmEnvironment(
@@ -6529,8 +6515,7 @@ async function npmPublish(options) {
     normalizedOptions,
     compareAndPublish
   );
-  (_b = (_a = normalizedOptions.logger) == null ? void 0 : _a.info) == null ? void 0 : _b.call(
-    _a,
+  normalizedOptions.logger?.info?.(
     formatPublishResult(manifest, normalizedOptions, publishResult)
   );
   return {

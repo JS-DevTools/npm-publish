@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    // target Node v16 / ES2021
-    "target": "es2021",
+    // target Node v20 / ES2023
+    "target": "es2023",
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
