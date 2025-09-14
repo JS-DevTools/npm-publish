@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import type { PackageManifest } from "../read-manifest.js";
 import type { NormalizedOptions } from "../normalize-options.js";
+import type { PackageManifest } from "../read-manifest.js";
 
 export type NpmCliEnvironment = Record<string, string>;
 

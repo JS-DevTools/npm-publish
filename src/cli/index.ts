@@ -1,4 +1,4 @@
-import { npmPublish, type Logger } from "../index.js";
+import { type Logger, npmPublish } from "../index.js";
 import { parseCliArguments } from "./parse-cli-arguments.js";
 
 export const USAGE = `

@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import * as subject from "../get-arguments.js";
 import type { NormalizedOptions } from "../../normalize-options.js";
+import * as subject from "../get-arguments.js";
 
 describe("get command arguments", () => {
   describe("getViewArguments", () => {

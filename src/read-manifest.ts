@@ -1,9 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import validatePackageName from "validate-npm-package-name";
+
 import semverValid from "semver/functions/valid.js";
-import { list as tarList } from "tar/list";
 import type { ReadEntry } from "tar";
+import { list as tarList } from "tar/list";
+import validatePackageName from "validate-npm-package-name";
+
 import * as errors from "./errors.js";
 
 /** A package manifest (package.json) and associated details. */
@@ -114,9 +116,9 @@ export async function readManifest(
 
   try {
     manifestJson = JSON.parse(manifestContents) as Record<string, unknown>;
-    name = manifestJson["name"];
-    version = normalizeVersion(manifestJson["version"]);
-    publishConfig = manifestJson["publishConfig"] ?? {};
+    name = manifestJson.name;
+    version = normalizeVersion(manifestJson.version);
+    publishConfig = manifestJson.publishConfig ?? {};
   } catch (error) {
     throw new errors.PackageJsonParseError(packageSpec, error);
   }
@@ -126,7 +128,7 @@ export async function readManifest(
   }
 
   if (typeof version !== "string") {
-    throw new errors.InvalidPackageVersionError(manifestJson["version"]);
+    throw new errors.InvalidPackageVersionError(manifestJson.version);
   }
 
   if (

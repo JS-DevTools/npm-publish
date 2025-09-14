@@ -1,5 +1,6 @@
-import type { Access, Strategy } from "./options.js";
 import type { ReleaseType as SemverReleaseType } from "semver";
+
+import type { Access, Strategy } from "./options.js";
 
 /** Release type */
 export type ReleaseType = SemverReleaseType | typeof INITIAL | typeof DIFFERENT;

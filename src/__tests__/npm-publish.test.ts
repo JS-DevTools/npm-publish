@@ -1,18 +1,18 @@
-import { vi, describe, it, expect } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { when } from "vitest-when";
 
-import * as subject from "../npm-publish.js";
-import { readManifest, type PackageManifest } from "../read-manifest.js";
-import {
-  normalizeOptions,
-  type NormalizedOptions,
-} from "../normalize-options.js";
-import { useNpmEnvironment } from "../npm/index.js";
 import {
   compareAndPublish,
   type PublishResult,
 } from "../compare-and-publish/index.js";
+import {
+  type NormalizedOptions,
+  normalizeOptions,
+} from "../normalize-options.js";
+import { useNpmEnvironment } from "../npm/index.js";
+import * as subject from "../npm-publish.js";
 import type { Logger, Options } from "../options.js";
+import { type PackageManifest, readManifest } from "../read-manifest.js";
 
 vi.mock("../read-manifest");
 vi.mock("../normalize-options");

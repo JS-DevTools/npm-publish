@@ -1,5 +1,6 @@
 import { createRequire } from "node:module";
 import os from "node:os";
+import childProcess from "node:child_process";
 import fs from "node:fs/promises";
 import path, { basename, posix } from "node:path";
 import EE, { EventEmitter } from "events";
@@ -12,7 +13,6 @@ import { dirname, parse } from "path";
 import assert from "assert";
 import { Buffer as Buffer$1 } from "buffer";
 import realZlib from "zlib";
-import childProcess from "node:child_process";
 import crypto from "crypto";
 
 //#region rolldown:runtime
@@ -59,11 +59,6 @@ const ACCESS_PUBLIC = "public";
 const ACCESS_RESTRICTED = "restricted";
 const STRATEGY_UPGRADE = "upgrade";
 const STRATEGY_ALL = "all";
-
-//#endregion
-//#region src/results.ts
-const INITIAL = "initial";
-const DIFFERENT = "different";
 
 //#endregion
 //#region src/errors.ts
@@ -150,61 +145,142 @@ var NpmCallError = class extends Error {
 };
 
 //#endregion
-//#region node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js
-var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js": ((exports, module) => {
-	const { builtinModules: builtins } = __require("module");
-	var scopedPackagePattern = /* @__PURE__ */ new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
-	var blacklist = ["node_modules", "favicon.ico"];
-	function validate$1(name$1) {
-		var warnings = [];
-		var errors = [];
-		if (name$1 === null) {
-			errors.push("name cannot be null");
-			return done(warnings, errors);
-		}
-		if (name$1 === void 0) {
-			errors.push("name cannot be undefined");
-			return done(warnings, errors);
-		}
-		if (typeof name$1 !== "string") {
-			errors.push("name must be a string");
-			return done(warnings, errors);
-		}
-		if (!name$1.length) errors.push("name length must be greater than zero");
-		if (name$1.match(/^\./)) errors.push("name cannot start with a period");
-		if (name$1.match(/^_/)) errors.push("name cannot start with an underscore");
-		if (name$1.trim() !== name$1) errors.push("name cannot contain leading or trailing spaces");
-		blacklist.forEach(function(blacklistedName) {
-			if (name$1.toLowerCase() === blacklistedName) errors.push(blacklistedName + " is a blacklisted name");
-		});
-		if (builtins.includes(name$1.toLowerCase())) warnings.push(name$1 + " is a core module name");
-		if (name$1.length > 214) warnings.push("name can no longer contain more than 214 characters");
-		if (name$1.toLowerCase() !== name$1) warnings.push("name can no longer contain capital letters");
-		if (/[~'!()*]/.test(name$1.split("/").slice(-1)[0])) warnings.push("name can no longer contain special characters (\"~'!()*\")");
-		if (encodeURIComponent(name$1) !== name$1) {
-			var nameMatch = name$1.match(scopedPackagePattern);
-			if (nameMatch) {
-				var user = nameMatch[1];
-				var pkg = nameMatch[2];
-				if (encodeURIComponent(user) === user && encodeURIComponent(pkg) === pkg) return done(warnings, errors);
-			}
-			errors.push("name can only contain URL-friendly characters");
-		}
-		return done(warnings, errors);
+//#region src/results.ts
+const INITIAL = "initial";
+const DIFFERENT = "different";
+
+//#endregion
+//#region src/npm/call-npm-cli.ts
+const VIEW = "view";
+const PUBLISH = "publish";
+const E404 = "E404";
+const E409 = "E409";
+const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
+const IS_WINDOWS = os.platform() === "win32";
+const NPM = IS_WINDOWS ? "npm.cmd" : "npm";
+const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
+const baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
+/**
+* Call the NPM CLI in JSON mode.
+*
+* @param command The command of the NPM CLI to call
+* @param cliArguments Any arguments to send to the command
+* @param options Customize environment variables or add an error handler.
+* @returns The parsed JSON, or stdout if unparsable.
+*/
+async function callNpmCli(command, cliArguments, options) {
+	const { stdout, stderr, exitCode } = await execNpm([
+		command,
+		...baseArguments(options),
+		...cliArguments
+	], options.environment, options.logger);
+	let successData;
+	let errorCode;
+	let error$1;
+	if (exitCode === 0) successData = parseJson(stdout);
+	else {
+		const errorPayload = parseJson(stdout, stderr);
+		if (typeof errorPayload?.error?.code === "string") errorCode = errorPayload.error.code.toUpperCase();
+		error$1 = new NpmCallError(command, exitCode, stderr);
 	}
-	var done = function(warnings, errors) {
-		var result = {
-			validForNewPackages: errors.length === 0 && warnings.length === 0,
-			validForOldPackages: errors.length === 0,
-			warnings,
-			errors
-		};
-		if (!result.warnings.length) delete result.warnings;
-		if (!result.errors.length) delete result.errors;
-		return result;
+	return {
+		successData,
+		errorCode,
+		error: error$1
 	};
-	module.exports = validate$1;
-}) });
+}
+/**
+* Execute the npm CLI.
+*
+* @param commandArguments Npm subcommand and arguments.
+* @param environment Environment variables.
+* @param logger Optional logger.
+* @returns Stdout, stderr, and the exit code.
+*/
+async function execNpm(commandArguments, environment, logger$1) {
+	logger$1?.debug?.(`Running command: ${NPM} ${commandArguments.join(" ")}`);
+	return new Promise((resolve) => {
+		let stdout = "";
+		let stderr = "";
+		const npm = childProcess.spawn(NPM, commandArguments, {
+			env: {
+				...process.env,
+				...environment
+			},
+			shell: IS_WINDOWS
+		});
+		npm.stdout.on("data", (data) => stdout += data);
+		npm.stderr.on("data", (data) => stderr += data);
+		npm.on("close", (code$1) => {
+			logger$1?.debug?.(`Received stdout: ${stdout}`);
+			logger$1?.debug?.(`Received stderr: ${stderr}`);
+			resolve({
+				stdout: stdout.trim(),
+				stderr: stderr.trim(),
+				exitCode: code$1 ?? 0
+			});
+		});
+	});
+}
+/**
+* Parse CLI outputs for JSON data.
+*
+* Certain versions of the npm CLI may intersperse JSON with human-readable
+* output, which this function accounts for.
+*
+* @param values CLI outputs to check
+* @returns Parsed JSON, if able to parse.
+*/
+function parseJson(...values) {
+	for (const value of values) {
+		const jsonValue = JSON_MATCH_RE.exec(value)?.[1];
+		if (jsonValue) try {
+			return JSON.parse(jsonValue);
+		} catch {
+			return;
+		}
+	}
+}
+
+//#endregion
+//#region src/npm/use-npm-environment.ts
+/**
+* Create a temporary .npmrc file with the given auth token, and call a task
+* with env vars set to use that .npmrc.
+*
+* @param manifest Pacakge metadata.
+* @param options Configuration options.
+* @param task A function called with the configured environment. After the
+*   function resolves, the temporary .npmrc file will be removed.
+* @returns The resolved value of `task`
+*/
+async function useNpmEnvironment(manifest, options, task) {
+	const { registry, token, logger: logger$1, temporaryDirectory } = options;
+	const { host, origin, pathname } = registry;
+	const pathnameWithSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
+	const config = [
+		"; created by jsdevtools/npm-publish",
+		`//${host}${pathnameWithSlash}:_authToken=\${NODE_AUTH_TOKEN}`,
+		`registry=${origin}${pathnameWithSlash}`,
+		""
+	].join(os.EOL);
+	const npmrcDirectory = await fs.mkdtemp(path.join(temporaryDirectory, "npm-publish-"));
+	const npmrc = path.join(npmrcDirectory, ".npmrc");
+	const environment = {
+		NODE_AUTH_TOKEN: token,
+		npm_config_userconfig: npmrc
+	};
+	await fs.writeFile(npmrc, config, "utf8");
+	logger$1?.debug?.(`Temporary .npmrc created at ${npmrc}\n${config}`);
+	try {
+		return await task(manifest, options, environment);
+	} finally {
+		await fs.rm(npmrcDirectory, {
+			force: true,
+			recursive: true
+		});
+	}
+}
 
 //#endregion
 //#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/debug.js
@@ -534,20 +610,264 @@ var require_parse = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.
 }) });
 
 //#endregion
+//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js
+var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js": ((exports, module) => {
+	const parse$4 = require_parse();
+	const diff = (version1, version2) => {
+		const v1$1 = parse$4(version1, null, true);
+		const v2 = parse$4(version2, null, true);
+		const comparison = v1$1.compare(v2);
+		if (comparison === 0) return null;
+		const v1Higher = comparison > 0;
+		const highVersion = v1Higher ? v1$1 : v2;
+		const lowVersion = v1Higher ? v2 : v1$1;
+		const highHasPre = !!highVersion.prerelease.length;
+		if (!!lowVersion.prerelease.length && !highHasPre) {
+			if (!lowVersion.patch && !lowVersion.minor) return "major";
+			if (highVersion.patch) return "patch";
+			if (highVersion.minor) return "minor";
+			return "major";
+		}
+		const prefix = highHasPre ? "pre" : "";
+		if (v1$1.major !== v2.major) return prefix + "major";
+		if (v1$1.minor !== v2.minor) return prefix + "minor";
+		if (v1$1.patch !== v2.patch) return prefix + "patch";
+		return "prerelease";
+	};
+	module.exports = diff;
+}) });
+
+//#endregion
+//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js
+var require_compare = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js": ((exports, module) => {
+	const SemVer = require_semver();
+	const compare$1 = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
+	module.exports = compare$1;
+}) });
+
+//#endregion
+//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js
+var require_gt = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js": ((exports, module) => {
+	const compare = require_compare();
+	const gt = (a, b, loose) => compare(a, b, loose) > 0;
+	module.exports = gt;
+}) });
+
+//#endregion
 //#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js
 var require_valid = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js": ((exports, module) => {
-	const parse$4 = require_parse();
+	const parse$3 = require_parse();
 	const valid = (version$1, options) => {
-		const v = parse$4(version$1, options);
+		const v = parse$3(version$1, options);
 		return v ? v.version : null;
 	};
 	module.exports = valid;
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/minipass@7.1.2/node_modules/minipass/dist/esm/index.js
+//#region src/compare-and-publish/compare-versions.ts
+var import_diff = /* @__PURE__ */ __toESM(require_diff(), 1);
+var import_gt = /* @__PURE__ */ __toESM(require_gt(), 1);
 var import_valid$1 = /* @__PURE__ */ __toESM(require_valid(), 1);
-var import_lib = /* @__PURE__ */ __toESM(require_lib$1(), 1);
+/**
+* Compare previously published versions with the package's current version.
+*
+* @param currentVersion The current package version.
+* @param publishedVersions The versions that have already been published.
+* @param options Configuration options
+* @returns The release type and previous version.
+*/
+function compareVersions(currentVersion, publishedVersions, options) {
+	const { versions, "dist-tags": tags } = publishedVersions ?? {};
+	const { strategy, tag: publishTag } = options;
+	const oldVersion = (0, import_valid$1.default)(tags?.[publishTag.value]) ?? void 0;
+	const isUnique = !versions?.includes(currentVersion);
+	let type;
+	if (isUnique) {
+		if (!oldVersion) type = INITIAL;
+		else if ((0, import_gt.default)(currentVersion, oldVersion)) type = (0, import_diff.default)(currentVersion, oldVersion) ?? DIFFERENT;
+		else if (strategy.value === STRATEGY_ALL) type = DIFFERENT;
+	}
+	return {
+		type,
+		oldVersion
+	};
+}
+
+//#endregion
+//#region src/compare-and-publish/get-arguments.ts
+/**
+* Given a package name and publish configuration, get the NPM CLI view
+* arguments.
+*
+* @param packageName Package name.
+* @param options Publish configuration.
+* @param retryWithTag Include a non-latest tag in the package spec for a rety
+*   attempt.
+* @returns Arguments to pass to the NPM CLI. If `retryWithTag` is true, but the
+*   publish config is using the `latest` tag, will return `undefined`.
+*/
+function getViewArguments(packageName, options, retryWithTag = false) {
+	return [
+		retryWithTag ? `${packageName}@${options.tag.value}` : packageName,
+		"dist-tags",
+		"versions"
+	];
+}
+/**
+* Given a publish configuration, get the NPM CLI publish arguments.
+*
+* @param packageSpec Package specification path.
+* @param options Publish configuration.
+* @returns Arguments to pass to the NPM CLI.
+*/
+function getPublishArguments(packageSpec, options) {
+	const { tag, access: access$1, dryRun, provenance } = options;
+	const publishArguments = [];
+	if (packageSpec.length > 0) publishArguments.push(packageSpec);
+	if (!tag.isDefault) publishArguments.push("--tag", tag.value);
+	if (!access$1.isDefault && access$1.value) publishArguments.push("--access", access$1.value);
+	if (!provenance.isDefault && provenance.value) publishArguments.push("--provenance");
+	if (!dryRun.isDefault && dryRun.value) publishArguments.push("--dry-run", "--force");
+	return publishArguments;
+}
+
+//#endregion
+//#region src/compare-and-publish/compare-and-publish.ts
+/**
+* Get the currently published versions of a package and publish if needed.
+*
+* @param manifest The package to potentially publish.
+* @param options Configuration options.
+* @param environment Environment variables for the npm cli.
+* @returns Information about the publish, including if it occurred.
+*/
+async function compareAndPublish(manifest, options, environment) {
+	const { name: name$1, version: version$1, packageSpec } = manifest;
+	const cliOptions = {
+		environment,
+		ignoreScripts: options.ignoreScripts.value,
+		logger: options.logger
+	};
+	const viewArguments = getViewArguments(name$1, options);
+	const publishArguments = getPublishArguments(packageSpec, options);
+	let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
+	if (!viewCall.successData && !viewCall.error) {
+		const viewWithTagArguments = getViewArguments(name$1, options, true);
+		viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
+	}
+	if (viewCall.error && viewCall.errorCode !== E404) throw viewCall.error;
+	const isDryRun = options.dryRun.value;
+	const comparison = compareVersions(version$1, viewCall.successData, options);
+	const publishCall = comparison.type ?? isDryRun ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : {
+		successData: void 0,
+		errorCode: void 0,
+		error: void 0
+	};
+	if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT && publishCall.errorCode !== E409) throw publishCall.error;
+	const { successData: publishData } = publishCall;
+	return {
+		id: isDryRun && !comparison.type ? void 0 : publishData?.id,
+		files: publishData?.files ?? [],
+		type: publishData ? comparison.type : void 0,
+		oldVersion: comparison.oldVersion
+	};
+}
+
+//#endregion
+//#region src/format-publish-result.ts
+const DRY_RUN_BANNER = "=== DRY RUN === DRY RUN === DRY RUN === DRY RUN === DRY RUN ===";
+const CONTENTS_BANNER = "=== Contents ===";
+/**
+* Format publish results into a string.
+*
+* @param manifest Package manifest
+* @param options Configuration options.
+* @param result Results from running npm publish.
+* @returns Formatted string.
+*/
+function formatPublishResult(manifest, options, result) {
+	const lines = [];
+	lines.push(result.id === void 0 ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.` : `📦 ${result.id}`);
+	if (result.files.length > 0) lines.push("", CONTENTS_BANNER);
+	for (const { path: path$3, size } of result.files) lines.push(`${formatSize(size)}\t${path$3}`);
+	return (options.dryRun.value ? [
+		DRY_RUN_BANNER,
+		"",
+		...lines,
+		"",
+		DRY_RUN_BANNER
+	] : lines).join(os.EOL);
+}
+const formatSize = (size) => {
+	if (size < 1e3) return `${size} B`;
+	if (size < 1e6) return `${(size / 1e3).toFixed(1)} kB`;
+	return `${(size / 1e6).toFixed(1)} MB`;
+};
+
+//#endregion
+//#region src/normalize-options.ts
+const REGISTRY_NPM = "https://registry.npmjs.org/";
+const TAG_LATEST = "latest";
+/**
+* Normalizes and sanitizes options, and fills-in any default values.
+*
+* @param manifest Package metadata from package.json.
+* @param options User-input options.
+* @returns Validated auth and publish configuration.
+*/
+function normalizeOptions(manifest, options) {
+	const defaultTag = manifest.publishConfig?.tag ?? TAG_LATEST;
+	const defaultRegistry = manifest.publishConfig?.registry ?? REGISTRY_NPM;
+	const defaultAccess = manifest.publishConfig?.access ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
+	const defaultProvenance = manifest.publishConfig?.provenance ?? false;
+	return {
+		token: validateToken(options.token),
+		registry: validateRegistry(options.registry ?? defaultRegistry),
+		tag: setValue(options.tag, defaultTag, validateTag),
+		access: setValue(options.access, defaultAccess, validateAccess),
+		provenance: setValue(options.provenance, defaultProvenance, Boolean),
+		ignoreScripts: setValue(options.ignoreScripts, true, Boolean),
+		dryRun: setValue(options.dryRun, false, Boolean),
+		strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
+		logger: options.logger,
+		temporaryDirectory: options.temporaryDirectory ?? os.tmpdir()
+	};
+}
+const setValue = (value, defaultValue, validate$2) => ({
+	value: validate$2(value ?? defaultValue),
+	isDefault: value === void 0
+});
+const validateToken = (value) => {
+	if (typeof value === "string" && value.length > 0) return value;
+	throw new InvalidTokenError();
+};
+const validateRegistry = (value) => {
+	try {
+		return new URL(value);
+	} catch {
+		throw new InvalidRegistryUrlError(value);
+	}
+};
+const validateTag = (value) => {
+	if (typeof value === "string") {
+		const trimmedValue = value.trim();
+		const encodedValue = encodeURIComponent(trimmedValue);
+		if (trimmedValue.length > 0 && trimmedValue === encodedValue) return value;
+	}
+	throw new InvalidTagError(value);
+};
+const validateAccess = (value) => {
+	if (value === void 0 || value === ACCESS_PUBLIC || value === ACCESS_RESTRICTED) return value;
+	throw new InvalidAccessError(value);
+};
+const validateStrategy = (value) => {
+	if (value === STRATEGY_ALL || value === STRATEGY_UPGRADE) return value;
+	throw new InvalidStrategyError(value);
+};
+
+//#endregion
+//#region node_modules/.pnpm/minipass@7.1.2/node_modules/minipass/dist/esm/index.js
 const proc = typeof process === "object" && process ? process : {
 	stdout: null,
 	stderr: null
@@ -2404,7 +2724,7 @@ const encodeNegative = (num, buf) => {
 		}
 	}
 };
-const parse$3 = (buf) => {
+const parse$2 = (buf) => {
 	const pre = buf[0];
 	const value = pre === 128 ? pos(buf.subarray(1, buf.length)) : pre === 255 ? twos(buf) : null;
 	if (value === null) throw Error("invalid base256 encoding");
@@ -2630,7 +2950,7 @@ const splitPrefix = (p, prefixSize) => {
 const decString = (buf, off, size) => buf.subarray(off, off + size).toString("utf8").replace(/\0.*/, "");
 const decDate = (buf, off, size) => numToDate(decNumber(buf, off, size));
 const numToDate = (num) => num === void 0 ? void 0 : /* @__PURE__ */ new Date(num * 1e3);
-const decNumber = (buf, off, size) => Number(buf[off]) & 128 ? parse$3(buf.subarray(off, off + size)) : decSmallNumber(buf, off, size);
+const decNumber = (buf, off, size) => Number(buf[off]) & 128 ? parse$2(buf.subarray(off, off + size)) : decSmallNumber(buf, off, size);
 const nanUndef = (value) => isNaN(value) ? void 0 : value;
 const decSmallNumber = (buf, off, size) => nanUndef(parseInt(buf.subarray(off, off + size).toString("utf8").replace(/\0.*$/, "").trim(), 8));
 const MAXNUM = {
@@ -3350,7 +3670,66 @@ const list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt)
 });
 
 //#endregion
+//#region node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js
+var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js": ((exports, module) => {
+	const { builtinModules: builtins } = __require("module");
+	var scopedPackagePattern = /* @__PURE__ */ new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
+	var blacklist = ["node_modules", "favicon.ico"];
+	function validate$1(name$1) {
+		var warnings = [];
+		var errors = [];
+		if (name$1 === null) {
+			errors.push("name cannot be null");
+			return done(warnings, errors);
+		}
+		if (name$1 === void 0) {
+			errors.push("name cannot be undefined");
+			return done(warnings, errors);
+		}
+		if (typeof name$1 !== "string") {
+			errors.push("name must be a string");
+			return done(warnings, errors);
+		}
+		if (!name$1.length) errors.push("name length must be greater than zero");
+		if (name$1.match(/^\./)) errors.push("name cannot start with a period");
+		if (name$1.match(/^_/)) errors.push("name cannot start with an underscore");
+		if (name$1.trim() !== name$1) errors.push("name cannot contain leading or trailing spaces");
+		blacklist.forEach(function(blacklistedName) {
+			if (name$1.toLowerCase() === blacklistedName) errors.push(blacklistedName + " is a blacklisted name");
+		});
+		if (builtins.includes(name$1.toLowerCase())) warnings.push(name$1 + " is a core module name");
+		if (name$1.length > 214) warnings.push("name can no longer contain more than 214 characters");
+		if (name$1.toLowerCase() !== name$1) warnings.push("name can no longer contain capital letters");
+		if (/[~'!()*]/.test(name$1.split("/").slice(-1)[0])) warnings.push("name can no longer contain special characters (\"~'!()*\")");
+		if (encodeURIComponent(name$1) !== name$1) {
+			var nameMatch = name$1.match(scopedPackagePattern);
+			if (nameMatch) {
+				var user = nameMatch[1];
+				var pkg = nameMatch[2];
+				if (encodeURIComponent(user) === user && encodeURIComponent(pkg) === pkg) return done(warnings, errors);
+			}
+			errors.push("name can only contain URL-friendly characters");
+		}
+		return done(warnings, errors);
+	}
+	var done = function(warnings, errors) {
+		var result = {
+			validForNewPackages: errors.length === 0 && warnings.length === 0,
+			validForOldPackages: errors.length === 0,
+			warnings,
+			errors
+		};
+		if (!result.warnings.length) delete result.warnings;
+		if (!result.errors.length) delete result.errors;
+		return result;
+	};
+	module.exports = validate$1;
+}) });
+
+//#endregion
 //#region src/read-manifest.ts
+var import_valid = /* @__PURE__ */ __toESM(require_valid(), 1);
+var import_lib = /* @__PURE__ */ __toESM(require_lib$1(), 1);
 const SCOPE_RE = /^(@.+)\/.+$/u;
 const MANIFEST_BASENAME = "package.json";
 const TARBALL_EXTNAME = ".tgz";
@@ -3364,7 +3743,7 @@ const isTarball = (file) => {
 	return typeof file === "string" && path.extname(file) === TARBALL_EXTNAME;
 };
 const normalizeVersion = (version$1) => {
-	return (0, import_valid$1.default)(version$1) ?? void 0;
+	return (0, import_valid.default)(version$1) ?? void 0;
 };
 const validateName = (name$1) => {
 	return (0, import_lib.default)(name$1).validForNewPackages;
@@ -3421,14 +3800,14 @@ async function readManifest(packagePath) {
 	let publishConfig;
 	try {
 		manifestJson = JSON.parse(manifestContents);
-		name$1 = manifestJson["name"];
-		version$1 = normalizeVersion(manifestJson["version"]);
-		publishConfig = manifestJson["publishConfig"] ?? {};
+		name$1 = manifestJson.name;
+		version$1 = normalizeVersion(manifestJson.version);
+		publishConfig = manifestJson.publishConfig ?? {};
 	} catch (error$1) {
 		throw new PackageJsonParseError(packageSpec, error$1);
 	}
 	if (!validateName(name$1)) throw new InvalidPackageNameError(name$1);
-	if (typeof version$1 !== "string") throw new InvalidPackageVersionError(manifestJson["version"]);
+	if (typeof version$1 !== "string") throw new InvalidPackageVersionError(manifestJson.version);
 	if (typeof publishConfig !== "object" || Array.isArray(publishConfig) || !publishConfig) throw new InvalidPackagePublishConfigError(publishConfig);
 	return {
 		packageSpec,
@@ -3438,385 +3817,6 @@ async function readManifest(packagePath) {
 		scope: SCOPE_RE.exec(name$1)?.[1]
 	};
 }
-
-//#endregion
-//#region src/normalize-options.ts
-const REGISTRY_NPM = "https://registry.npmjs.org/";
-const TAG_LATEST = "latest";
-/**
-* Normalizes and sanitizes options, and fills-in any default values.
-*
-* @param manifest Package metadata from package.json.
-* @param options User-input options.
-* @returns Validated auth and publish configuration.
-*/
-function normalizeOptions(manifest, options) {
-	const defaultTag = manifest.publishConfig?.tag ?? TAG_LATEST;
-	const defaultRegistry = manifest.publishConfig?.registry ?? REGISTRY_NPM;
-	const defaultAccess = manifest.publishConfig?.access ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
-	const defaultProvenance = manifest.publishConfig?.provenance ?? false;
-	return {
-		token: validateToken(options.token),
-		registry: validateRegistry(options.registry ?? defaultRegistry),
-		tag: setValue(options.tag, defaultTag, validateTag),
-		access: setValue(options.access, defaultAccess, validateAccess),
-		provenance: setValue(options.provenance, defaultProvenance, Boolean),
-		ignoreScripts: setValue(options.ignoreScripts, true, Boolean),
-		dryRun: setValue(options.dryRun, false, Boolean),
-		strategy: setValue(options.strategy, STRATEGY_ALL, validateStrategy),
-		logger: options.logger,
-		temporaryDirectory: options.temporaryDirectory ?? os.tmpdir()
-	};
-}
-const setValue = (value, defaultValue, validate$2) => ({
-	value: validate$2(value ?? defaultValue),
-	isDefault: value === void 0
-});
-const validateToken = (value) => {
-	if (typeof value === "string" && value.length > 0) return value;
-	throw new InvalidTokenError();
-};
-const validateRegistry = (value) => {
-	try {
-		return new URL(value);
-	} catch {
-		throw new InvalidRegistryUrlError(value);
-	}
-};
-const validateTag = (value) => {
-	if (typeof value === "string") {
-		const trimmedValue = value.trim();
-		const encodedValue = encodeURIComponent(trimmedValue);
-		if (trimmedValue.length > 0 && trimmedValue === encodedValue) return value;
-	}
-	throw new InvalidTagError(value);
-};
-const validateAccess = (value) => {
-	if (value === void 0 || value === ACCESS_PUBLIC || value === ACCESS_RESTRICTED) return value;
-	throw new InvalidAccessError(value);
-};
-const validateStrategy = (value) => {
-	if (value === STRATEGY_ALL || value === STRATEGY_UPGRADE) return value;
-	throw new InvalidStrategyError(value);
-};
-
-//#endregion
-//#region src/npm/call-npm-cli.ts
-const VIEW = "view";
-const PUBLISH = "publish";
-const E404 = "E404";
-const E409 = "E409";
-const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
-const IS_WINDOWS = os.platform() === "win32";
-const NPM = IS_WINDOWS ? "npm.cmd" : "npm";
-const JSON_MATCH_RE = /(\{[\s\S]*\})/mu;
-const baseArguments = (options) => options.ignoreScripts ? ["--ignore-scripts", "--json"] : ["--json"];
-/**
-* Call the NPM CLI in JSON mode.
-*
-* @param command The command of the NPM CLI to call
-* @param cliArguments Any arguments to send to the command
-* @param options Customize environment variables or add an error handler.
-* @returns The parsed JSON, or stdout if unparsable.
-*/
-async function callNpmCli(command, cliArguments, options) {
-	const { stdout, stderr, exitCode } = await execNpm([
-		command,
-		...baseArguments(options),
-		...cliArguments
-	], options.environment, options.logger);
-	let successData;
-	let errorCode;
-	let error$1;
-	if (exitCode === 0) successData = parseJson(stdout);
-	else {
-		const errorPayload = parseJson(stdout, stderr);
-		if (errorPayload?.error?.code) errorCode = String(errorPayload.error.code).toUpperCase();
-		error$1 = new NpmCallError(command, exitCode, stderr);
-	}
-	return {
-		successData,
-		errorCode,
-		error: error$1
-	};
-}
-/**
-* Execute the npm CLI.
-*
-* @param commandArguments Npm subcommand and arguments.
-* @param environment Environment variables.
-* @param logger Optional logger.
-* @returns Stdout, stderr, and the exit code.
-*/
-async function execNpm(commandArguments, environment, logger$1) {
-	logger$1?.debug?.(`Running command: ${NPM} ${commandArguments.join(" ")}`);
-	return new Promise((resolve) => {
-		let stdout = "";
-		let stderr = "";
-		const npm = childProcess.spawn(NPM, commandArguments, {
-			env: {
-				...process.env,
-				...environment
-			},
-			shell: IS_WINDOWS
-		});
-		npm.stdout.on("data", (data) => stdout += data);
-		npm.stderr.on("data", (data) => stderr += data);
-		npm.on("close", (code$1) => {
-			logger$1?.debug?.(`Received stdout: ${stdout}`);
-			logger$1?.debug?.(`Received stderr: ${stderr}`);
-			resolve({
-				stdout: stdout.trim(),
-				stderr: stderr.trim(),
-				exitCode: code$1 ?? 0
-			});
-		});
-	});
-}
-/**
-* Parse CLI outputs for JSON data.
-*
-* Certain versions of the npm CLI may intersperse JSON with human-readable
-* output, which this function accounts for.
-*
-* @param values CLI outputs to check
-* @returns Parsed JSON, if able to parse.
-*/
-function parseJson(...values) {
-	for (const value of values) {
-		const jsonValue = JSON_MATCH_RE.exec(value)?.[1];
-		if (jsonValue) try {
-			return JSON.parse(jsonValue);
-		} catch {
-			return;
-		}
-	}
-}
-
-//#endregion
-//#region src/npm/use-npm-environment.ts
-/**
-* Create a temporary .npmrc file with the given auth token, and call a task
-* with env vars set to use that .npmrc.
-*
-* @param manifest Pacakge metadata.
-* @param options Configuration options.
-* @param task A function called with the configured environment. After the
-*   function resolves, the temporary .npmrc file will be removed.
-* @returns The resolved value of `task`
-*/
-async function useNpmEnvironment(manifest, options, task) {
-	const { registry, token, logger: logger$1, temporaryDirectory } = options;
-	const { host, origin, pathname } = registry;
-	const pathnameWithSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
-	const config = [
-		"; created by jsdevtools/npm-publish",
-		`//${host}${pathnameWithSlash}:_authToken=\${NODE_AUTH_TOKEN}`,
-		`registry=${origin}${pathnameWithSlash}`,
-		""
-	].join(os.EOL);
-	const npmrcDirectory = await fs.mkdtemp(path.join(temporaryDirectory, "npm-publish-"));
-	const npmrc = path.join(npmrcDirectory, ".npmrc");
-	const environment = {
-		NODE_AUTH_TOKEN: token,
-		npm_config_userconfig: npmrc
-	};
-	await fs.writeFile(npmrc, config, "utf8");
-	logger$1?.debug?.(`Temporary .npmrc created at ${npmrc}\n${config}`);
-	try {
-		return await task(manifest, options, environment);
-	} finally {
-		await fs.rm(npmrcDirectory, {
-			force: true,
-			recursive: true
-		});
-	}
-}
-
-//#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js
-var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js": ((exports, module) => {
-	const parse$2 = require_parse();
-	const diff = (version1, version2) => {
-		const v1$1 = parse$2(version1, null, true);
-		const v2 = parse$2(version2, null, true);
-		const comparison = v1$1.compare(v2);
-		if (comparison === 0) return null;
-		const v1Higher = comparison > 0;
-		const highVersion = v1Higher ? v1$1 : v2;
-		const lowVersion = v1Higher ? v2 : v1$1;
-		const highHasPre = !!highVersion.prerelease.length;
-		if (!!lowVersion.prerelease.length && !highHasPre) {
-			if (!lowVersion.patch && !lowVersion.minor) return "major";
-			if (highVersion.patch) return "patch";
-			if (highVersion.minor) return "minor";
-			return "major";
-		}
-		const prefix = highHasPre ? "pre" : "";
-		if (v1$1.major !== v2.major) return prefix + "major";
-		if (v1$1.minor !== v2.minor) return prefix + "minor";
-		if (v1$1.patch !== v2.patch) return prefix + "patch";
-		return "prerelease";
-	};
-	module.exports = diff;
-}) });
-
-//#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js
-var require_compare = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js": ((exports, module) => {
-	const SemVer = require_semver();
-	const compare$1 = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-	module.exports = compare$1;
-}) });
-
-//#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js
-var require_gt = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js": ((exports, module) => {
-	const compare = require_compare();
-	const gt = (a, b, loose) => compare(a, b, loose) > 0;
-	module.exports = gt;
-}) });
-
-//#endregion
-//#region src/compare-and-publish/compare-versions.ts
-var import_diff = /* @__PURE__ */ __toESM(require_diff(), 1);
-var import_gt = /* @__PURE__ */ __toESM(require_gt(), 1);
-var import_valid = /* @__PURE__ */ __toESM(require_valid(), 1);
-/**
-* Compare previously published versions with the package's current version.
-*
-* @param currentVersion The current package version.
-* @param publishedVersions The versions that have already been published.
-* @param options Configuration options
-* @returns The release type and previous version.
-*/
-function compareVersions(currentVersion, publishedVersions, options) {
-	const { versions, "dist-tags": tags } = publishedVersions ?? {};
-	const { strategy, tag: publishTag } = options;
-	const oldVersion = (0, import_valid.default)(tags?.[publishTag.value]) ?? void 0;
-	const isUnique = !versions?.includes(currentVersion);
-	let type;
-	if (isUnique) {
-		if (!oldVersion) type = INITIAL;
-		else if ((0, import_gt.default)(currentVersion, oldVersion)) type = (0, import_diff.default)(currentVersion, oldVersion) ?? DIFFERENT;
-		else if (strategy.value === STRATEGY_ALL) type = DIFFERENT;
-	}
-	return {
-		type,
-		oldVersion
-	};
-}
-
-//#endregion
-//#region src/compare-and-publish/get-arguments.ts
-/**
-* Given a package name and publish configuration, get the NPM CLI view
-* arguments.
-*
-* @param packageName Package name.
-* @param options Publish configuration.
-* @param retryWithTag Include a non-latest tag in the package spec for a rety
-*   attempt.
-* @returns Arguments to pass to the NPM CLI. If `retryWithTag` is true, but the
-*   publish config is using the `latest` tag, will return `undefined`.
-*/
-function getViewArguments(packageName, options, retryWithTag = false) {
-	return [
-		retryWithTag ? `${packageName}@${options.tag.value}` : packageName,
-		"dist-tags",
-		"versions"
-	];
-}
-/**
-* Given a publish configuration, get the NPM CLI publish arguments.
-*
-* @param packageSpec Package specification path.
-* @param options Publish configuration.
-* @returns Arguments to pass to the NPM CLI.
-*/
-function getPublishArguments(packageSpec, options) {
-	const { tag, access: access$1, dryRun, provenance } = options;
-	const publishArguments = [];
-	if (packageSpec.length > 0) publishArguments.push(packageSpec);
-	if (!tag.isDefault) publishArguments.push("--tag", tag.value);
-	if (!access$1.isDefault && access$1.value) publishArguments.push("--access", access$1.value);
-	if (!provenance.isDefault && provenance.value) publishArguments.push("--provenance");
-	if (!dryRun.isDefault && dryRun.value) publishArguments.push("--dry-run", "--force");
-	return publishArguments;
-}
-
-//#endregion
-//#region src/compare-and-publish/compare-and-publish.ts
-/**
-* Get the currently published versions of a package and publish if needed.
-*
-* @param manifest The package to potentially publish.
-* @param options Configuration options.
-* @param environment Environment variables for the npm cli.
-* @returns Information about the publish, including if it occurred.
-*/
-async function compareAndPublish(manifest, options, environment) {
-	const { name: name$1, version: version$1, packageSpec } = manifest;
-	const cliOptions = {
-		environment,
-		ignoreScripts: options.ignoreScripts.value,
-		logger: options.logger
-	};
-	const viewArguments = getViewArguments(name$1, options);
-	const publishArguments = getPublishArguments(packageSpec, options);
-	let viewCall = await callNpmCli(VIEW, viewArguments, cliOptions);
-	if (!viewCall.successData && !viewCall.error) {
-		const viewWithTagArguments = getViewArguments(name$1, options, true);
-		viewCall = await callNpmCli(VIEW, viewWithTagArguments, cliOptions);
-	}
-	if (viewCall.error && viewCall.errorCode !== E404) throw viewCall.error;
-	const isDryRun = options.dryRun.value;
-	const comparison = compareVersions(version$1, viewCall.successData, options);
-	const publishCall = comparison.type ?? isDryRun ? await callNpmCli(PUBLISH, publishArguments, cliOptions) : {
-		successData: void 0,
-		errorCode: void 0,
-		error: void 0
-	};
-	if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT && publishCall.errorCode !== E409) throw publishCall.error;
-	const { successData: publishData } = publishCall;
-	return {
-		id: isDryRun && !comparison.type ? void 0 : publishData?.id,
-		files: publishData?.files ?? [],
-		type: publishData ? comparison.type : void 0,
-		oldVersion: comparison.oldVersion
-	};
-}
-
-//#endregion
-//#region src/format-publish-result.ts
-const DRY_RUN_BANNER = "=== DRY RUN === DRY RUN === DRY RUN === DRY RUN === DRY RUN ===";
-const CONTENTS_BANNER = "=== Contents ===";
-/**
-* Format publish results into a string.
-*
-* @param manifest Package manifest
-* @param options Configuration options.
-* @param result Results from running npm publish.
-* @returns Formatted string.
-*/
-function formatPublishResult(manifest, options, result) {
-	const lines = [];
-	lines.push(result.id === void 0 ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.` : `📦 ${result.id}`);
-	if (result.files.length > 0) lines.push("", CONTENTS_BANNER);
-	for (const { path: path$3, size } of result.files) lines.push(`${formatSize(size)}\t${path$3}`);
-	return (options.dryRun.value ? [
-		DRY_RUN_BANNER,
-		"",
-		...lines,
-		"",
-		DRY_RUN_BANNER
-	] : lines).join(os.EOL);
-}
-const formatSize = (size) => {
-	if (size < 1e3) return `${size} B`;
-	if (size < 1e6) return `${(size / 1e3).toFixed(1)} kB`;
-	return `${(size / 1e6).toFixed(1)} MB`;
-};
 
 //#endregion
 //#region src/npm-publish.ts
@@ -6010,7 +6010,7 @@ async function run() {
 		ignoreScripts: getBooleanInput("ignore-scripts"),
 		dryRun: getBooleanInput("dry-run"),
 		logger,
-		temporaryDirectory: process.env["RUNNER_TEMP"]
+		temporaryDirectory: process.env.RUNNER_TEMP
 	});
 	setOutput("id", results.id, "");
 	setOutput("name", results.name);

@@ -1,8 +1,8 @@
 import os from "node:os";
 
 import type { PublishResult } from "./compare-and-publish/index.js";
-import type { PackageManifest } from "./read-manifest.js";
 import type { NormalizedOptions } from "./normalize-options.js";
+import type { PackageManifest } from "./read-manifest.js";
 
 const DRY_RUN_BANNER =
   "=== DRY RUN === DRY RUN === DRY RUN === DRY RUN === DRY RUN ===";

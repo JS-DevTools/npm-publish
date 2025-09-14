@@ -19,14 +19,6 @@ updates:
       development:
         dependency-type: "development"
 
-    ignore:
-      # TODO(mcous, 2024-07-06): update to ESLint v9 + flat config
-      - dependency-name: "eslint"
-        versions: [">=9"]
-      # rimraf dropped support for ESLint v18
-      - dependency-name: "rimraf"
-        versions: [">=6"]
-
   # Update GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"

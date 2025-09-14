@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import * as subject from "../format-publish-result.js";
-import type { PackageManifest } from "../read-manifest.js";
-import type { NormalizedOptions } from "../normalize-options.js";
 import type {
-  PublishResult,
   PublishFile,
+  PublishResult,
 } from "../compare-and-publish/index.js";
+import * as subject from "../format-publish-result.js";
+import type { NormalizedOptions } from "../normalize-options.js";
+import type { PackageManifest } from "../read-manifest.js";
 
 describe("formatPublishResult", () => {
   it("should say if a publish was skipped", () => {

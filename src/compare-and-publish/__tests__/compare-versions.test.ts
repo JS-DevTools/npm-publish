@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import * as subject from "../compare-versions.js";
 import type { NormalizedOptions } from "../../normalize-options.js";
+import * as subject from "../compare-versions.js";
 
 describe("compareVersions", () => {
   it("should recognize initial release on a tag", () => {

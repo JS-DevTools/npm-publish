@@ -1,16 +1,16 @@
-import type { PackageManifest } from "../read-manifest.js";
 import type { NormalizedOptions } from "../normalize-options.js";
 import {
-  VIEW,
-  PUBLISH,
+  callNpmCli,
   E404,
   E409,
   EPUBLISHCONFLICT,
-  callNpmCli,
   type NpmCliEnvironment,
+  PUBLISH,
+  VIEW,
 } from "../npm/index.js";
+import type { PackageManifest } from "../read-manifest.js";
 import { compareVersions, type VersionComparison } from "./compare-versions.js";
-import { getViewArguments, getPublishArguments } from "./get-arguments.js";
+import { getPublishArguments, getViewArguments } from "./get-arguments.js";
 
 export interface PublishResult extends VersionComparison {
   id: string | undefined;

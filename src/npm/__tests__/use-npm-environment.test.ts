@@ -2,10 +2,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { describe, beforeEach, afterEach, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { PackageManifest } from "../../read-manifest.js";
 import type { NormalizedOptions } from "../../normalize-options.js";
+import type { PackageManifest } from "../../read-manifest.js";
 import * as subject from "../use-npm-environment.js";
 
 describe("useNpmEnvironment", () => {
@@ -57,7 +57,7 @@ describe("useNpmEnvironment", () => {
         inputManifest,
         inputOptions,
         async (manifest, options, environment) => {
-          npmrcPath = environment["npm_config_userconfig"]!;
+          npmrcPath = environment.npm_config_userconfig!;
           npmrcContents = await fs.readFile(npmrcPath, "utf8");
           return { manifest, options, environment };
         }

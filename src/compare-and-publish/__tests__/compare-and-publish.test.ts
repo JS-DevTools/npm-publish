@@ -1,15 +1,14 @@
-import { vi, describe, it, beforeEach, expect } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { when } from "vitest-when";
 
-import type { PackageManifest } from "../../read-manifest.js";
-import type { NormalizedOptions } from "../../normalize-options.js";
-
-import * as subject from "../compare-and-publish.js";
 import * as errors from "../../errors.js";
-import type { Logger } from "../../options.js";
+import type { NormalizedOptions } from "../../normalize-options.js";
 import { callNpmCli, type NpmCliEnvironment } from "../../npm/index.js";
+import type { Logger } from "../../options.js";
+import type { PackageManifest } from "../../read-manifest.js";
+import * as subject from "../compare-and-publish.js";
 import { compareVersions } from "../compare-versions.js";
-import { getViewArguments, getPublishArguments } from "../get-arguments.js";
+import { getPublishArguments, getViewArguments } from "../get-arguments.js";
 
 vi.mock("../../npm");
 vi.mock("../compare-versions");

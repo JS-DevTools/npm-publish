@@ -1,9 +1,9 @@
-import { readManifest } from "./read-manifest.js";
-import { normalizeOptions } from "./normalize-options.js";
-import { useNpmEnvironment } from "./npm/index.js";
 import { compareAndPublish } from "./compare-and-publish/index.js";
 import { formatPublishResult } from "./format-publish-result.js";
+import { normalizeOptions } from "./normalize-options.js";
+import { useNpmEnvironment } from "./npm/index.js";
 import type { Options } from "./options.js";
+import { readManifest } from "./read-manifest.js";
 import type { Results } from "./results.js";
 
 /**

@@ -1,8 +1,9 @@
 import os from "node:os";
-import { describe, it, expect } from "vitest";
 
-import * as subject from "../normalize-options.js";
+import { describe, expect, it } from "vitest";
+
 import * as errors from "../errors.js";
+import * as subject from "../normalize-options.js";
 import type { Logger } from "../options.js";
 
 describe("normalizeOptions", () => {
