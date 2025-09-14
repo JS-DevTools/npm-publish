@@ -44,6 +44,7 @@ describe("get command arguments", () => {
         "restricted",
         "--provenance",
         "--dry-run",
+        "--force",
       ]);
     });
 

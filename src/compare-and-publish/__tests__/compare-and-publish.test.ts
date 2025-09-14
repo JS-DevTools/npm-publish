@@ -224,32 +224,35 @@ describe("compareAndPublish", () => {
     await expect(result).rejects.toThrow(errors.NpmCallError);
   });
 
-  it("should allow an EPUBLISHCONFLICT from npm publish", async () => {
-    when(callNpmCli<"publish">)
-      .calledWith("publish", ["."], {
-        logger,
-        environment,
-        ignoreScripts: false,
-      })
-      .thenResolve({
-        successData: undefined,
-        errorCode: "EPUBLISHCONFLICT",
-        error: new errors.NpmCallError("publish", 1, "oh no"),
+  it.each(["EPUBLISHCONFLICT", "E409"])(
+    "should allow an %s error from npm publish",
+    async (errorCode) => {
+      when(callNpmCli<"publish">)
+        .calledWith("publish", ["."], {
+          logger,
+          environment,
+          ignoreScripts: false,
+        })
+        .thenResolve({
+          successData: undefined,
+          errorCode,
+          error: new errors.NpmCallError("publish", 1, "oh no"),
+        });
+
+      const result = await subject.compareAndPublish(
+        manifest,
+        normalizedOptions,
+        environment
+      );
+
+      expect(result).toEqual({
+        id: undefined,
+        files: [],
+        oldVersion: "0.0.1",
+        type: undefined,
       });
-
-    const result = await subject.compareAndPublish(
-      manifest,
-      normalizedOptions,
-      environment
-    );
-
-    expect(result).toEqual({
-      id: undefined,
-      files: [],
-      oldVersion: "0.0.1",
-      type: undefined,
-    });
-  });
+    }
+  );
 
   it("should raise a non-EPUBLISHCONFLIG from npm publish", async () => {
     when(callNpmCli<"publish">)
