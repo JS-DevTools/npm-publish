@@ -187,9 +187,9 @@ jobs:
           dry-run: true
 
       - name: Check release output
-        if: ${{ steps.action-publish-dry-before.outputs.type }}
+        if: ${{ steps.action-publish-dry-before.outputs.type != 'patch' }}
         run: |
-          echo "::error::Expected release type to be '', got '${{ steps.action-publish-dry-before.outputs.type }}'"
+          echo "::error::Expected release type to be 'patch', got '${{ steps.action-publish-dry-before.outputs.type }}'"
           exit 1
 
       - id: action-publish
