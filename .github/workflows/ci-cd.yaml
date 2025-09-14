@@ -33,20 +33,23 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Run tests
-        run: npm run coverage
+        run: pnpm coverage
 
       - name: Send code coverage results to Coveralls
-        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           parallel: true
           flag-name: Node.js ${{ matrix.node-version }} / ${{ matrix.os }}
@@ -58,7 +61,7 @@ jobs:
     needs: test
     steps:
       - name: Let Coveralls know that all tests have finished
-        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           parallel-finished: true
 
@@ -71,17 +74,20 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - name: Install Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          cache: npm
+          cache: pnpm
 
       - name: Install development dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm build
 
       - name: Verify no un-staged changes
         run: |
@@ -89,7 +95,7 @@ jobs:
           git diff-files --quiet
 
       - name: Run lints
-        run: npm run lint
+        run: pnpm lint
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
@@ -121,13 +127,17 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      - name: Install Node.js ${{ matrix.node-version }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
+      - name: Install Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "24"
+          cache: pnpm
 
       - name: Install production dependencies
-        run: npm install --production
+        run: pnpm install --production
 
       - name: Download publish artifact
         uses: actions/download-artifact@v5
