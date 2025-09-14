@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/npm/l/@jsdevtools/npm-publish.svg)](LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/JS-DevTools/npm-publish)
 
-Publish packages to npm automatically in GitHub Actions by updating the version number.
+Publish packages to npm automatically in GitHub Actions whenever a change to your package's `version` field is detected.
 
 - [Change log][releases]
 - [v3 to v4 migration guide](#v3-to-v4)
@@ -14,6 +14,37 @@ Publish packages to npm automatically in GitHub Actions by updating the version 
 - [v1 to v4 migration guide](#v1-to-v4)
 
 [releases]: https://github.com/JS-DevTools/npm-publish/releases
+
+## ⚠️ You probably don't need this!
+
+This action automates a specific kind of continuous deployment to `npm`, where you want to publish whenever the `version` field in `package.json` changes on your `main` branch. If you prefer to publish on tags (for example, those created by the `npm version` command), or are using an alternative package manager like `pnpm`, you don't need this action! Simply configure `setup-node` with its `registry-url` option and call your package manager's `publish` command directly. This is more secure than relying on a third-party action like this one, and is more customizable.
+
+```yaml
+# Publish to npm whenever a tag is pushed
+name: Publish to npm
+on:
+  push:
+    tags: v*
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+      - run: npm test
+      - run: npm publish --provenance --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+See [GitHub's Node.js publishing guide](https://docs.github.com/en/actions/tutorials/publish-packages/publish-nodejs-packages) for more details and examples.
 
 ## Features
 
