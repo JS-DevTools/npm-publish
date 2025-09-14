@@ -74,10 +74,10 @@
   },
   "dependencies": {
     "@types/semver": "^7.5.2",
-    "command-line-args": "6.0.0",
-    "semver": "7.6.2",
-    "tar": "7.4.0",
-    "validate-npm-package-name": "^5.0.1"
+    "command-line-args": "6.0.1",
+    "semver": "7.7.2",
+    "tar": "7.4.3",
+    "validate-npm-package-name": "^6.0.2"
   },
   "packageManager": "pnpm@10.16.1+sha256.b77e92ba0d59a6372b6c5041bbb3f866fb85e927df333827f0c7f577c5e1a713"
 }
