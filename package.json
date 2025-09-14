@@ -39,7 +39,7 @@
     "lint": "eslint . && prettier . --check",
     "format": "eslint . --fix && prettier . --write",
     "build": "concurrently -g pnpm:build:*",
-    "build:dist": "rolldown src/action/main.ts --dir=dist --platform=node --sourcemap",
+    "build:dist": "rolldown src/action/main.ts --dir=dist --platform=node --treeshake --sourcemap",
     "build:lib": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage"
