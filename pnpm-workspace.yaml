@@ -2,3 +2,7 @@ autoInstallPeers: false
 strictPeerDependencies: true
 onlyBuiltDependencies:
   - esbuild
+overrides:
+  # actions/http-client@2.2 increases bundle size dramatically
+  # https://github.com/actions/toolkit/issues/1621
+  "@actions/http-client@2": "~2.1.1"
