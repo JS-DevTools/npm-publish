@@ -2,8 +2,8 @@
   "compilerOptions": {
     // target Node v20 / ES2023
     "target": "es2023",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
 
     // Interoperability with CommonJS modules

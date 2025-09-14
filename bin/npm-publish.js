@@ -1,12 +1,23 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/use-unknown-in-catch-callback-variable, unicorn/prefer-module, unicorn/prefer-top-level-await */
-"use strict";
+import process from "node:process";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
-const process = require("node:process");
-const { version } = require("../package.json");
-const { main } = require("../lib/cli/index.js");
+import { main } from "../lib/cli/index.js";
 
-main(process.argv.slice(2), version).catch((error) => {
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+// eslint-disable-next-line jsdoc/check-tag-names
+/** @type {{ version: string }} */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const { version } = JSON.parse(
+  fs.readFileSync(path.join(dirname, "../package.json"), "utf8")
+);
+
+try {
+  await main(process.argv.slice(2), version);
+} catch (error) {
   console.error(error);
   process.exitCode = 1;
-});
+}
