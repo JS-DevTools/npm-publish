@@ -12,6 +12,7 @@ import fs$2 from "node:fs";
 import { dirname, parse } from "path";
 import assert from "assert";
 import { Buffer as Buffer$1 } from "buffer";
+import * as realZlib$1 from "zlib";
 import realZlib from "zlib";
 
 //#region rolldown:runtime
@@ -24,12 +25,12 @@ var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function() {
 	return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
-var __copyProps = (to, from, except, desc) => {
+var __copyProps = (to, from, except, desc$1) => {
 	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
 		key = keys[i];
 		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
 			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+			enumerable: !(desc$1 = __getOwnPropDesc(from, key)) || desc$1.enumerable
 		});
 	}
 	return to;
@@ -270,15 +271,15 @@ async function useNpmEnvironment(manifest, options, task) {
 }
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/debug.js
-var require_debug = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/debug.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/debug.js
+var require_debug = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/debug.js": ((exports, module) => {
 	const debug$4 = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {};
 	module.exports = debug$4;
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/constants.js
-var require_constants = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/constants.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/constants.js
+var require_constants = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/constants.js": ((exports, module) => {
 	const SEMVER_SPEC_VERSION = "2.0.0";
 	const MAX_LENGTH$2 = 256;
 	const MAX_SAFE_INTEGER$1 = Number.MAX_SAFE_INTEGER || 9007199254740991;
@@ -306,14 +307,15 @@ var require_constants = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/re.js
-var require_re = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/re.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/re.js
+var require_re = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/re.js": ((exports, module) => {
 	const { MAX_SAFE_COMPONENT_LENGTH, MAX_SAFE_BUILD_LENGTH, MAX_LENGTH: MAX_LENGTH$1 } = require_constants();
 	const debug$3 = require_debug();
 	exports = module.exports = {};
 	const re$1 = exports.re = [];
 	const safeRe = exports.safeRe = [];
 	const src = exports.src = [];
+	const safeSrc = exports.safeSrc = [];
 	const t$1 = exports.t = {};
 	let R = 0;
 	const LETTERDASHNUMBER = "[a-zA-Z0-9-]";
@@ -332,6 +334,7 @@ var require_re = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/n
 		debug$3(name$1, index, value);
 		t$1[name$1] = index;
 		src[index] = value;
+		safeSrc[index] = safe;
 		re$1[index] = new RegExp(value, isGlobal ? "g" : void 0);
 		safeRe[index] = new RegExp(safe, isGlobal ? "g" : void 0);
 	};
@@ -340,8 +343,8 @@ var require_re = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/n
 	createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
 	createToken("MAINVERSION", `(${src[t$1.NUMERICIDENTIFIER]})\\.(${src[t$1.NUMERICIDENTIFIER]})\\.(${src[t$1.NUMERICIDENTIFIER]})`);
 	createToken("MAINVERSIONLOOSE", `(${src[t$1.NUMERICIDENTIFIERLOOSE]})\\.(${src[t$1.NUMERICIDENTIFIERLOOSE]})\\.(${src[t$1.NUMERICIDENTIFIERLOOSE]})`);
-	createToken("PRERELEASEIDENTIFIER", `(?:${src[t$1.NUMERICIDENTIFIER]}|${src[t$1.NONNUMERICIDENTIFIER]})`);
-	createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t$1.NUMERICIDENTIFIERLOOSE]}|${src[t$1.NONNUMERICIDENTIFIER]})`);
+	createToken("PRERELEASEIDENTIFIER", `(?:${src[t$1.NONNUMERICIDENTIFIER]}|${src[t$1.NUMERICIDENTIFIER]})`);
+	createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t$1.NONNUMERICIDENTIFIER]}|${src[t$1.NUMERICIDENTIFIERLOOSE]})`);
 	createToken("PRERELEASE", `(?:-(${src[t$1.PRERELEASEIDENTIFIER]}(?:\\.${src[t$1.PRERELEASEIDENTIFIER]})*))`);
 	createToken("PRERELEASELOOSE", `(?:-?(${src[t$1.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t$1.PRERELEASEIDENTIFIERLOOSE]})*))`);
 	createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
@@ -384,8 +387,8 @@ var require_re = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/n
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/parse-options.js
-var require_parse_options = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/parse-options.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/parse-options.js
+var require_parse_options = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/parse-options.js": ((exports, module) => {
 	const looseOption = Object.freeze({ loose: true });
 	const emptyOpts = Object.freeze({});
 	const parseOptions$1 = (options) => {
@@ -397,8 +400,8 @@ var require_parse_options = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/sem
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/identifiers.js
-var require_identifiers = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/identifiers.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/identifiers.js
+var require_identifiers = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/identifiers.js": ((exports, module) => {
 	const numeric = /^[0-9]+$/;
 	const compareIdentifiers$1 = (a, b) => {
 		const anum = numeric.test(a);
@@ -417,8 +420,8 @@ var require_identifiers = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semve
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/semver.js
-var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/semver.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/classes/semver.js
+var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/classes/semver.js": ((exports, module) => {
 	const debug$2 = require_debug();
 	const { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
 	const { safeRe: re, t } = require_re();
@@ -508,6 +511,13 @@ var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6
 			} while (++i);
 		}
 		inc(release, identifier, identifierBase) {
+			if (release.startsWith("pre")) {
+				if (!identifier && identifierBase === false) throw new Error("invalid increment argument: identifier is empty");
+				if (identifier) {
+					const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE]);
+					if (!match || match[1] !== identifier) throw new Error(`invalid identifier: ${identifier}`);
+				}
+			}
 			switch (release) {
 				case "premajor":
 					this.prerelease.length = 0;
@@ -531,6 +541,10 @@ var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6
 					if (this.prerelease.length === 0) this.inc("patch", identifier, identifierBase);
 					this.inc("pre", identifier, identifierBase);
 					break;
+				case "release":
+					if (this.prerelease.length === 0) throw new Error(`version ${this.raw} is not a prerelease`);
+					this.prerelease.length = 0;
+					break;
 				case "major":
 					if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0) this.major++;
 					this.minor = 0;
@@ -548,7 +562,6 @@ var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6
 					break;
 				case "pre": {
 					const base = Number(identifierBase) ? 1 : 0;
-					if (!identifier && identifierBase === false) throw new Error("invalid increment argument: identifier is empty");
 					if (this.prerelease.length === 0) this.prerelease = [base];
 					else {
 						let i = this.prerelease.length;
@@ -581,8 +594,8 @@ var require_semver = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/parse.js
-var require_parse = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/parse.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/parse.js
+var require_parse = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/parse.js": ((exports, module) => {
 	const SemVer$1 = require_semver();
 	const parse$4 = (version, options, throwErrors = false) => {
 		if (version instanceof SemVer$1) return version;
@@ -597,8 +610,8 @@ var require_parse = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js
-var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/diff.js
+var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/diff.js": ((exports, module) => {
 	const parse$3 = require_parse();
 	const diff = (version1, version2) => {
 		const v1 = parse$3(version1, null, true);
@@ -611,9 +624,10 @@ var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2
 		const highHasPre = !!highVersion.prerelease.length;
 		if (!!lowVersion.prerelease.length && !highHasPre) {
 			if (!lowVersion.patch && !lowVersion.minor) return "major";
-			if (highVersion.patch) return "patch";
-			if (highVersion.minor) return "minor";
-			return "major";
+			if (lowVersion.compareMain(highVersion) === 0) {
+				if (lowVersion.minor && !lowVersion.patch) return "minor";
+				return "patch";
+			}
 		}
 		const prefix = highHasPre ? "pre" : "";
 		if (v1.major !== v2.major) return prefix + "major";
@@ -625,24 +639,24 @@ var require_diff = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js
-var require_compare = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/compare.js
+var require_compare = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/compare.js": ((exports, module) => {
 	const SemVer = require_semver();
 	const compare$1 = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
 	module.exports = compare$1;
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js
-var require_gt = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/gt.js
+var require_gt = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/gt.js": ((exports, module) => {
 	const compare = require_compare();
 	const gt = (a, b, loose) => compare(a, b, loose) > 0;
 	module.exports = gt;
 }) });
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js
-var require_valid = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js": ((exports, module) => {
+//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/valid.js
+var require_valid = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/valid.js": ((exports, module) => {
 	const parse$2 = require_parse();
 	const valid = (version, options) => {
 		const v = parse$2(version, options);
@@ -2002,7 +2016,7 @@ var WriteStreamSync = class extends WriteStream {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/options.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/options.js
 const argmap = new Map([
 	["C", "cwd"],
 	["f", "file"],
@@ -2047,7 +2061,7 @@ const dealias = (opt = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/make-command.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/make-command.js
 const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate$1) => {
 	return Object.assign((opt_ = [], entries, cb) => {
 		if (Array.isArray(opt_)) {
@@ -2087,7 +2101,7 @@ const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate$1) =
 };
 
 //#endregion
-//#region node_modules/.pnpm/minizlib@3.0.1/node_modules/minizlib/dist/esm/constants.js
+//#region node_modules/.pnpm/minizlib@3.0.2/node_modules/minizlib/dist/esm/constants.js
 /* c8 ignore start */
 const realZlibConstants = realZlib.constants || { ZLIB_VERNUM: 4736 };
 /* c8 ignore stop */
@@ -2201,8 +2215,13 @@ const constants = Object.freeze(Object.assign(Object.create(null), {
 }, realZlibConstants));
 
 //#endregion
-//#region node_modules/.pnpm/minizlib@3.0.1/node_modules/minizlib/dist/esm/index.js
+//#region node_modules/.pnpm/minizlib@3.0.2/node_modules/minizlib/dist/esm/index.js
 const OriginalBufferConcat = Buffer$1.concat;
+const desc = Object.getOwnPropertyDescriptor(Buffer$1, "concat");
+const noop$1 = (args) => args;
+const passthroughBufferConcat = desc?.writable === true || desc?.set !== void 0 ? (makeNoOp) => {
+	Buffer$1.concat = makeNoOp ? noop$1 : OriginalBufferConcat;
+} : (_) => {};
 const _superWrite = Symbol("_superWrite");
 var ZlibError = class extends Error {
 	code;
@@ -2249,7 +2268,7 @@ var ZlibBase = class extends Minipass {
 		this.#fullFlushFlag = opts.fullFlushFlag ?? 0;
 		/* c8 ignore stop */
 		try {
-			this.#handle = new realZlib[mode](opts);
+			this.#handle = new realZlib$1[mode](opts);
 		} catch (er) {
 			throw new ZlibError(er);
 		}
@@ -2314,14 +2333,14 @@ var ZlibBase = class extends Minipass {
 		nativeHandle.close = () => {};
 		const originalClose = this.#handle.close;
 		this.#handle.close = () => {};
-		Buffer$1.concat = (args) => args;
+		passthroughBufferConcat(true);
 		let result = void 0;
 		try {
 			const flushFlag = typeof chunk[_flushFlag] === "number" ? chunk[_flushFlag] : this.#flushFlag;
 			result = this.#handle._processChunk(chunk, flushFlag);
-			Buffer$1.concat = OriginalBufferConcat;
+			passthroughBufferConcat(false);
 		} catch (err) {
-			Buffer$1.concat = OriginalBufferConcat;
+			passthroughBufferConcat(false);
 			this.#onError(new ZlibError(err));
 		} finally {
 			if (this.#handle) {
@@ -2682,7 +2701,7 @@ var Node = class {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/large-numbers.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/large-numbers.js
 const encode = (num, buf) => {
 	if (!Number.isSafeInteger(num)) throw Error("cannot encode number outside of javascript safe integer range");
 	else if (num < 0) encodeNegative(num, buf);
@@ -2748,7 +2767,7 @@ const onesComp = (byte) => (255 ^ byte) & 255;
 const twosComp = (byte) => (255 ^ byte) + 1 & 255;
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/types.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/types.js
 const isCode = (c) => name.has(c);
 const name = new Map([
 	["0", "File"],
@@ -2776,7 +2795,7 @@ const name = new Map([
 const code = new Map(Array.from(name).map((kv) => [kv[1], kv[0]]));
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/header.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/header.js
 var Header = class {
 	cksumValid = false;
 	needPax = false;
@@ -2953,7 +2972,7 @@ const NULLS = new Array(156).join("\0");
 const encString = (buf, off, size, str) => str === void 0 ? false : (buf.write(str + NULLS, off, size, "utf8"), str.length !== Buffer.byteLength(str) || str.length > size);
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/pax.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/pax.js
 var Pax = class Pax {
 	atime;
 	mtime;
@@ -3050,12 +3069,12 @@ const parseKVLine = (set, line) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/normalize-windows-path.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/normalize-windows-path.js
 const platform = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
 const normalizeWindowsPath = platform !== "win32" ? (p) => p : (p) => p && p.replace(/\\/g, "/");
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/read-entry.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/read-entry.js
 var ReadEntry = class extends Minipass {
 	extended;
 	globalExtended;
@@ -3159,7 +3178,7 @@ var ReadEntry = class extends Minipass {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/warn-method.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/warn-method.js
 const warnMethod = (self, code$1, message, data = {}) => {
 	if (self.file) data.file = self.file;
 	if (self.cwd) data.cwd = self.cwd;
@@ -3176,7 +3195,7 @@ const warnMethod = (self, code$1, message, data = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/parse.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/parse.js
 const maxMetaEntrySize = 1024 * 1024;
 const gzipHeader = Buffer.from([31, 139]);
 const STATE = Symbol("state");
@@ -3569,7 +3588,7 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/strip-trailing-slashes.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/strip-trailing-slashes.js
 const stripTrailingSlashes = (str) => {
 	let i = str.length - 1;
 	let slashesStart = -1;
@@ -3581,7 +3600,7 @@ const stripTrailingSlashes = (str) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.0/node_modules/tar/dist/esm/list.js
+//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/list.js
 const onReadEntryFunction = (opt) => {
 	const onReadEntry = opt.onReadEntry;
 	opt.onReadEntry = onReadEntry ? (e) => {
@@ -3657,11 +3676,11 @@ const list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt)
 });
 
 //#endregion
-//#region node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js
-var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-npm-package-name@5.0.1/node_modules/validate-npm-package-name/lib/index.js": ((exports, module) => {
+//#region node_modules/.pnpm/validate-npm-package-name@6.0.2/node_modules/validate-npm-package-name/lib/index.js
+var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-npm-package-name@6.0.2/node_modules/validate-npm-package-name/lib/index.js": ((exports, module) => {
 	const { builtinModules: builtins } = __require("module");
 	var scopedPackagePattern = /* @__PURE__ */ new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
-	var blacklist = ["node_modules", "favicon.ico"];
+	var exclusionList = ["node_modules", "favicon.ico"];
 	function validate(name$1) {
 		var warnings = [];
 		var errors = [];
@@ -3678,11 +3697,11 @@ var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-np
 			return done(warnings, errors);
 		}
 		if (!name$1.length) errors.push("name length must be greater than zero");
-		if (name$1.match(/^\./)) errors.push("name cannot start with a period");
+		if (name$1.startsWith(".")) errors.push("name cannot start with a period");
 		if (name$1.match(/^_/)) errors.push("name cannot start with an underscore");
 		if (name$1.trim() !== name$1) errors.push("name cannot contain leading or trailing spaces");
-		blacklist.forEach(function(blacklistedName) {
-			if (name$1.toLowerCase() === blacklistedName) errors.push(blacklistedName + " is a blacklisted name");
+		exclusionList.forEach(function(excludedName) {
+			if (name$1.toLowerCase() === excludedName) errors.push(excludedName + " is not a valid package name");
 		});
 		if (builtins.includes(name$1.toLowerCase())) warnings.push(name$1 + " is a core module name");
 		if (name$1.length > 214) warnings.push("name can no longer contain more than 214 characters");
@@ -3693,6 +3712,7 @@ var require_lib$1 = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/validate-np
 			if (nameMatch) {
 				var user = nameMatch[1];
 				var pkg = nameMatch[2];
+				if (pkg.startsWith(".")) errors.push("name cannot start with a period");
 				if (encodeURIComponent(user) === user && encodeURIComponent(pkg) === pkg) return done(warnings, errors);
 			}
 			errors.push("name can only contain URL-friendly characters");
@@ -3871,14 +3891,14 @@ var require_utils = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+co
 var require_command = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/command.js": ((exports) => {
 	var __createBinding$9 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
+		var desc$1 = Object.getOwnPropertyDescriptor(m, k);
+		if (!desc$1 || ("get" in desc$1 ? !m.__esModule : desc$1.writable || desc$1.configurable)) desc$1 = {
 			enumerable: true,
 			get: function() {
 				return m[k];
 			}
 		};
-		Object.defineProperty(o, k2, desc);
+		Object.defineProperty(o, k2, desc$1);
 	}) : (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
@@ -3961,14 +3981,14 @@ var require_command = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+
 var require_file_command = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/file-command.js": ((exports) => {
 	var __createBinding$8 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
+		var desc$1 = Object.getOwnPropertyDescriptor(m, k);
+		if (!desc$1 || ("get" in desc$1 ? !m.__esModule : desc$1.writable || desc$1.configurable)) desc$1 = {
 			enumerable: true,
 			get: function() {
 				return m[k];
 			}
 		};
-		Object.defineProperty(o, k2, desc);
+		Object.defineProperty(o, k2, desc$1);
 	}) : (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
@@ -5248,14 +5268,14 @@ var require_summary = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+
 var require_path_utils = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/path-utils.js": ((exports) => {
 	var __createBinding$6 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
+		var desc$1 = Object.getOwnPropertyDescriptor(m, k);
+		if (!desc$1 || ("get" in desc$1 ? !m.__esModule : desc$1.writable || desc$1.configurable)) desc$1 = {
 			enumerable: true,
 			get: function() {
 				return m[k];
 			}
 		};
-		Object.defineProperty(o, k2, desc);
+		Object.defineProperty(o, k2, desc$1);
 	}) : (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
@@ -6254,14 +6274,14 @@ var require_exec = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+exe
 var require_platform = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/platform.js": ((exports) => {
 	var __createBinding$1 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
+		var desc$1 = Object.getOwnPropertyDescriptor(m, k);
+		if (!desc$1 || ("get" in desc$1 ? !m.__esModule : desc$1.writable || desc$1.configurable)) desc$1 = {
 			enumerable: true,
 			get: function() {
 				return m[k];
 			}
 		};
-		Object.defineProperty(o, k2, desc);
+		Object.defineProperty(o, k2, desc$1);
 	}) : (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
@@ -6369,14 +6389,14 @@ var require_platform = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions
 var require_core = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/core.js": ((exports) => {
 	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
+		var desc$1 = Object.getOwnPropertyDescriptor(m, k);
+		if (!desc$1 || ("get" in desc$1 ? !m.__esModule : desc$1.writable || desc$1.configurable)) desc$1 = {
 			enumerable: true,
 			get: function() {
 				return m[k];
 			}
 		};
-		Object.defineProperty(o, k2, desc);
+		Object.defineProperty(o, k2, desc$1);
 	}) : (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
