@@ -142,7 +142,6 @@ const DIFFERENT = "different";
 const VIEW = "view";
 const PUBLISH = "publish";
 const E404 = "E404";
-const E409 = "E409";
 const EPUBLISHCONFLICT = "EPUBLISHCONFLICT";
 const IS_WINDOWS$1 = os.platform() === "win32";
 const NPM = IS_WINDOWS$1 ? "npm.cmd" : "npm";
@@ -765,7 +764,7 @@ async function compareAndPublish(manifest, options, environment) {
 		errorCode: void 0,
 		error: void 0
 	};
-	if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT && publishCall.errorCode !== E409) throw publishCall.error;
+	if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) throw publishCall.error;
 	const { successData: publishData } = publishCall;
 	return {
 		id: isDryRun && !comparison.type ? void 0 : publishData?.id,

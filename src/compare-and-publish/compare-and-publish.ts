@@ -2,7 +2,6 @@ import type { NormalizedOptions } from "../normalize-options.js";
 import {
   callNpmCli,
   E404,
-  E409,
   EPUBLISHCONFLICT,
   type NpmCliEnvironment,
   PUBLISH,
@@ -67,11 +66,7 @@ export async function compareAndPublish(
       ? await callNpmCli(PUBLISH, publishArguments, cliOptions)
       : { successData: undefined, errorCode: undefined, error: undefined };
 
-  if (
-    publishCall.error &&
-    publishCall.errorCode !== EPUBLISHCONFLICT &&
-    publishCall.errorCode !== E409
-  ) {
+  if (publishCall.error && publishCall.errorCode !== EPUBLISHCONFLICT) {
     throw publishCall.error;
   }
 

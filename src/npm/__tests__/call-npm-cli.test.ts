@@ -13,6 +13,7 @@ describe.concurrent("callNpmCli", () => {
         ignoreScripts: true,
         environment: {
           npm_config_scope: "@cool-scope",
+          npm_config_ignore_scripts: "false",
         },
       });
 
@@ -36,6 +37,7 @@ describe.concurrent("callNpmCli", () => {
         ignoreScripts: false,
         environment: {
           npm_config_scope: "@cool-scope",
+          npm_config_ignore_scripts: "false",
         },
       });
 
