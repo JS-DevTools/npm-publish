@@ -77,4 +77,24 @@ describe("useNpmEnvironment", () => {
       await expect(fs.access(npmrcPath!)).rejects.toThrow(/ENOENT/);
     }
   );
+
+  it("allows unspecified token", async () => {
+    const inputManifest = { name: "fizzbuzz" } as PackageManifest;
+    const inputOptions = {
+      token: undefined,
+      registry: new URL("http://example.com/"),
+      temporaryDirectory: directory,
+    } as NormalizedOptions;
+
+    const result = await subject.useNpmEnvironment(
+      inputManifest,
+      inputOptions,
+      async (_manifest, _options, environment) => {
+        await Promise.resolve();
+        return environment;
+      }
+    );
+
+    expect(result).toMatchObject({ NODE_AUTH_TOKEN: "" });
+  });
 });

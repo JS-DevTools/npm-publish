@@ -9,7 +9,7 @@ branding:
 inputs:
   token:
     description: The NPM access token to use when publishing
-    required: true
+    required: false
 
   registry:
     description: The NPM registry URL to use

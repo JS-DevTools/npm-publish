@@ -14,7 +14,9 @@ Arguments:
 
 Options:
 
-  --token <token>         (Required) npm authentication token.
+  --token <token>         npm authentication token.
+                          Not required if using trusted publishing.
+                          See npm documentation for details.
 
   --registry <url>        Registry to read from and write to.
                           Defaults to "https://registry.npmjs.org/".

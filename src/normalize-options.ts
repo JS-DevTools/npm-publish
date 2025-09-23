@@ -19,7 +19,7 @@ export const TAG_LATEST = "latest";
 /** Normalized and sanitized auth, publish, and runtime configurations. */
 export interface NormalizedOptions {
   registry: URL;
-  token: string;
+  token: string | undefined;
   tag: ConfigValue<string>;
   access: ConfigValue<Access | undefined>;
   provenance: ConfigValue<boolean>;
@@ -58,7 +58,7 @@ export function normalizeOptions(
   const defaultProvenance = manifest.publishConfig?.provenance ?? false;
 
   return {
-    token: validateToken(options.token),
+    token: validateToken(options.token ?? undefined),
     registry: validateRegistry(options.registry ?? defaultRegistry),
     tag: setValue(options.tag, defaultTag, validateTag),
     access: setValue(options.access, defaultAccess, validateAccess),
@@ -80,12 +80,12 @@ const setValue = <TValue>(
   isDefault: value === undefined,
 });
 
-const validateToken = (value: unknown): string => {
-  if (typeof value === "string" && value.length > 0) {
-    return value;
+const validateToken = (value: unknown): string | undefined => {
+  if (typeof value !== "string" && value !== undefined && value !== null) {
+    throw new errors.InvalidTokenError();
   }
 
-  throw new errors.InvalidTokenError();
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 };
 
 const validateRegistry = (value: unknown): URL => {

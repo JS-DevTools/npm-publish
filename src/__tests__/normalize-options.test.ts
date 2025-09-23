@@ -58,14 +58,21 @@ describe("normalizeOptions", () => {
 
     it("should throw if token invalid", () => {
       expect(() => {
-        subject.normalizeOptions(manifest, { token: "" });
-      }).toThrow(errors.InvalidTokenError);
-
-      expect(() => {
         // @ts-expect-error: intentionally mistyped for validation testing
-        subject.normalizeOptions({ token: 42 }, manifest);
+        subject.normalizeOptions(manifest, { token: 0 });
       }).toThrow(errors.InvalidTokenError);
     });
+
+    // eslint-disable-next-line unicorn/no-null
+    it.each([undefined, null, ""])(
+      "should set unspecified token %j to undefined",
+      (token) => {
+        // @ts-expect-error: intentionally mistyped for validation testing
+        const result = subject.normalizeOptions(manifest, { token });
+
+        expect(result).toMatchObject({ token: undefined });
+      }
+    );
   });
 
   describe("publishConfig", () => {

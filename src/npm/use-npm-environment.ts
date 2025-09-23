@@ -42,7 +42,10 @@ export async function useNpmEnvironment<TReturn>(
     path.join(temporaryDirectory, "npm-publish-")
   );
   const npmrc = path.join(npmrcDirectory, ".npmrc");
-  const environment = { NODE_AUTH_TOKEN: token, npm_config_userconfig: npmrc };
+  const environment = {
+    NODE_AUTH_TOKEN: token ?? "",
+    npm_config_userconfig: npmrc,
+  };
 
   await fs.writeFile(npmrc, config, "utf8");
 

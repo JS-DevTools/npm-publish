@@ -24,8 +24,13 @@ export interface Logger {
 
 /** Options that determine how/whether the package is published. */
 export interface Options {
-  /** The NPM access token to use when publishing. */
-  token: string;
+  /**
+   * The NPM access token to use when publishing.
+   *
+   * May be left unspecified if `npm` is running in an environment with [trusted
+   * publishing](https://docs.npmjs.com/trusted-publishers#supported-cicd-providers)
+   */
+  token?: string | undefined;
 
   /**
    * The absolute or relative path of your package.
