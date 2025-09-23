@@ -12,7 +12,7 @@ describe("run", () => {
   beforeEach(() => {
     vi.stubEnv("RUNNER_TEMP", "/path/to/temp");
 
-    when(core.getRequiredSecretInput).calledWith("token").thenReturn("abc123");
+    when(core.getSecretInput).calledWith("token").thenReturn("abc123");
     when(core.getInput).calledWith("package").thenReturn("./package.json");
     when(core.getInput)
       .calledWith("registry")

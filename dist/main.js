@@ -6773,9 +6773,9 @@ function getInput(name$1) {
 * @param name Input name
 * @returns The input secret value.
 */
-function getRequiredSecretInput(name$1) {
-	const inputString = (0, import_core.getInput)(name$1, { required: true });
-	(0, import_core.setSecret)(inputString);
+function getSecretInput(name$1) {
+	const inputString = getInput(name$1);
+	if (inputString) (0, import_core.setSecret)(inputString);
 	return inputString;
 }
 /**
@@ -6806,7 +6806,7 @@ function setOutput(name$1, value, defaultValue) {
 /** Run the action. */
 async function run() {
 	const results = await npmPublish({
-		token: getRequiredSecretInput("token"),
+		token: getSecretInput("token"),
 		registry: getInput("registry"),
 		package: getInput("package"),
 		tag: getInput("tag"),

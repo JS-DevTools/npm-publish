@@ -5,7 +5,7 @@ import * as core from "./core.js";
 /** Run the action. */
 async function run(): Promise<void> {
   const results = await npmPublish({
-    token: core.getRequiredSecretInput("token"),
+    token: core.getSecretInput("token"),
     registry: core.getInput("registry"),
     package: core.getInput("package"),
     tag: core.getInput("tag"),
