@@ -35,9 +35,12 @@ export function getInput(name: string): string | undefined {
  * @param name Input name
  * @returns The input secret value.
  */
-export function getRequiredSecretInput(name: string): string {
-  const inputString = ghGetInput(name, { required: true });
-  ghSetSecret(inputString);
+export function getSecretInput(name: string): string | undefined {
+  const inputString = getInput(name);
+  if (inputString) {
+    ghSetSecret(inputString);
+  }
+
   return inputString;
 }
 
