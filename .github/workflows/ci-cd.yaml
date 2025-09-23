@@ -230,6 +230,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' }}
     name: Publish
     runs-on: ubuntu-latest
+    environment: npm
     timeout-minutes: 10
 
     permissions:
@@ -259,5 +260,3 @@ jobs:
 
       - name: Publish to NPM
         uses: ./
-        with:
-          token: ${{ secrets.NPM_TOKEN }}

@@ -254,7 +254,7 @@ async function useNpmEnvironment(manifest, options, task) {
 	const npmrcDirectory = await fs.mkdtemp(path.join(temporaryDirectory, "npm-publish-"));
 	const npmrc = path.join(npmrcDirectory, ".npmrc");
 	const environment = {
-		NODE_AUTH_TOKEN: token,
+		NODE_AUTH_TOKEN: token ?? "",
 		npm_config_userconfig: npmrc
 	};
 	await fs.writeFile(npmrc, config, "utf8");
@@ -822,7 +822,7 @@ function normalizeOptions(manifest, options) {
 	const defaultAccess = manifest.publishConfig?.access ?? (manifest.scope === void 0 ? ACCESS_PUBLIC : void 0);
 	const defaultProvenance = manifest.publishConfig?.provenance ?? false;
 	return {
-		token: validateToken(options.token),
+		token: validateToken(options.token ?? void 0),
 		registry: validateRegistry(options.registry ?? defaultRegistry),
 		tag: setValue(options.tag, defaultTag, validateTag),
 		access: setValue(options.access, defaultAccess, validateAccess),
@@ -839,8 +839,8 @@ const setValue = (value, defaultValue, validate$1) => ({
 	isDefault: value === void 0
 });
 const validateToken = (value) => {
-	if (typeof value === "string" && value.length > 0) return value;
-	throw new InvalidTokenError();
+	if (typeof value !== "string" && value !== void 0 && value !== null) throw new InvalidTokenError();
+	return typeof value === "string" && value.length > 0 ? value : void 0;
 };
 const validateRegistry = (value) => {
 	try {

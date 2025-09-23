@@ -44,7 +44,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-See [GitHub's Node.js publishing guide](https://docs.github.com/en/actions/tutorials/publish-packages/publish-nodejs-packages) for more details and examples.
+See GitHub's [Node.js publishing][] guide and npm's [trusted publishing][] docs for more details and examples.
+
+[Node.js publishing]: https://docs.github.com/en/actions/tutorials/publish-packages/publish-nodejs-packages
+[trusted publishing]: https://docs.npmjs.com/trusted-publishers#supported-cicd-providers
 
 ## Features
 
@@ -97,6 +100,30 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
 ```
 
+If you have [trusted publishing][] configured for your package and use `npm@>=11.5.1`, you can omit the `token` input and use OIDC instead.
+
+> [!IMPORTANT]
+> If you're publishing a private package, you will still need to provide a read-only `token` so the action can read existing versions from the registry before publish.
+
+```diff
+  jobs:
+    publish:
+      runs-on: ubuntu-latest
++     permissions:
++       contents: read
++       id-token: write  # required to use OIDC
+      steps:
+        - uses: actions/checkout@v5
+        - uses: actions/setup-node@v5
+          with:
+            node-version: "24"  # includes npm@11.6.0
+        - run: npm ci
+        - run: npm test
+        - uses: JS-DevTools/npm-publish@v4
+-         with:
+-           token: ${{ secrets.NPM_TOKEN }}
+```
+
 You can also publish to third-party registries. For example, to publish to the [GitHub Package Registry][], set `token` to `secrets.GITHUB_TOKEN` and `registry` to `https://npm.pkg.github.com`:
 
 ```yaml
@@ -134,7 +161,7 @@ You can set any or all of the following input parameters using `with`:
 
 | Name             | Type                   | Default                       | Description                                                                      |
 | ---------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `token`          | string                 | **required**                  | Authentication token to use with the configured registry.                        |
+| `token`          | string                 | unspecified                   | Registry authentication token, not required if using [trusted publishing][]³     |
 | `registry`¹      | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
 | `package`        | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
 | `tag`¹           | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
@@ -146,6 +173,7 @@ You can set any or all of the following input parameters using `with`:
 
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
+3. Trusted publishing npm `>=11.5.1` and must be run from a supported cloud provider.
 
 [npm-tag]: https://docs.npmjs.com/cli/v9/commands/npm-publish#tag
 [npm-access]: https://docs.npmjs.com/cli/v9/commands/npm-publish#access
@@ -209,7 +237,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 
 | Name                 | Type                   | Default                       | Description                                                                      |
 | -------------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `token`              | string                 | **required**                  | Authentication token to use with the configured registry.                        |
+| `token`              | string                 | **required**                  | Registry authentication token, not required if using [trusted publishing][]³     |
 | `registry`¹          | string, `URL`          | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
 | `package`            | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
 | `tag`¹               | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
@@ -223,6 +251,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 
 1. May be specified using `publishConfig` in `package.json`.
 2. Provenance requires npm `>=9.5.0`.
+3. Trusted publishing npm `>=11.5.1` and must be run from a supported cloud provider.
 
 ### API output
 
@@ -281,7 +310,9 @@ Arguments:
 
 Options:
 
-  --token <token>         (Required) npm authentication token.
+  --token <token>         npm authentication token.
+                          Not required if using trusted publishing.
+                          See npm documentation for details.
 
   --registry <url>        Registry to read from and write to.
                           Defaults to "https://registry.npmjs.org/".
