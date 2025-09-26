@@ -2015,7 +2015,7 @@ var WriteStreamSync = class extends WriteStream {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/options.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/options.js
 const argmap = new Map([
 	["C", "cwd"],
 	["f", "file"],
@@ -2060,7 +2060,7 @@ const dealias = (opt = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/make-command.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/make-command.js
 const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate$1) => {
 	return Object.assign((opt_ = [], entries, cb) => {
 		if (Array.isArray(opt_)) {
@@ -2100,7 +2100,7 @@ const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate$1) =
 };
 
 //#endregion
-//#region node_modules/.pnpm/minizlib@3.0.2/node_modules/minizlib/dist/esm/constants.js
+//#region node_modules/.pnpm/minizlib@3.1.0/node_modules/minizlib/dist/esm/constants.js
 /* c8 ignore start */
 const realZlibConstants = realZlib.constants || { ZLIB_VERNUM: 4736 };
 /* c8 ignore stop */
@@ -2214,7 +2214,7 @@ const constants = Object.freeze(Object.assign(Object.create(null), {
 }, realZlibConstants));
 
 //#endregion
-//#region node_modules/.pnpm/minizlib@3.0.2/node_modules/minizlib/dist/esm/index.js
+//#region node_modules/.pnpm/minizlib@3.1.0/node_modules/minizlib/dist/esm/index.js
 const OriginalBufferConcat = Buffer$1.concat;
 const desc = Object.getOwnPropertyDescriptor(Buffer$1, "concat");
 const noop$1 = (args) => args;
@@ -2225,14 +2225,14 @@ const _superWrite = Symbol("_superWrite");
 var ZlibError = class extends Error {
 	code;
 	errno;
-	constructor(err) {
-		super("zlib: " + err.message);
+	constructor(err, origin) {
+		super("zlib: " + err.message, { cause: err });
 		this.code = err.code;
 		this.errno = err.errno;
 		/* c8 ignore next */
 		if (!this.code) this.code = "ZLIB_ERROR";
 		this.message = "zlib: " + err.message;
-		Error.captureStackTrace(this, this.constructor);
+		Error.captureStackTrace(this, origin ?? this.constructor);
 	}
 	get name() {
 		return "ZlibError";
@@ -2266,10 +2266,11 @@ var ZlibBase = class extends Minipass {
 		this.#finishFlushFlag = opts.finishFlush ?? 0;
 		this.#fullFlushFlag = opts.fullFlushFlag ?? 0;
 		/* c8 ignore stop */
+		if (typeof realZlib$1[mode] !== "function") throw new TypeError("Compression method not supported: " + mode);
 		try {
 			this.#handle = new realZlib$1[mode](opts);
 		} catch (er) {
-			throw new ZlibError(er);
+			throw new ZlibError(er, this.constructor);
 		}
 		this.#onError = (err) => {
 			if (this.#sawError) return;
@@ -2340,7 +2341,7 @@ var ZlibBase = class extends Minipass {
 			passthroughBufferConcat(false);
 		} catch (err) {
 			passthroughBufferConcat(false);
-			this.#onError(new ZlibError(err));
+			this.#onError(new ZlibError(err, this.write));
 		} finally {
 			if (this.#handle) {
 				this.#handle._handle = nativeHandle;
@@ -2349,7 +2350,7 @@ var ZlibBase = class extends Minipass {
 				this.#handle.removeAllListeners("error");
 			}
 		}
-		if (this.#handle) this.#handle.on("error", (er) => this.#onError(new ZlibError(er)));
+		if (this.#handle) this.#handle.on("error", (er) => this.#onError(new ZlibError(er, this.write)));
 		let writeReturn;
 		if (result) if (Array.isArray(result) && result.length > 0) {
 			const r = result[0];
@@ -2437,270 +2438,23 @@ var BrotliDecompress = class extends Brotli {
 		super(opts, "BrotliDecompress");
 	}
 };
-
-//#endregion
-//#region node_modules/.pnpm/yallist@5.0.0/node_modules/yallist/dist/esm/index.js
-var Yallist = class Yallist {
-	tail;
-	head;
-	length = 0;
-	static create(list$1 = []) {
-		return new Yallist(list$1);
-	}
-	constructor(list$1 = []) {
-		for (const item of list$1) this.push(item);
-	}
-	*[Symbol.iterator]() {
-		for (let walker = this.head; walker; walker = walker.next) yield walker.value;
-	}
-	removeNode(node) {
-		if (node.list !== this) throw new Error("removing node which does not belong to this list");
-		const next = node.next;
-		const prev = node.prev;
-		if (next) next.prev = prev;
-		if (prev) prev.next = next;
-		if (node === this.head) this.head = next;
-		if (node === this.tail) this.tail = prev;
-		this.length--;
-		node.next = void 0;
-		node.prev = void 0;
-		node.list = void 0;
-		return next;
-	}
-	unshiftNode(node) {
-		if (node === this.head) return;
-		if (node.list) node.list.removeNode(node);
-		const head = this.head;
-		node.list = this;
-		node.next = head;
-		if (head) head.prev = node;
-		this.head = node;
-		if (!this.tail) this.tail = node;
-		this.length++;
-	}
-	pushNode(node) {
-		if (node === this.tail) return;
-		if (node.list) node.list.removeNode(node);
-		const tail = this.tail;
-		node.list = this;
-		node.prev = tail;
-		if (tail) tail.next = node;
-		this.tail = node;
-		if (!this.head) this.head = node;
-		this.length++;
-	}
-	push(...args) {
-		for (let i = 0, l = args.length; i < l; i++) push(this, args[i]);
-		return this.length;
-	}
-	unshift(...args) {
-		for (var i = 0, l = args.length; i < l; i++) unshift(this, args[i]);
-		return this.length;
-	}
-	pop() {
-		if (!this.tail) return;
-		const res = this.tail.value;
-		const t$2 = this.tail;
-		this.tail = this.tail.prev;
-		if (this.tail) this.tail.next = void 0;
-		else this.head = void 0;
-		t$2.list = void 0;
-		this.length--;
-		return res;
-	}
-	shift() {
-		if (!this.head) return;
-		const res = this.head.value;
-		const h = this.head;
-		this.head = this.head.next;
-		if (this.head) this.head.prev = void 0;
-		else this.tail = void 0;
-		h.list = void 0;
-		this.length--;
-		return res;
-	}
-	forEach(fn, thisp) {
-		thisp = thisp || this;
-		for (let walker = this.head, i = 0; !!walker; i++) {
-			fn.call(thisp, walker.value, i, this);
-			walker = walker.next;
-		}
-	}
-	forEachReverse(fn, thisp) {
-		thisp = thisp || this;
-		for (let walker = this.tail, i = this.length - 1; !!walker; i--) {
-			fn.call(thisp, walker.value, i, this);
-			walker = walker.prev;
-		}
-	}
-	get(n) {
-		let i = 0;
-		let walker = this.head;
-		for (; !!walker && i < n; i++) walker = walker.next;
-		if (i === n && !!walker) return walker.value;
-	}
-	getReverse(n) {
-		let i = 0;
-		let walker = this.tail;
-		for (; !!walker && i < n; i++) walker = walker.prev;
-		if (i === n && !!walker) return walker.value;
-	}
-	map(fn, thisp) {
-		thisp = thisp || this;
-		const res = new Yallist();
-		for (let walker = this.head; !!walker;) {
-			res.push(fn.call(thisp, walker.value, this));
-			walker = walker.next;
-		}
-		return res;
-	}
-	mapReverse(fn, thisp) {
-		thisp = thisp || this;
-		var res = new Yallist();
-		for (let walker = this.tail; !!walker;) {
-			res.push(fn.call(thisp, walker.value, this));
-			walker = walker.prev;
-		}
-		return res;
-	}
-	reduce(fn, initial) {
-		let acc;
-		let walker = this.head;
-		if (arguments.length > 1) acc = initial;
-		else if (this.head) {
-			walker = this.head.next;
-			acc = this.head.value;
-		} else throw new TypeError("Reduce of empty list with no initial value");
-		for (var i = 0; !!walker; i++) {
-			acc = fn(acc, walker.value, i);
-			walker = walker.next;
-		}
-		return acc;
-	}
-	reduceReverse(fn, initial) {
-		let acc;
-		let walker = this.tail;
-		if (arguments.length > 1) acc = initial;
-		else if (this.tail) {
-			walker = this.tail.prev;
-			acc = this.tail.value;
-		} else throw new TypeError("Reduce of empty list with no initial value");
-		for (let i = this.length - 1; !!walker; i--) {
-			acc = fn(acc, walker.value, i);
-			walker = walker.prev;
-		}
-		return acc;
-	}
-	toArray() {
-		const arr = new Array(this.length);
-		for (let i = 0, walker = this.head; !!walker; i++) {
-			arr[i] = walker.value;
-			walker = walker.next;
-		}
-		return arr;
-	}
-	toArrayReverse() {
-		const arr = new Array(this.length);
-		for (let i = 0, walker = this.tail; !!walker; i++) {
-			arr[i] = walker.value;
-			walker = walker.prev;
-		}
-		return arr;
-	}
-	slice(from = 0, to = this.length) {
-		if (to < 0) to += this.length;
-		if (from < 0) from += this.length;
-		const ret = new Yallist();
-		if (to < from || to < 0) return ret;
-		if (from < 0) from = 0;
-		if (to > this.length) to = this.length;
-		let walker = this.head;
-		let i = 0;
-		for (i = 0; !!walker && i < from; i++) walker = walker.next;
-		for (; !!walker && i < to; i++, walker = walker.next) ret.push(walker.value);
-		return ret;
-	}
-	sliceReverse(from = 0, to = this.length) {
-		if (to < 0) to += this.length;
-		if (from < 0) from += this.length;
-		const ret = new Yallist();
-		if (to < from || to < 0) return ret;
-		if (from < 0) from = 0;
-		if (to > this.length) to = this.length;
-		let i = this.length;
-		let walker = this.tail;
-		for (; !!walker && i > to; i--) walker = walker.prev;
-		for (; !!walker && i > from; i--, walker = walker.prev) ret.push(walker.value);
-		return ret;
-	}
-	splice(start, deleteCount = 0, ...nodes) {
-		if (start > this.length) start = this.length - 1;
-		if (start < 0) start = this.length + start;
-		let walker = this.head;
-		for (let i = 0; !!walker && i < start; i++) walker = walker.next;
-		const ret = [];
-		for (let i = 0; !!walker && i < deleteCount; i++) {
-			ret.push(walker.value);
-			walker = this.removeNode(walker);
-		}
-		if (!walker) walker = this.tail;
-		else if (walker !== this.tail) walker = walker.prev;
-		for (const v of nodes) walker = insertAfter(this, walker, v);
-		return ret;
-	}
-	reverse() {
-		const head = this.head;
-		const tail = this.tail;
-		for (let walker = head; !!walker; walker = walker.prev) {
-			const p = walker.prev;
-			walker.prev = walker.next;
-			walker.next = p;
-		}
-		this.head = tail;
-		this.tail = head;
-		return this;
+var Zstd = class extends ZlibBase {
+	constructor(opts, mode) {
+		opts = opts || {};
+		opts.flush = opts.flush || constants.ZSTD_e_continue;
+		opts.finishFlush = opts.finishFlush || constants.ZSTD_e_end;
+		opts.fullFlushFlag = constants.ZSTD_e_flush;
+		super(opts, mode);
 	}
 };
-function insertAfter(self, node, value) {
-	const prev = node;
-	const next = node ? node.next : self.head;
-	const inserted = new Node(value, prev, next, self);
-	if (inserted.next === void 0) self.tail = inserted;
-	if (inserted.prev === void 0) self.head = inserted;
-	self.length++;
-	return inserted;
-}
-function push(self, item) {
-	self.tail = new Node(item, self.tail, void 0, self);
-	if (!self.head) self.head = self.tail;
-	self.length++;
-}
-function unshift(self, item) {
-	self.head = new Node(item, void 0, self.head, self);
-	if (!self.tail) self.tail = self.head;
-	self.length++;
-}
-var Node = class {
-	list;
-	next;
-	prev;
-	value;
-	constructor(value, prev, next, list$1) {
-		this.list = list$1;
-		this.value = value;
-		if (prev) {
-			prev.next = this;
-			this.prev = prev;
-		} else this.prev = void 0;
-		if (next) {
-			next.prev = this;
-			this.next = next;
-		} else this.next = void 0;
+var ZstdDecompress = class extends Zstd {
+	constructor(opts) {
+		super(opts, "ZstdDecompress");
 	}
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/large-numbers.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/large-numbers.js
 const encode = (num, buf) => {
 	if (!Number.isSafeInteger(num)) throw Error("cannot encode number outside of javascript safe integer range");
 	else if (num < 0) encodeNegative(num, buf);
@@ -2766,7 +2520,7 @@ const onesComp = (byte) => (255 ^ byte) & 255;
 const twosComp = (byte) => (255 ^ byte) + 1 & 255;
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/types.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/types.js
 const isCode = (c) => name.has(c);
 const name = new Map([
 	["0", "File"],
@@ -2794,7 +2548,7 @@ const name = new Map([
 const code = new Map(Array.from(name).map((kv) => [kv[1], kv[0]]));
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/header.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/header.js
 var Header = class {
 	cksumValid = false;
 	needPax = false;
@@ -2971,7 +2725,7 @@ const NULLS = new Array(156).join("\0");
 const encString = (buf, off, size, str) => str === void 0 ? false : (buf.write(str + NULLS, off, size, "utf8"), str.length !== Buffer.byteLength(str) || str.length > size);
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/pax.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/pax.js
 var Pax = class Pax {
 	atime;
 	mtime;
@@ -3068,12 +2822,12 @@ const parseKVLine = (set, line) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/normalize-windows-path.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/normalize-windows-path.js
 const platform = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
 const normalizeWindowsPath = platform !== "win32" ? (p) => p : (p) => p && p.replace(/\\/g, "/");
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/read-entry.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/read-entry.js
 var ReadEntry = class extends Minipass {
 	extended;
 	globalExtended;
@@ -3177,7 +2931,7 @@ var ReadEntry = class extends Minipass {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/warn-method.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/warn-method.js
 const warnMethod = (self, code$1, message, data = {}) => {
 	if (self.file) data.file = self.file;
 	if (self.cwd) data.cwd = self.cwd;
@@ -3194,9 +2948,16 @@ const warnMethod = (self, code$1, message, data = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/parse.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/parse.js
 const maxMetaEntrySize = 1024 * 1024;
 const gzipHeader = Buffer.from([31, 139]);
+const zstdHeader = Buffer.from([
+	40,
+	181,
+	47,
+	253
+]);
+const ZIP_HEADER_LEN = Math.max(gzipHeader.length, zstdHeader.length);
 const STATE = Symbol("state");
 const WRITEENTRY = Symbol("writeEntry");
 const READENTRY = Symbol("readEntry");
@@ -3234,9 +2995,10 @@ var Parser = class extends EventEmitter {
 	maxMetaEntrySize;
 	filter;
 	brotli;
+	zstd;
 	writable = true;
 	readable = false;
-	[QUEUE] = new Yallist();
+	[QUEUE] = [];
 	[BUFFER];
 	[READENTRY];
 	[WRITEENTRY];
@@ -3269,7 +3031,9 @@ var Parser = class extends EventEmitter {
 		this.maxMetaEntrySize = opt.maxMetaEntrySize || maxMetaEntrySize;
 		this.filter = typeof opt.filter === "function" ? opt.filter : noop;
 		const isTBR = opt.file && (opt.file.endsWith(".tar.br") || opt.file.endsWith(".tbr"));
-		this.brotli = !opt.gzip && opt.brotli !== void 0 ? opt.brotli : isTBR ? void 0 : false;
+		this.brotli = !(opt.gzip || opt.zstd) && opt.brotli !== void 0 ? opt.brotli : isTBR ? void 0 : false;
+		const isTZST = opt.file && (opt.file.endsWith(".tar.zst") || opt.file.endsWith(".tzst"));
+		this.zstd = !(opt.gzip || opt.brotli) && opt.zstd !== void 0 ? opt.zstd : isTZST ? true : void 0;
 		this.on("end", () => this[CLOSESTREAM]());
 		if (typeof opt.onwarn === "function") this.on("warn", opt.onwarn);
 		if (typeof opt.onReadEntry === "function") this.on("entry", opt.onReadEntry);
@@ -3454,14 +3218,22 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 				chunk = Buffer.concat([this[BUFFER], chunk]);
 				this[BUFFER] = void 0;
 			}
-			if (chunk.length < gzipHeader.length) {
+			if (chunk.length < ZIP_HEADER_LEN) {
 				this[BUFFER] = chunk;
 				/* c8 ignore next */
 				cb?.();
 				return true;
 			}
 			for (let i = 0; this[UNZIP] === void 0 && i < gzipHeader.length; i++) if (chunk[i] !== gzipHeader[i]) this[UNZIP] = false;
-			const maybeBrotli = this.brotli === void 0;
+			let isZstd = false;
+			if (this[UNZIP] === false && this.zstd !== false) {
+				isZstd = true;
+				for (let i = 0; i < zstdHeader.length; i++) if (chunk[i] !== zstdHeader[i]) {
+					isZstd = false;
+					break;
+				}
+			}
+			const maybeBrotli = this.brotli === void 0 && !isZstd;
 			if (this[UNZIP] === false && maybeBrotli) if (chunk.length < 512) if (this[ENDED]) this.brotli = true;
 			else {
 				this[BUFFER] = chunk;
@@ -3475,10 +3247,10 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 			} catch (_) {
 				this.brotli = true;
 			}
-			if (this[UNZIP] === void 0 || this[UNZIP] === false && this.brotli) {
+			if (this[UNZIP] === void 0 || this[UNZIP] === false && (this.brotli || isZstd)) {
 				const ended = this[ENDED];
 				this[ENDED] = false;
-				this[UNZIP] = this[UNZIP] === void 0 ? new Unzip({}) : new BrotliDecompress({});
+				this[UNZIP] = this[UNZIP] === void 0 ? new Unzip({}) : isZstd ? new ZstdDecompress({}) : new BrotliDecompress({});
 				this[UNZIP].on("data", (chunk$1) => this[CONSUMECHUNK](chunk$1));
 				this[UNZIP].on("error", (er) => this.abort(er));
 				this[UNZIP].on("end", () => {
@@ -3578,7 +3350,7 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 			this[UNZIP].end();
 		} else {
 			this[ENDED] = true;
-			if (this.brotli === void 0) chunk = chunk || Buffer.alloc(0);
+			if (this.brotli === void 0 || this.zstd === void 0) chunk = chunk || Buffer.alloc(0);
 			if (chunk) this.write(chunk);
 			this[MAYBEEND]();
 		}
@@ -3587,7 +3359,7 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/strip-trailing-slashes.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/strip-trailing-slashes.js
 const stripTrailingSlashes = (str) => {
 	let i = str.length - 1;
 	let slashesStart = -1;
@@ -3599,7 +3371,7 @@ const stripTrailingSlashes = (str) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.4.3/node_modules/tar/dist/esm/list.js
+//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/list.js
 const onReadEntryFunction = (opt) => {
 	const onReadEntry = opt.onReadEntry;
 	opt.onReadEntry = onReadEntry ? (e) => {
@@ -3629,13 +3401,16 @@ const listFileSync = (opt) => {
 	const file = opt.file;
 	let fd;
 	try {
-		const stat = fs$2.statSync(file);
+		fd = fs$2.openSync(file, "r");
+		const stat = fs$2.fstatSync(fd);
 		const readSize = opt.maxReadSize || 16 * 1024 * 1024;
-		if (stat.size < readSize) p.end(fs$2.readFileSync(file));
-		else {
+		if (stat.size < readSize) {
+			const buf = Buffer.allocUnsafe(stat.size);
+			fs$2.readSync(fd, buf, 0, stat.size, 0);
+			p.end(buf);
+		} else {
 			let pos$1 = 0;
 			const buf = Buffer.allocUnsafe(readSize);
-			fd = fs$2.openSync(file, "r");
 			while (pos$1 < stat.size) {
 				const bytesRead = fs$2.readSync(fd, buf, 0, readSize, pos$1);
 				pos$1 += bytesRead;
