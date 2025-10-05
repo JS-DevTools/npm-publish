@@ -4115,6 +4115,7 @@ var require_lib = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+http
 		});
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
 	const http = __importStar$7(__require("http"));
 	const https = __importStar$7(__require("https"));
 	const pm = __importStar$7(require_proxy());
@@ -4773,6 +4774,7 @@ var require_summary = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+
 		});
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
 	const os_1$1 = __require("os");
 	const fs_1 = __require("fs");
 	const { access, appendFile, writeFile } = fs_1.promises;
@@ -5170,6 +5172,7 @@ var require_io_util = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+
 	};
 	var _a;
 	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
 	const fs$3 = __importStar$5(__require("fs"));
 	const path$4 = __importStar$5(__require("path"));
 	_a = fs$3.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
@@ -6108,6 +6111,7 @@ var require_platform = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions
 		return mod && mod.__esModule ? mod : { "default": mod };
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.getDetails = exports.isLinux = exports.isMacOS = exports.isWindows = exports.arch = exports.platform = void 0;
 	const os_1 = __importDefault(__require("os"));
 	const exec = __importStar$1(require_exec());
 	const getWindowsInfo = () => __awaiter$1(void 0, void 0, void 0, function* () {
@@ -6526,7 +6530,7 @@ var require_core = /* @__PURE__ */ __commonJS({ "node_modules/.pnpm/@actions+cor
 //#endregion
 //#region src/action/core.ts
 var import_core = /* @__PURE__ */ __toESM(require_core(), 1);
-/** Logger using the methods from @actions/core. */
+/** Logger using the methods from `@actions/core`. */
 const logger = {
 	debug: import_core.debug,
 	info: import_core.info,
