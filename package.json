@@ -62,12 +62,12 @@
     "@vitest/coverage-v8": "^3.2.4",
     "concurrently": "^9.2.1",
     "eslint": "^9.35.0",
-    "eslint-plugin-jsdoc": "^57.0.8",
+    "eslint-plugin-jsdoc": "^60.7.0",
     "globals": "^16.4.0",
     "prettier": "^3.6.2",
     "prettier-plugin-jsdoc": "^1.3.3",
     "rimraf": "^6.0.1",
-    "rolldown": "1.0.0-beta.37",
+    "rolldown": "1.0.0-beta.41",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
     "vitest-when": "^0.8.0"
@@ -79,5 +79,5 @@
     "tar": "7.5.1",
     "validate-npm-package-name": "^6.0.2"
   },
-  "packageManager": "pnpm@10.16.1+sha256.b77e92ba0d59a6372b6c5041bbb3f866fb85e927df333827f0c7f577c5e1a713"
+  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
 }

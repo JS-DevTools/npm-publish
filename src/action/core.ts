@@ -1,4 +1,4 @@
-/** Wrapper module for @actions/core */
+/** Wrapper module for `@actions/core` */
 import {
   debug as ghLogDebug,
   error as ghLogError,
@@ -11,7 +11,7 @@ import {
 
 import type { Logger } from "../options.js";
 
-/** Logger using the methods from @actions/core. */
+/** Logger using the methods from `@actions/core`. */
 export const logger: Logger = {
   debug: ghLogDebug,
   info: ghLogInfo,
