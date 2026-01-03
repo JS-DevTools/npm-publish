@@ -32,16 +32,14 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm test
-      - run: npm publish --provenance --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish --ignore-scripts
 ```
 
 See GitHub's [Node.js publishing][] guide and npm's [trusted publishing][] docs for more details and examples.
@@ -78,7 +76,7 @@ This package can be used three different ways:
 
 ## GitHub Action
 
-To use the GitHub Action, you'll need to add it as a step in your [workflow file][]. By default, the only thing you need to do is set the `token` parameter to your [npm authentication token][].
+To use the GitHub Action, you'll need to add it as a step in your [workflow file][]. By default, the only thing you need to do is set `permissions.id-token` to `write` to enable [trusted publishing][] via OIDC.
 
 ```yaml
 on:
@@ -88,41 +86,27 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: "24"
       - run: npm ci
       - run: npm test
       - uses: JS-DevTools/npm-publish@v4
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
 ```
-
-If you have [trusted publishing][] configured for your package and use `npm@>=11.5.1`, you can omit the `token` input and use OIDC instead.
 
 > [!IMPORTANT]
-> If you're publishing a private package, you will still need to provide a read-only `token` so the action can read existing versions from the registry before publish.
-
-```diff
-  jobs:
-    publish:
-      runs-on: ubuntu-latest
-+     permissions:
-+       contents: read
-+       id-token: write  # required to use OIDC
-      steps:
-        - uses: actions/checkout@v5
-        - uses: actions/setup-node@v5
-          with:
-            node-version: "24"  # includes npm@11.6.0
-        - run: npm ci
-        - run: npm test
-        - uses: JS-DevTools/npm-publish@v4
--         with:
--           token: ${{ secrets.NPM_TOKEN }}
-```
+> If you're publishing a private package with [trusted publishing][], you will still need to provide a read-only [`token`][npm authentication token] so the action can read existing versions from the registry before publish.
+>
+> ```diff
+>   - uses: JS-DevTools/npm-publish@v4
+> +   with:
+> +     token: ${{ secrets.NPM_TOKEN }}
+> ```
 
 You can also publish to third-party registries. For example, to publish to the [GitHub Package Registry][], set `token` to `secrets.GITHUB_TOKEN` and `registry` to `https://npm.pkg.github.com`:
 
@@ -138,8 +122,8 @@ jobs:
       contents: read
       packages: write # allow GITHUB_TOKEN to publish packages
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: "24"
       - run: npm ci
@@ -161,7 +145,7 @@ You can set any or all of the following input parameters using `with`:
 
 | Name             | Type                   | Default                       | Description                                                                      |
 | ---------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `token`          | string                 | unspecified                   | Registry authentication token, not required if using [trusted publishing][]³     |
+| `token`          | string                 | None                          | Registry authentication token, not required if using [trusted publishing][]³     |
 | `registry`¹      | string                 | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
 | `package`        | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
 | `tag`¹           | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
@@ -187,8 +171,6 @@ npm-publish exposes several output variables, which you can use in later steps o
   steps:
     - uses: JS-DevTools/npm-publish@v4
 +     id: publish
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
 
 +   - if: ${{ steps.publish.outputs.type }}
 +     run: echo "Version changed!"
@@ -237,7 +219,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 
 | Name                 | Type                   | Default                       | Description                                                                      |
 | -------------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `token`              | string                 | **required**                  | Registry authentication token, not required if using [trusted publishing][]³     |
+| `token`              | string                 | None                          | Registry authentication token, not required if using [trusted publishing][]³     |
 | `registry`¹          | string, `URL`          | `https://registry.npmjs.org/` | Registry URL to use.                                                             |
 | `package`            | string                 | Current working directory     | Path to a package directory, a `package.json`, or a packed `.tgz` to publish.    |
 | `tag`¹               | string                 | `latest`                      | [Distribution tag][npm-tag] to publish to.                                       |
@@ -246,7 +228,7 @@ import type { Options } from "@jsdevtools/npm-publish";
 | `strategy`           | `all`, `upgrade`       | `all`                         | Use `all` to publish all unique versions, `upgrade` for only semver upgrades.    |
 | `ignoreScripts`      | boolean                | `true`                        | Run `npm publish` with the `--ignore-scripts` flag as a security precaution.     |
 | `dryRun`             | boolean                | `false`                       | Run `npm publish` with the `--dry-run` flag to prevent publication.              |
-| `logger`             | object                 | `undefined`                   | Logging interface with `debug`, `info`, and `error` log methods.                 |
+| `logger`             | object                 | None                          | Logging interface with `debug`, `info`, and `error` log methods.                 |
 | `temporaryDirectory` | string                 | `os.tmpdir()`                 | Temporary directory to hold a generated `.npmrc` file                            |
 
 1. May be specified using `publishConfig` in `package.json`.
@@ -395,7 +377,7 @@ The `check-version` and `greater-version-only` boolean options were replaced wit
 `check-version: false` has been removed. If you only need to publish, without first checking whether the version exists in the registry, you can [use `npm` directly][publishing-nodejs-packages] instead:
 
 ```diff
-  - uses: actions/setup-node@v5
+  - uses: actions/setup-node@v6
     with:
       node-version: '24'
 +     registry-url: https://registry.npmjs.org/
@@ -447,7 +429,7 @@ If you can't change your build, you can set the `ignore-scripts` input to `false
 The global `.npmrc` file is no longer read nor modified. This means the `token` option is now required for the library and CLI. (It was already required for the action.) You may have workarounds in place referencing `INPUT_TOKEN`, which v1 [erroneously wrote][#15] to `.npmrc`. These workarounds should be removed.
 
 ```diff
-  - uses: actions/setup-node@v5
+  - uses: actions/setup-node@v6
     with:
       node-version: '24'
       registry-url: https://registry.npmjs.org/
