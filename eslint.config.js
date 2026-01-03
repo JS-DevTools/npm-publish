@@ -31,12 +31,6 @@ export default defineConfig(
     extends: [jsdoc.configs["flat/recommended-typescript-flavor-error"]],
   },
   {
-    files: ["**/__tests__/**"],
-    rules: {
-      // "@typescript-eslint/no-unsafe-assignment": "off",
-    },
-  },
-  {
     rules: {
       "jsdoc/tag-lines": "off",
     },

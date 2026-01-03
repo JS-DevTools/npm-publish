@@ -793,8 +793,7 @@ const CONTENTS_BANNER = "=== Contents ===";
 * @returns Formatted string.
 */
 function formatPublishResult(manifest, options, result) {
-	const lines = [];
-	lines.push(result.id === void 0 ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.` : `📦 ${result.id}`);
+	const lines = [result.id === void 0 ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.` : `📦 ${result.id}`];
 	if (result.files.length > 0) lines.push("", CONTENTS_BANNER);
 	for (const { path: path$6, size } of result.files) lines.push(`${formatSize(size)}\t${path$6}`);
 	return (options.dryRun.value ? [
