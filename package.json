@@ -75,9 +75,9 @@
   "dependencies": {
     "@types/semver": "^7.7.1",
     "command-line-args": "6.0.1",
-    "semver": "7.7.2",
-    "tar": "7.5.1",
-    "validate-npm-package-name": "^6.0.2"
+    "semver": "7.7.3",
+    "tar": "7.5.2",
+    "validate-npm-package-name": "^7.0.1"
   },
   "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
 }
