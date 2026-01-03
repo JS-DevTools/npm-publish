@@ -22,13 +22,11 @@ export function formatPublishResult(
   options: NormalizedOptions,
   result: PublishResult
 ): string {
-  const lines = [];
-
-  lines.push(
+  const lines = [
     result.id === undefined
       ? `🙅‍♀️ ${manifest.name}@${manifest.version} already published.`
-      : `📦 ${result.id}`
-  );
+      : `📦 ${result.id}`,
+  ];
 
   if (result.files.length > 0) {
     lines.push("", CONTENTS_BANNER);

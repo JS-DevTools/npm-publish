@@ -272,14 +272,14 @@ async function useNpmEnvironment(manifest, options, task) {
 }
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/debug.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/internal/debug.js
 var require_debug = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {};
 	module.exports = debug;
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/constants.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/internal/constants.js
 var require_constants$5 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const SEMVER_SPEC_VERSION = "2.0.0";
 	const MAX_LENGTH = 256;
@@ -308,7 +308,7 @@ var require_constants$5 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/re.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/internal/re.js
 var require_re = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const { MAX_SAFE_COMPONENT_LENGTH, MAX_SAFE_BUILD_LENGTH, MAX_LENGTH } = require_constants$5();
 	const debug = require_debug();
@@ -388,7 +388,7 @@ var require_re = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/parse-options.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/internal/parse-options.js
 var require_parse_options = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const looseOption = Object.freeze({ loose: true });
 	const emptyOpts = Object.freeze({});
@@ -401,10 +401,11 @@ var require_parse_options = /* @__PURE__ */ __commonJSMin(((exports, module) => 
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/internal/identifiers.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/internal/identifiers.js
 var require_identifiers = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const numeric = /^[0-9]+$/;
 	const compareIdentifiers = (a, b) => {
+		if (typeof a === "number" && typeof b === "number") return a === b ? 0 : a < b ? -1 : 1;
 		const anum = numeric.test(a);
 		const bnum = numeric.test(b);
 		if (anum && bnum) {
@@ -421,7 +422,7 @@ var require_identifiers = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/classes/semver.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/classes/semver.js
 var require_semver = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const debug = require_debug();
 	const { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants$5();
@@ -478,7 +479,13 @@ var require_semver = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		compareMain(other) {
 			if (!(other instanceof SemVer)) other = new SemVer(other, this.options);
-			return compareIdentifiers(this.major, other.major) || compareIdentifiers(this.minor, other.minor) || compareIdentifiers(this.patch, other.patch);
+			if (this.major < other.major) return -1;
+			if (this.major > other.major) return 1;
+			if (this.minor < other.minor) return -1;
+			if (this.minor > other.minor) return 1;
+			if (this.patch < other.patch) return -1;
+			if (this.patch > other.patch) return 1;
+			return 0;
 		}
 		comparePre(other) {
 			if (!(other instanceof SemVer)) other = new SemVer(other, this.options);
@@ -595,7 +602,7 @@ var require_semver = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/parse.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/functions/parse.js
 var require_parse$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const SemVer = require_semver();
 	const parse = (version, options, throwErrors = false) => {
@@ -611,7 +618,7 @@ var require_parse$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/diff.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/functions/diff.js
 var require_diff = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const parse = require_parse$1();
 	const diff = (version1, version2) => {
@@ -640,7 +647,7 @@ var require_diff = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/compare.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/functions/compare.js
 var require_compare = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const SemVer = require_semver();
 	const compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
@@ -648,7 +655,7 @@ var require_compare = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/gt.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/functions/gt.js
 var require_gt = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const compare = require_compare();
 	const gt = (a, b, loose) => compare(a, b, loose) > 0;
@@ -656,7 +663,7 @@ var require_gt = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 
 //#endregion
-//#region node_modules/.pnpm/semver@7.7.2/node_modules/semver/functions/valid.js
+//#region node_modules/.pnpm/semver@7.7.3/node_modules/semver/functions/valid.js
 var require_valid = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const parse = require_parse$1();
 	const valid = (version, options) => {
@@ -2014,7 +2021,7 @@ var WriteStreamSync = class extends WriteStream {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/options.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/options.js
 const argmap = new Map([
 	["C", "cwd"],
 	["f", "file"],
@@ -2059,7 +2066,7 @@ const dealias = (opt = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/make-command.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/make-command.js
 const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate) => {
 	return Object.assign((opt_ = [], entries, cb) => {
 		if (Array.isArray(opt_)) {
@@ -2453,7 +2460,7 @@ var ZstdDecompress = class extends Zstd {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/large-numbers.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/large-numbers.js
 const encode = (num, buf) => {
 	if (!Number.isSafeInteger(num)) throw Error("cannot encode number outside of javascript safe integer range");
 	else if (num < 0) encodeNegative(num, buf);
@@ -2519,7 +2526,7 @@ const onesComp = (byte) => (255 ^ byte) & 255;
 const twosComp = (byte) => (255 ^ byte) + 1 & 255;
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/types.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/types.js
 const isCode = (c) => name.has(c);
 const name = new Map([
 	["0", "File"],
@@ -2547,7 +2554,7 @@ const name = new Map([
 const code = new Map(Array.from(name).map((kv) => [kv[1], kv[0]]));
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/header.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/header.js
 var Header = class {
 	cksumValid = false;
 	needPax = false;
@@ -2577,12 +2584,12 @@ var Header = class {
 	decode(buf, off, ex, gex) {
 		if (!off) off = 0;
 		if (!buf || !(buf.length >= off + 512)) throw new Error("need 512 bytes for header");
-		this.path = decString(buf, off, 100);
-		this.mode = decNumber(buf, off + 100, 8);
-		this.uid = decNumber(buf, off + 108, 8);
-		this.gid = decNumber(buf, off + 116, 8);
-		this.size = decNumber(buf, off + 124, 12);
-		this.mtime = decDate(buf, off + 136, 12);
+		this.path = ex?.path ?? decString(buf, off, 100);
+		this.mode = ex?.mode ?? gex?.mode ?? decNumber(buf, off + 100, 8);
+		this.uid = ex?.uid ?? gex?.uid ?? decNumber(buf, off + 108, 8);
+		this.gid = ex?.gid ?? gex?.gid ?? decNumber(buf, off + 116, 8);
+		this.size = ex?.size ?? gex?.size ?? decNumber(buf, off + 124, 12);
+		this.mtime = ex?.mtime ?? gex?.mtime ?? decDate(buf, off + 136, 12);
 		this.cksum = decNumber(buf, off + 148, 12);
 		if (gex) this.#slurp(gex, true);
 		if (ex) this.#slurp(ex);
@@ -2592,18 +2599,19 @@ var Header = class {
 		if (this.#type === "5") this.size = 0;
 		this.linkpath = decString(buf, off + 157, 100);
 		if (buf.subarray(off + 257, off + 265).toString() === "ustar\x0000") {
-			this.uname = decString(buf, off + 265, 32);
-			this.gname = decString(buf, off + 297, 32);
 			/* c8 ignore start */
-			this.devmaj = decNumber(buf, off + 329, 8) ?? 0;
-			this.devmin = decNumber(buf, off + 337, 8) ?? 0;
+			this.uname = ex?.uname ?? gex?.uname ?? decString(buf, off + 265, 32);
+			this.gname = ex?.gname ?? gex?.gname ?? decString(buf, off + 297, 32);
+			this.devmaj = ex?.devmaj ?? gex?.devmaj ?? decNumber(buf, off + 329, 8) ?? 0;
+			this.devmin = ex?.devmin ?? gex?.devmin ?? decNumber(buf, off + 337, 8) ?? 0;
 			/* c8 ignore stop */
 			if (buf[off + 475] !== 0) this.path = decString(buf, off + 345, 155) + "/" + this.path;
 			else {
 				const prefix = decString(buf, off + 345, 130);
 				if (prefix) this.path = prefix + "/" + this.path;
-				this.atime = decDate(buf, off + 476, 12);
-				this.ctime = decDate(buf, off + 488, 12);
+				/* c8 ignore start */
+				this.atime = ex?.atime ?? gex?.atime ?? decDate(buf, off + 476, 12);
+				this.ctime = ex?.ctime ?? gex?.ctime ?? decDate(buf, off + 488, 12);
 			}
 		}
 		let sum = 256;
@@ -2724,7 +2732,7 @@ const NULLS = new Array(156).join("\0");
 const encString = (buf, off, size, str) => str === void 0 ? false : (buf.write(str + NULLS, off, size, "utf8"), str.length !== Buffer.byteLength(str) || str.length > size);
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/pax.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/pax.js
 var Pax = class Pax {
 	atime;
 	mtime;
@@ -2821,12 +2829,12 @@ const parseKVLine = (set, line) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/normalize-windows-path.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/normalize-windows-path.js
 const platform = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
 const normalizeWindowsPath = platform !== "win32" ? (p) => p : (p) => p && p.replace(/\\/g, "/");
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/read-entry.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/read-entry.js
 var ReadEntry = class extends Minipass {
 	extended;
 	globalExtended;
@@ -2930,7 +2938,7 @@ var ReadEntry = class extends Minipass {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/warn-method.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/warn-method.js
 const warnMethod = (self, code$1, message, data = {}) => {
 	if (self.file) data.file = self.file;
 	if (self.cwd) data.cwd = self.cwd;
@@ -2947,7 +2955,7 @@ const warnMethod = (self, code$1, message, data = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/parse.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/parse.js
 const maxMetaEntrySize = 1024 * 1024;
 const gzipHeader = Buffer.from([31, 139]);
 const zstdHeader = Buffer.from([
@@ -3358,7 +3366,7 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/strip-trailing-slashes.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/strip-trailing-slashes.js
 const stripTrailingSlashes = (str) => {
 	let i = str.length - 1;
 	let slashesStart = -1;
@@ -3370,7 +3378,7 @@ const stripTrailingSlashes = (str) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.1/node_modules/tar/dist/esm/list.js
+//#region node_modules/.pnpm/tar@7.5.2/node_modules/tar/dist/esm/list.js
 const onReadEntryFunction = (opt) => {
 	const onReadEntry = opt.onReadEntry;
 	opt.onReadEntry = onReadEntry ? (e) => {
@@ -3405,13 +3413,14 @@ const listFileSync = (opt) => {
 		const readSize = opt.maxReadSize || 16 * 1024 * 1024;
 		if (stat.size < readSize) {
 			const buf = Buffer.allocUnsafe(stat.size);
-			fs$2.readSync(fd, buf, 0, stat.size, 0);
-			p.end(buf);
+			const read = fs$2.readSync(fd, buf, 0, stat.size, 0);
+			p.end(read === buf.byteLength ? buf : buf.subarray(0, read));
 		} else {
 			let pos$1 = 0;
 			const buf = Buffer.allocUnsafe(readSize);
 			while (pos$1 < stat.size) {
 				const bytesRead = fs$2.readSync(fd, buf, 0, readSize, pos$1);
+				if (bytesRead === 0) break;
 				pos$1 += bytesRead;
 				p.write(buf.subarray(0, bytesRead));
 			}
@@ -3449,7 +3458,7 @@ const list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt)
 });
 
 //#endregion
-//#region node_modules/.pnpm/validate-npm-package-name@6.0.2/node_modules/validate-npm-package-name/lib/index.js
+//#region node_modules/.pnpm/validate-npm-package-name@7.0.1/node_modules/validate-npm-package-name/lib/index.js
 var require_lib$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const { builtinModules: builtins } = __require("module");
 	var scopedPackagePattern = /* @__PURE__ */ new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
@@ -3471,6 +3480,7 @@ var require_lib$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		if (!name$1.length) errors.push("name length must be greater than zero");
 		if (name$1.startsWith(".")) errors.push("name cannot start with a period");
+		if (name$1.startsWith("-")) errors.push("name cannot start with a hyphen");
 		if (name$1.match(/^_/)) errors.push("name cannot start with an underscore");
 		if (name$1.trim() !== name$1) errors.push("name cannot contain leading or trailing spaces");
 		exclusionList.forEach(function(excludedName) {

@@ -33,7 +33,7 @@ export default defineConfig(
   {
     files: ["**/__tests__/**"],
     rules: {
-      "@typescript-eslint/no-unsafe-assignment": "off",
+      // "@typescript-eslint/no-unsafe-assignment": "off",
     },
   },
   {
