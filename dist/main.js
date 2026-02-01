@@ -2024,7 +2024,7 @@ var WriteStreamSync = class extends WriteStream {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/options.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/options.js
 const argmap = new Map([
 	["C", "cwd"],
 	["f", "file"],
@@ -2069,7 +2069,7 @@ const dealias = (opt = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/make-command.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/make-command.js
 const makeCommand = (syncFile, asyncFile, syncNoFile, asyncNoFile, validate) => {
 	return Object.assign((opt_ = [], entries, cb) => {
 		if (Array.isArray(opt_)) {
@@ -2463,7 +2463,7 @@ var ZstdDecompress = class extends Zstd {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/large-numbers.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/large-numbers.js
 const encode = (num, buf) => {
 	if (!Number.isSafeInteger(num)) throw Error("cannot encode number outside of javascript safe integer range");
 	else if (num < 0) encodeNegative(num, buf);
@@ -2529,7 +2529,7 @@ const onesComp = (byte) => (255 ^ byte) & 255;
 const twosComp = (byte) => (255 ^ byte) + 1 & 255;
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/types.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/types.js
 const isCode = (c) => name.has(c);
 const name = new Map([
 	["0", "File"],
@@ -2557,7 +2557,7 @@ const name = new Map([
 const code = new Map(Array.from(name).map((kv) => [kv[1], kv[0]]));
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/header.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/header.js
 var Header = class {
 	cksumValid = false;
 	needPax = false;
@@ -2735,7 +2735,7 @@ const NULLS = new Array(156).join("\0");
 const encString = (buf, off, size, str) => str === void 0 ? false : (buf.write(str + NULLS, off, size, "utf8"), str.length !== Buffer.byteLength(str) || str.length > size);
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/pax.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/pax.js
 var Pax = class Pax {
 	atime;
 	mtime;
@@ -2832,12 +2832,12 @@ const parseKVLine = (set, line) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/normalize-windows-path.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/normalize-windows-path.js
 const platform$1 = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
 const normalizeWindowsPath = platform$1 !== "win32" ? (p) => p : (p) => p && p.replace(/\\/g, "/");
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/read-entry.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/read-entry.js
 var ReadEntry = class extends Minipass {
 	extended;
 	globalExtended;
@@ -2941,7 +2941,7 @@ var ReadEntry = class extends Minipass {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/warn-method.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/warn-method.js
 const warnMethod = (self, code, message, data = {}) => {
 	if (self.file) data.file = self.file;
 	if (self.cwd) data.cwd = self.cwd;
@@ -2958,7 +2958,7 @@ const warnMethod = (self, code, message, data = {}) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/parse.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/parse.js
 const maxMetaEntrySize = 1024 * 1024;
 const gzipHeader = Buffer.from([31, 139]);
 const zstdHeader = Buffer.from([
@@ -3369,7 +3369,7 @@ while (this[PROCESSENTRY](this[QUEUE].shift()));
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/strip-trailing-slashes.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/strip-trailing-slashes.js
 const stripTrailingSlashes = (str) => {
 	let i = str.length - 1;
 	let slashesStart = -1;
@@ -3381,7 +3381,7 @@ const stripTrailingSlashes = (str) => {
 };
 
 //#endregion
-//#region node_modules/.pnpm/tar@7.5.3/node_modules/tar/dist/esm/list.js
+//#region node_modules/.pnpm/tar@7.5.7/node_modules/tar/dist/esm/list.js
 const onReadEntryFunction = (opt) => {
 	const onReadEntry = opt.onReadEntry;
 	opt.onReadEntry = onReadEntry ? (e) => {
@@ -3461,9 +3461,88 @@ const list = makeCommand(listFileSync, listFile, (opt) => new Parser(opt), (opt)
 });
 
 //#endregion
-//#region node_modules/.pnpm/validate-npm-package-name@7.0.1/node_modules/validate-npm-package-name/lib/index.js
+//#region node_modules/.pnpm/validate-npm-package-name@7.0.2/node_modules/validate-npm-package-name/lib/builtin-modules.json
+var require_builtin_modules = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [
+		"_http_agent",
+		"_http_client",
+		"_http_common",
+		"_http_incoming",
+		"_http_outgoing",
+		"_http_server",
+		"_stream_duplex",
+		"_stream_passthrough",
+		"_stream_readable",
+		"_stream_transform",
+		"_stream_wrap",
+		"_stream_writable",
+		"_tls_common",
+		"_tls_wrap",
+		"assert",
+		"assert/strict",
+		"async_hooks",
+		"buffer",
+		"child_process",
+		"cluster",
+		"console",
+		"constants",
+		"crypto",
+		"dgram",
+		"diagnostics_channel",
+		"dns",
+		"dns/promises",
+		"domain",
+		"events",
+		"fs",
+		"fs/promises",
+		"http",
+		"http2",
+		"https",
+		"inspector",
+		"inspector/promises",
+		"module",
+		"net",
+		"os",
+		"path",
+		"path/posix",
+		"path/win32",
+		"perf_hooks",
+		"process",
+		"punycode",
+		"querystring",
+		"readline",
+		"readline/promises",
+		"repl",
+		"stream",
+		"stream/consumers",
+		"stream/promises",
+		"stream/web",
+		"string_decoder",
+		"sys",
+		"timers",
+		"timers/promises",
+		"tls",
+		"trace_events",
+		"tty",
+		"url",
+		"util",
+		"util/types",
+		"v8",
+		"vm",
+		"wasi",
+		"worker_threads",
+		"zlib",
+		"node:sea",
+		"node:sqlite",
+		"node:test",
+		"node:test/reporters"
+	];
+}));
+
+//#endregion
+//#region node_modules/.pnpm/validate-npm-package-name@7.0.2/node_modules/validate-npm-package-name/lib/index.js
 var require_lib = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const { builtinModules: builtins } = __require("module");
+	const builtins = require_builtin_modules();
 	var scopedPackagePattern = /* @__PURE__ */ new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
 	var exclusionList = ["node_modules", "favicon.ico"];
 	function validate(name) {
