@@ -52,7 +52,7 @@
     "provenance": true
   },
   "devDependencies": {
-    "@actions/core": "^2.0.1",
+    "@actions/core": "^3.0.0",
     "@mcous/eslint-config": "^0.8.0",
     "@mcous/prettier-config": "^0.4.0",
     "@mcous/typescript-config": "^0.3.0",
@@ -62,12 +62,12 @@
     "@vitest/coverage-v8": "^4.0.16",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-jsdoc": "^62.5.0",
     "globals": "^17.0.0",
     "prettier": "^3.7.4",
     "prettier-plugin-jsdoc": "^1.8.0",
     "rimraf": "^6.1.2",
-    "rolldown": "1.0.0-beta.58",
+    "rolldown": "1.0.0-rc.2",
     "typescript": "^5.9.2",
     "vitest": "^4.0.16",
     "vitest-when": "^0.10.0"
