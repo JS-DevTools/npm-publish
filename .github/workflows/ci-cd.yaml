@@ -98,7 +98,7 @@ jobs:
         run: pnpm lint
 
       - name: Upload publish artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: publish-artifact
           path: lib
@@ -139,7 +139,7 @@ jobs:
         run: pnpm install --production
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: publish-artifact
           path: lib
@@ -253,7 +253,7 @@ jobs:
           package-manager-cache: false
 
       - name: Download publish artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: publish-artifact
           path: lib
