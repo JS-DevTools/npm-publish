@@ -68,7 +68,7 @@
     "globals": "^17.4.0",
     "prettier": "^3.7.4",
     "prettier-plugin-jsdoc": "^1.8.0",
-    "rolldown": "1.0.0-rc.12",
+    "rolldown": "1.0.0-rc.13",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2",
     "vitest-when": "^0.10.0"
